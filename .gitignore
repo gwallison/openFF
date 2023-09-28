@@ -1,0 +1,13 @@
+*.zip
+*.pyc
+.ipynb_checkpoints/*.*
+out/
+old/
+data/
+tmp/
+*.html
+*.pkl
+*.parquet
+__pycache__/
+ext/
+

@@ -1,8 +1,10 @@
+<center> <img src="images/header_logo.png" width="100"/></center>
+
 # Open-FF documentation
-- [What is FracFocus?]()
+- [What is FracFocus?](What_is_FracFocus.md)
 - [Open-FF Overview]()
 ### Creating a new Open-FF data set
-Currently this is performed about monthly under FracTracker's sponsorship.  While most users of Open-FF's resources will have no need to create a data set from scratch, we present documentation below for transparency. 
+Currently this is performed about monthly under [FracTracker](https://www.fractracker.org/)'s sponsorship.  While most users of Open-FF's resources will have no need to create a data set from scratch, we present documentation below for transparency. 
 - [Resolving chemical identity]()
 - [Calculating mass]()
 - [Standardizing text fields]()

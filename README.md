@@ -1,4 +1,4 @@
-<center> <img src="https://storage.googleapis.com/open-ff-common/openFF_logo.png" width="100"/>
+<center> <img src="docs/images/header_logo.png" width="100"/>
 
 # Open-FF
 
@@ -13,7 +13,7 @@
     
 [Read the documents](docs/Top.md)
 
-Browse the data
+[Browse the data](https://storage.googleapis.com/open-ff-browser/Open-FF_Catalog.html)
 
 View the code
 
@@ -21,3 +21,5 @@ View open issues
 
 Contact the team 
 
+```{include} docs/Top.md
+```

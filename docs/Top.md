@@ -1,4 +1,7 @@
 <center> <img src="images/header_logo.png" width="100"/></center>
+<!-- this is a test of a comment 
+To do:
+--->
 
 # Open-FF documentation
 - [What is FracFocus?](What_is_FracFocus.md)
@@ -13,7 +16,7 @@ Currently this is performed about monthly under [FracTracker](https://www.fractr
 - [Getting Open-FF data](Getting_Open-FF_data.md)
 
 ### The Data Browser
-Like the Open-FF data set, the  Data Browser is also updated regularly and users will likely have no need to generate them independently.  Nevertheless, the process is also documented below.
+Like the Open-FF data set, the  Data Browser is also updated regularly and users will likely have no need to generate them independently.  Nevertheless, its features and construction are also documented below.
 - [Browser overview](Browser_overview.md)
 - [Generating the Browser](Generating_the_Browser.md)
 

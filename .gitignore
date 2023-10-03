@@ -1,6 +1,7 @@
 *.zip
 *.pyc
 .ipynb_checkpoints/
+sandbox/
 out/
 old/
 data/

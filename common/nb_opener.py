@@ -1,20 +1,15 @@
-import platform
-import sys
+import pandas as pd
+import numpy as np
+import os
 
 def is_remote():
+    import platform
     locals = ['Dell_2023_Gary']
     if platform.node() in locals:
         return False
     return True
 
-if is_remote():
-    sys.path.insert(0,'../')
-else:
-    sys.path.insert(0,'../')
-
 # make output location
-# this code may overwrite files in the "sandbox" directory.  Make sure you want to do that
-import os
 tmp_dir = 'sandbox'
 try:
     os.mkdir(tmp_dir)

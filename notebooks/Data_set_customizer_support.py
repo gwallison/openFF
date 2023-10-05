@@ -29,3 +29,27 @@ else:
 print('Creating full dataframe...')
 df = pd.read_parquet(df_fn)
 print(f'The full Open-FF data frame shape (rows,cols): {df.shape}')
+
+# states
+import ipywidgets as widgets
+def prep_states():
+    st_lst = df.bgStateName.unique().tolist()
+    st_lst.sort()
+    st_lst.insert(0,'All states')
+    states = widgets.SelectMultiple(
+                    options=st_lst,
+                    value=['All states'],
+                    #rows=10,
+                    description='Select State(s)',
+                    disabled=False
+                )
+    return states
+
+def show_inc_chem_checkbox():
+    include_chem = widgets.Checkbox(
+                        value=True,
+                        description='Include chemical data',
+                        disabled=False,
+                        indent=True
+                    )
+    return include_chem

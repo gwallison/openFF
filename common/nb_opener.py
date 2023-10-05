@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import os
 
+out_dir = 'sandbox'
+
+
 def is_remote():
     import platform
     locals = ['Dell_2023_Gary']
@@ -9,9 +12,11 @@ def is_remote():
         return False
     return True
 
-# make output location
-tmp_dir = 'sandbox'
-try:
-    os.mkdir(tmp_dir)
-except:
-    print(f'{tmp_dir} already exists')
+def make_sandbox(name=out_dir):
+    # make output location
+    tmp_dir = name
+    try:
+        os.mkdir(name)
+    except:
+        print(f'{name} already exists')
+        

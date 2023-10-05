@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
-import requests 
+
 
 # handles to use in notebook
 out_dir = 'sandbox'
@@ -91,9 +91,11 @@ def check_for_custom_list(chem_set,inc_chk_box):
         print('No custom chemical list; continue to next step')
     return cus_chem
 
+
+
 def filter_by_chem_set(df,chem_set,cus_chem):
     # now process selected chemicals
-    if chem_set == None:
+    if chem_set == None: # only metadata
         return df
     if chem_set.value != 'all':
         if chem_set.value == 'uvcb':
@@ -133,9 +135,12 @@ def filter_by_col_set(df,col_set,inc_chk_box):
     std_set_chem = ['CASNumber','IngredientName','Supplier','bgCAS','calcMass','categoryCAS',
                     'PercentHFJob','Purpose','TradeName','bgSupplier',
                     'is_valid_cas','bgIngredientName']
+    
     lst = std_set_meta
     if inc_chk_box.value:
         lst = lst + std_set_chem
+    else: # take only meta
+        df = df.groupby('UploadKey',as_index=False)[df.columns.tolist()].first()
         
     if col_set.value == 'Standard':
         df = df[df.in_std_filtered].filter(lst,axis=1)

@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import requests
+import urllib
 import os
 
+#################### general utilities  ########################
 def is_remote():
     # check if we are not working on a known local machine
     import platform
@@ -11,6 +13,8 @@ def is_remote():
         return False
     return True
 
+
+#####################  Interacting with files, remote and local ##############
 def make_sandbox(name='sandbox'):
     # make output location
     tmp_dir = name
@@ -25,8 +29,8 @@ def get_size_of_url_file(url):
 
 def fetch_file(url,fn):
     # get file from url, save it at fn
-    sz = get_size_of_url(url)
-    if size>100000000:
+    sz = get_size_of_url_file(url)
+    if sz>100000000:
         print('Fetching file, please be patient...')
     urllib.request.urlretrieve(url,fn)
 
@@ -44,5 +48,5 @@ def get_df_from_file(df_url,df_fn,force_freshen=False,inp_format='parquet'):
     assert inp_format=='parquet'
     return pd.read_parquet(df_fn)
 
-def show_done():
-    print('done')
+def show_done(txt='Completed'):
+    print(txt)

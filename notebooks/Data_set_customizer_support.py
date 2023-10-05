@@ -7,7 +7,7 @@ import urllib
 out_dir = 'sandbox'
 
 print('running Data_set_customizer_support')
-import common.nb_opener as nbo
+import openFF.common.nb_opener as nbo
 
 nbo.make_sandbox(out_dir)
 

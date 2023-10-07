@@ -75,7 +75,7 @@ class Table_constructor():
                                   #'bgSource','alt_CAS'
                                   ]]
         self.tables['cas_ing'] = df
-        ct.na_check(df,txt='assembling cas_ing table')
+        #ct.na_check(df,txt='assembling cas_ing table')
 
         
     def assemble_companies_table(self):
@@ -195,7 +195,7 @@ class Table_constructor():
                     'PercentHighAdditive','MassIngredient',
                     'ingKeyPresent','reckey','IngredientKey',
                     'IngredientComment','density_from_comment']].copy()
-        ct.na_check(df,txt='assembling chem_rec 1')
+        #ct.na_check(df,txt='assembling chem_rec 1')
         
         df.Supplier = df.Supplier.fillna('MISSING')
 
@@ -203,7 +203,7 @@ class Table_constructor():
         df = pd.merge(df,self.tables['cas_ing'],
                                 on=['CASNumber','IngredientName'],
                                 how='left')     
-        ct.na_check(df,txt='bgCAS add')
+        # ct.na_check(df,txt='bgCAS add')
         unCAS = df[df.bgCAS.isna()]\
                     .groupby(['CASNumber','IngredientName'],as_index=False)\
                         ['UploadKey'].count()
@@ -230,7 +230,7 @@ class Table_constructor():
 
         df = pd.merge(df,cmp,on='Supplier',
                                  how='left',validate='m:1')
-        ct.na_check(df,txt='bgSupplier add')
+        # ct.na_check(df,txt='bgSupplier add')
         
         unSup = df[df.bgSupplier.isna()]
         if len(unSup)>0: 
@@ -242,7 +242,7 @@ class Table_constructor():
         self.print_step('flagging duplicate records',1)
         self.tables['chemrecs'] = self.flag_duplicated_records(df)
 
-        ct.na_check(df,txt='assembling chem_rec end')
+        # ct.na_check(df,txt='assembling chem_rec end')
 
     ############   POST ASSEMBLY PROCESSING   ############
 
@@ -435,7 +435,7 @@ class Table_constructor():
             self.print_size(self.tables[name],name)
      
     def assemble_all_tables(self,df):
-        ct.na_check(df,txt='top of assemble all tables')
+        # ct.na_check(df,txt='top of assemble all tables')
         self.assemble_cas_ing_table()
         self.assemble_companies_table()
         self.assemble_bgCAS_table(self.tables['cas_ing'])

@@ -94,37 +94,6 @@ class Read_FF():
         There are a handful of annoying entries that cause havoc if left as is:
             '0.0' (in Supplier) is changed here to '0'"""
         
-        # if cols ==[]: 
-        #     workcols = self.cols_to_clean
-        # else:
-        #     workcols = []
-        #     for col in cols:
-        #         if col in self.cols_to_clean:
-        #             workcols.append(col)
-
-        # for colname in self.cols_to_clean:
-        #     print(f'   -- cleaning {colname}')
-        #     gb = df.groupby(colname,as_index=False).size()
-        #     gb.columns = [colname,'junk']
-        #     # replace return, newline, tab with single space
-        #     gb['clean'] = gb[colname].replace(r'\r+|\n+|\t+',' ', regex=True)
-        #     # remove whitespace from the ends
-        #     gb.clean = gb.clean.str.strip()
-        #     print(f'    -- Num cleaned : {(gb.clean!=gb[colname]).sum()}')
-        #     if colname in self.cols_to_lower:
-        #         gb.clean = gb.clean.str.lower()
-        #     df = pd.merge(df,gb,on=colname,how='left',validate='m:1')
-        #     df.rename({colname:'oldRaw','clean':colname},axis=1,inplace=True)
-        #     df.drop(['oldRaw','junk'],axis=1,inplace=True)
-            
-        #     # # last check: do the has_nonprintable check in cas_tools
-        #     # flag = df[colname].map(lambda x: ct.has_non_printable(x))
-        #     # if flag.sum()!=0:
-        #     #     print(f'Warning: non-printable characters still detected in {colname}!')
-           
-        #     df.Supplier = np.where(df.Supplier=='0.0','0',df.Supplier)
-            
-        # return df
 
         for colname in self.cols_to_clean:
             #print(f'   -- cleaning {colname}')
@@ -147,10 +116,6 @@ class Read_FF():
             #print(df.columns)
             df.drop(['oldRaw','junk'],axis=1,inplace=True)
             
-            # # last check: do the has_nonprintable check in cas_tools
-            # flag = df[colname].map(lambda x: ct.has_non_printable(x))
-            # if flag.sum()!=0:
-            #     print(f'Warning: non-printable characters still detected in {colname}!')
            
             df.Supplier = np.where(df.Supplier=='0.0','0',df.Supplier)
             

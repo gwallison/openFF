@@ -4,8 +4,9 @@ Created on Fri May  5 18:26:56 2023
 
 @author: garya
 
-Used to guide the colab-type builder code.  Each routine runs some steps for a 
-cell.
+Used to guide the builder_nb notebook code.  
+Most routine runs some steps for a cell to help make the notebook more
+readable for non-coders, while still making the steps easily accessible
 """
 
 # Preamble: run as soon as this module is imported

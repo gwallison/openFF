@@ -1,5 +1,5 @@
-import pandas as pd
-import numpy as np
+#import pandas as pd
+#import numpy as np
 import os
 
 
@@ -8,11 +8,12 @@ out_dir = 'sandbox'
 df_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
 df_fn = os.path.join(out_dir,'full_df.parquet')
 
-from openFF.common.nb_helper import make_sandbox, get_df_from_file, show_done
+from openFF.common.nb_helper import make_sandbox, show_done
+from openFF.common.file_handler import get_df_from_url
 
 ##### execute the following on run 
 make_sandbox(out_dir)
-df = get_df_from_file(df_url,df_fn)
+df = get_df_from_url(df_url,df_fn)
 show_done()
 
 ##### filtering routines

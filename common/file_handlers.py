@@ -16,7 +16,8 @@ in a spreadsheet, CSV can be generated and read with these routines
 """
 import pandas as pd
 import os
-
+import requests
+import urllib
 
 # this is the list of FF fields that should be treated as text columns in CSV file
 lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
@@ -69,4 +70,30 @@ def get_df(fn,cols=None):
         return pd.read_parquet(fn,columns=cols)
     else:
         assert 1==0, f'File extension <{tup[1]}> not valid for "save_df"'
+
+#####################  Interacting with remote files ##############
+def get_size_of_url_file(url):
+    response = requests.head(url,allow_redirects=True)
+    return int(response.headers['Content-Length'])
+
+def fetch_file_from_url(url,fn):
+    # get file from url, save it at fn
+    sz = get_size_of_url_file(url)
+    if sz>100000000: # alert that a large file download is in progress
+        print('Fetching file, please be patient...')
+    urllib.request.urlretrieve(url,fn)
+
+def get_df_from_url(df_url,df_fn,force_freshen=False,inp_format='parquet'):
+    # get file from url, checking first it it already exists, then convert to dataframe
+    if force_freshen:
+        fetch_file_from_url(df_url,df_fn);
+    else:
+        if os.path.isfile(df_fn):
+            print('File already downloaded')
+        else:    
+            fetch_file_from_url(df_url,df_fn);
+            
+    print('Creating full dataframe...')
+    assert inp_format=='parquet'
+    return pd.read_parquet(df_fn)
 

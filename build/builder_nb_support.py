@@ -16,22 +16,10 @@ import shutil
 import pandas as pd
 from IPython.display import display
 from IPython.display import Markdown as md
-# import requests
 
-from intg_support.file_handlers import store_df_as_csv, save_df, get_df
+from common.file_handlers import store_df_as_csv, save_df, get_df
 
 use_itables = True
-
-root_dir = ''
-orig_dir = os.path.join(root_dir,'orig_dir')
-work_dir = os.path.join(root_dir,'work_dir')
-final_dir = os.path.join(root_dir,'final')
-ext_dir = os.path.join(root_dir,'ext')
-code_dir = os.path.join(root_dir,'intg_support')
-
-repo_info_fn = os.path.join(work_dir,'repo_info.csv')
-
-
 if use_itables:
     from itables import init_notebook_mode
     init_notebook_mode(all_interactive=True)
@@ -43,6 +31,17 @@ if use_itables:
 else:
     def iShow(df,maxBytes=0,classes=None):
         display(df)
+
+root_dir = ''
+orig_dir = os.path.join(root_dir,'orig_dir')
+work_dir = os.path.join(root_dir,'work_dir')
+final_dir = os.path.join(root_dir,'final')
+ext_dir = os.path.join(root_dir,'ext')
+code_dir = os.path.join(root_dir,'intg_support')
+
+repo_info_fn = os.path.join(work_dir,'repo_info.csv')
+
+
        
         
 def clr_cell(txt='Cell Completed', color = '#669999'):

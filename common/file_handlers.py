@@ -25,14 +25,16 @@ lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
                 'rawName','cleanName','xlateName',  # for companyXlate...
                 ]
 
+#### Interacting with files in local situations
+
 def store_df_as_csv(df,fn,encoding='utf-8',str_lst = lst_str_cols):
-    # saves files in standard encoding, and adds single quote in first position
-    # to columns in str_lst, to make them be interpreted as strings by excel, etc
+    # saves files in standard encoding, and double quotes 
+    # columns in str_lst, to make them be interpreted as strings by excel, etc
     t = df.copy()
     for col in str_lst:
         if col in t.columns:
             # print(col)
-            t[col] = "'"+t[col]
+            t[col] = '"'+t[col]+'"'
     t.to_csv(fn,encoding=encoding)
     
 def get_csv(fn,check_zero=True,encoding='utf-8',sep=',',quotechar='"',
@@ -72,6 +74,7 @@ def get_df(fn,cols=None):
         assert 1==0, f'File extension <{tup[1]}> not valid for "save_df"'
 
 #####################  Interacting with remote files ##############
+
 def get_size_of_url_file(url):
     response = requests.head(url,allow_redirects=True)
     return int(response.headers['Content-Length'])

@@ -18,7 +18,7 @@ from IPython.display import display
 from IPython.display import Markdown as md
 
 from common.file_handlers import store_df_as_csv, save_df, get_df
-
+from common.nb_helper import completed
 use_itables = True
 if use_itables:
     from itables import init_notebook_mode
@@ -32,36 +32,19 @@ else:
     def iShow(df,maxBytes=0,classes=None):
         display(df)
 
-root_dir = ''
+root_dir = 'sandbox'
 orig_dir = os.path.join(root_dir,'orig_dir')
 work_dir = os.path.join(root_dir,'work_dir')
 final_dir = os.path.join(root_dir,'final')
 ext_dir = os.path.join(root_dir,'ext')
-code_dir = os.path.join(root_dir,'intg_support')
+
+# code_dir = os.path.join(root_dir,'intg_support')
 
 repo_info_fn = os.path.join(work_dir,'repo_info.csv')
 
 
        
         
-def clr_cell(txt='Cell Completed', color = '#669999'):
-    import datetime    
-    t = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-    s = f"""<div style="background-color: {color}; padding: 10px; border: 1px solid green;">"""
-    s+= f'<h3> {txt} </h3> {t}'
-    s+= "</div>"
-    display(md(s))
-
-def completed(status=True,txt=''):
-    if txt =='':
-        if status:
-            txt = 'This step completed normally.'
-        else:
-            txt ='Problems encountered in this cell! Resolve before continuing.' 
-    if status:
-        clr_cell(txt)
-    else:
-        clr_cell(txt,color='#ff6666')
 
 def init_repo_info():
     if not os.path.exists(repo_info_fn):        

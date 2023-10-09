@@ -8,13 +8,13 @@ out_dir = 'sandbox'
 df_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
 df_fn = os.path.join(out_dir,'full_df.parquet')
 
-from openFF.common.nb_helper import make_sandbox, show_done
-from openFF.common.file_handler import get_df_from_url
+from openFF.common.nb_helper import make_sandbox, completed
+from openFF.common.file_handlers import get_df_from_url, store_df_as_csv
 
 ##### execute the following on run 
 make_sandbox(out_dir)
 df = get_df_from_url(df_url,df_fn)
-show_done()
+completed()
 
 ##### filtering routines
 
@@ -31,14 +31,14 @@ def prep_states():
                     description='Select State(s)',
                     disabled=False
                 )
-    show_done()
+    completed()
     return states
 
 def filter_by_statelist(df,states):
     if states.value[0]!='All states':
         df = df[df.bgStateName.isin(list(states.value))]
     print(f"The current filtered data frame's shape (rows,cols): {df.shape}")
-    show_done()
+    completed()
     return df
 
 def show_inc_chem_checkbox():
@@ -52,7 +52,7 @@ def show_inc_chem_checkbox():
 
 def show_chem_set(inc_chk_box):
     if not inc_chk_box.value:
-        show_done('No chemical records to be included. Skip to "Select columns"')
+        completed('No chemical records to be included. Skip to "Select columns"')
         chem_set = None
     else:
         chem_set = widgets.Dropdown(
@@ -114,7 +114,7 @@ def filter_by_chem_set(df,chem_set,cus_chem):
         df = df[df.bgCAS.isin(caslst)]
     print(f'Number of chemicals selected: {len(df.bgCAS.unique())}')
     print(f"The current filtered data frame's shape (rows,cols): {df.shape}")    
-    show_done()
+    completed()
     return df
 
 def show_col_set():
@@ -146,7 +146,7 @@ def filter_by_col_set(df,col_set,inc_chk_box):
     if col_set.value == 'Standard':
         df = df[df.in_std_filtered].filter(lst,axis=1)
     print(f"The current filtered data frame's shape (rows,cols): {df.shape}")
-    show_done()
+    completed()
     return df
 
 def show_formats():
@@ -163,7 +163,7 @@ def make_output_file(df,format_type):
     if format_type.value=='CSV':
         # make the CSV file
         outfn = os.path.join(out_dir,"my_output.csv")
-        df.to_csv(outfn)
+        store_df_as_csv(df,outfn)
 
     if format_type.value=='Excel':
         # make the Excel
@@ -177,4 +177,4 @@ def make_output_file(df,format_type):
     file_size = os.path.getsize(outfn)
     print("File Size is :", file_size, "bytes")
     print(f'Output saved at: {outfn}, size: {file_size:,} bytes') 
-    show_done()
+    completed()

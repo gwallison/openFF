@@ -9,16 +9,16 @@ Most routine runs some steps for a cell to help make the notebook more
 readable for non-coders, while still making the steps easily accessible
 """
 
-# Preamble: run as soon as this module is imported
-
+##### ------ Preamble: run as soon as this module is imported
 import os 
 import shutil
 import pandas as pd
 from IPython.display import display
 from IPython.display import Markdown as md
 
-from common.file_handlers import store_df_as_csv, save_df, get_df
-from common.nb_helper import completed
+from openFF.common.file_handlers import store_df_as_csv, save_df, get_df
+from openFF.common.nb_helper import completed, make_sandbox
+
 use_itables = True
 if use_itables:
     from itables import init_notebook_mode
@@ -42,9 +42,10 @@ ext_dir = os.path.join(root_dir,'ext')
 
 repo_info_fn = os.path.join(work_dir,'repo_info.csv')
 
-
-       
+make_sandbox(root_dir)
+completed()     
         
+####  ------- Utilities called by other functions in this file 
 
 def init_repo_info():
     if not os.path.exists(repo_info_fn):        
@@ -75,7 +76,7 @@ def get_raw_df(cols=None):
   return pd.read_parquet(os.path.join(work_dir,'raw_flat.parquet'),
                          columns=cols)
 
-
+####  ------ Functions called by the builder notebook
 
 def create_and_fill_folders(download_repo=True,
                             repo_root='https://storage.googleapis.com/open-ff-common/repos/current_repo'):   

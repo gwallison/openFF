@@ -13,8 +13,8 @@ def is_remote():
         return False
     return True
 
-def show_done(txt='Completed'):
-    print(txt)
+# def show_done(txt='Completed'):
+#     print(txt)
 
 def make_sandbox(name='sandbox'):
     # make output location

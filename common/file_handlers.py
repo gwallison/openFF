@@ -28,13 +28,13 @@ lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
 #### Interacting with files in local situations
 
 def store_df_as_csv(df,fn,encoding='utf-8',str_lst = lst_str_cols):
-    # saves files in standard encoding, and double quotes 
-    # columns in str_lst, to make them be interpreted as strings by excel, etc
+    # saves files in standard encoding, and single quote added in front of every value in 
+    # columns in str_lst, to make them be interpreted as strings by excel (a "literal" value)
     t = df.copy()
     for col in str_lst:
         if col in t.columns:
             # print(col)
-            t[col] = '"'+t[col]+'"'
+            t[col] = "'"+t[col]
     t.to_csv(fn,encoding=encoding)
     
 def get_csv(fn,check_zero=True,encoding='utf-8',sep=',',quotechar='"',

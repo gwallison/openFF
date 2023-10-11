@@ -81,9 +81,6 @@ def get_raw_df(cols=None):
 def create_and_fill_folders(download_repo=True,
                             repo_root='https://storage.googleapis.com/open-ff-common/repos/current_repo'):   
     import urllib.request
-
-
-
     dirs = [orig_dir,work_dir,final_dir,ext_dir]
     for d in dirs:
         if os.path.isdir(d):

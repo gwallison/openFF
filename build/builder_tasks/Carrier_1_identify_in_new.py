@@ -5,13 +5,10 @@ Created on Thu Jun 24 15:37:55 2021
 @author: Gary
 """
 import pandas as pd
-import numpy as np
+#import numpy as np
 import os
 import datetime
-from intg_support.file_handlers import store_df_as_csv, get_csv, save_df, get_df
-
-#import build_common
-#trans_dir = build_common.get_transformed_dir()
+from openFF.common.file_handlers import store_df_as_csv, save_df, get_df
 
 
 lower_tolerance = 95
@@ -25,20 +22,11 @@ today_str = datetime.datetime.today().strftime("%Y-%m-%d")
 
 class Carrier_ID():
     def __init__(self,input_df,ref_dir='./ref_dir',out_dir='./out_dir'):
-        # self.remove_dropped_keys = remove_dropped_keys
-        # if not self.remove_dropped_keys:
-        #     print('  -- Not removing dropped keys from carrier sets')
         self.df = input_df
         self.in_upk = self.df.UploadKey
         self.in_ik = self.df.IngredientKey
         self.ref_dir = ref_dir
         self.out_dir = out_dir
-        #self.curdf_fn = os.path.join(self.ref_dir,'curation_files','carrier_list_curated.csv')
-        #self.curprobdf_fn = os.path.join(self.ref_dir,'curation_files','curated_carrier_problems.csv')
-        # self.data_source = data_source
-        # self.auto_fn = trans_dir+f'{data_source}/carrier_list_auto.csv'
-        # self.curdf_fn = trans_dir+f'{data_source}/carrier_list_curated.csv'
-        # self.probdf_fn = trans_dir+f'{data_source}/carrier_list_prob.csv'
         
         # list of single purpose lables for carriers
         self.wlst = ['carrier / base fluid', 'carrier/base fluid', 'carrier fluid',
@@ -58,31 +46,8 @@ class Carrier_ID():
         self.gasses = ['7727-37-9','124-38-9']
         self.merge_bgCAS()
         self.make_percent_sums()
-        # self.fetch_carrier_lists()
 
         
-    
-
-    # def fetch_carrier_lists(self):
-        
-    #     try:
-    #         #print('  -- loading curated carrier records')
-    #         self.curdf = pd.read_csv(self.curdf_fn,low_memory=False,
-    #                                   quotechar='$',encoding='utf-8')
-    #         #print(f' curdf: {len(self.curdf.UploadKey.unique())}')
-    #         #self.curdf = self.check_for_removed_keys(self.curdf)        
-    #         self.remove_disclosures(self.curdf)
-    #     except:
-    #         self.curdf = pd.DataFrame()
-            
-    #     try:
-    #         #print('  -- loading curated problem records')
-    #         self.curprobdf = pd.read_csv(self.curprobdf_fn,low_memory=False,
-    #                                   quotechar='$',encoding='utf-8')
-    #         # self.curdf = self.check_for_removed_keys(self.curdf)        
-    #         self.remove_disclosures(self.curprobdf)
-    #     except:
-    #         self.curprobdf = pd.DataFrame()
             
     def merge_bgCAS(self):
         #casing =  pd.read_csv('./sources/casing_curate_master.csv',
@@ -93,37 +58,6 @@ class Carrier_ID():
                            on=['CASNumber','IngredientName'],how='left')
         self.df.is_valid_CAS.fillna(False,inplace=True)
         
-    # def make_MI_fields(self):
-    #     # remove records that are more likely unreliable: when MI is small
-    #     cond = (self.df.MassIngredient>2)&(self.df.PercentHFJob>0)
-    #     t = self.df[cond][['MassIngredient','PercentHFJob','UploadKey']].copy()
-        
-    #     # make a simple ratio of MI to %HFJ.  If everything is consistent, this
-    #     # ratio should essentially be the same for all records in a disclosure
-    #     t['permassratio'] = t.MassIngredient/t.PercentHFJob
-    #     gb = t.groupby('UploadKey',as_index=False)['permassratio'].agg(['min','max']).reset_index()
-    #     gb.columns = ['UploadKey','small','big']
-    #     gb['rat_dev'] = (gb.big-gb.small)/gb.big
-    #     # set MIok to true if the range within a disclosure is less than 10%
-    #     #    MIok is a disclosure level flag.
-    #     gb['MIok'] = gb.rat_dev<.1
-        
-    #     print(f'Creating MIok: Number disclosures with MI: {len(gb)}, out of tolerance: {len(gb[gb.rat_dev>0.1])}')
-
-    #     self.df = pd.merge(self.df,gb[['UploadKey','MIok']],on='UploadKey',how='left')
-    #     self.df.MIok = np.where(~cond,False,self.df.MIok)  
-        
-    #     cond2 = (self.df.MassIngredient>5)&(self.df.TotalBaseWaterVolume>10000)&self.df.MIok
-    #     self.df['dens_test'] = np.where(cond2,
-    #                            self.df.MassIngredient/self.df.TotalBaseWaterVolume,
-    #                            np.NaN)
-    #     # density can be within pretty wide range; will check again at 
-    #     c1 = self.df.dens_test>density_min
-    #     c2 = self.df.dens_test<density_max
-    #     self.df['maybe_water_by_MI']=np.where(c1&c2,'yes','no')
-    #     self.df.maybe_water_by_MI = np.where(self.df.dens_test.isna(),
-    #                                          'not testable',
-    #                                          self.df.maybe_water_by_MI)        
         
     def make_percent_sums(self):
         gball = self.df.groupby('UploadKey',as_index=False)[['PercentHFJob',
@@ -252,8 +186,6 @@ class Carrier_ID():
             problems.append(str(d[upk])[1:-1])
         self.probdf = pd.DataFrame({'UploadKey':uploadKeys,
                             'reasons':problems})
-        # self.probdf.to_csv(os.path.join(self.out_dir,'carrier_list_prob.csv'),
-        #                    encoding= 'utf-8',quotechar='$',index=False)
         save_df(self.probdf,os.path.join(self.out_dir,'carrier_list_prob.parquet'))
 
         self.remove_disclosures(self.probdf)
@@ -273,8 +205,6 @@ class Carrier_ID():
         t = t.drop('has_purp',axis=1)
         t = pd.merge(t,gbp,on='UploadKey',how='left')
         
-        #print(f'IS IN t: {(t.UploadKey=="ffd52c1a-1868-4b7f-a8a8-47c6621d4802").sum()}')
-    
         c1 = t.has_purp==1  # only 1 record with Purpose in wlst
         c2 = t.bgCAS == '7732-18-5'  # must be water
         c3 = (t.PercentHFJob >= 50)&(t.PercentHFJob <= 100)  # should be at least this amount
@@ -284,9 +214,6 @@ class Carrier_ID():
                              'PercentHFJob','bgCAS',#'maybe_water_by_MI','dens_test',
                            'MassIngredient','TotalBaseWaterVolume']].copy()
         slic['auto_carrier_type'] = 's1'
-        #print(f'Disclosure is in set: {len(slic[slic.UploadKey=="f961a561-edd3-4c9e-8b38-3ba58d2b73c9"])}')
-        #print(f"Auto_set_1: new {len(slic)}, maybe_water_by_MI? {len(slic[slic.maybe_water_by_MI=='yes'])}, not kept (MIdensity out of range): {len(slic[slic.maybe_water_by_MI=='no'])}")
-        #slic = slic[~(slic.maybe_water_by_MI=='no')] # don't keep those flagged disclosures
         
         return slic
 
@@ -302,7 +229,6 @@ class Carrier_ID():
         """
         
         t = self.df[self.df.is_valid_CAS].copy()
-        #print(self.df.columns)
         t['has_purp'] = (t.Purpose.str.strip().str.lower().isin(self.wlst))\
                         &(t.PercentHFJob>0)  # prevent some carriers with no %HFJ from the calculation
                                              # Added 11/9/2021, after removing all previous S2 from 
@@ -373,7 +299,6 @@ class Carrier_ID():
         precond = (self.df.CASNumber=='MISSING')&\
                 (self.df.IngredientName.str.contains('including mix water'))&\
                 ((self.df.PercentHFJob >= 60)&(self.df.PercentHFJob < 100))
-        #print(f'Number of raw records with primary condition: {precond.sum()}')
         t = self.df[(self.df.is_valid_CAS)|precond|(self.df.bgCAS=='proprietary')].copy()
         gb = t.groupby('UploadKey',as_index=False)['PercentHFJob'].sum()\
             .rename({'PercentHFJob':'totPercent'},axis=1)
@@ -408,7 +333,6 @@ class Carrier_ID():
         c1 = t.has_purp==0  # no records with Purpose in wlst
         c2 = t.bgCAS == '7732-18-5'  # must be water
         c3 = (t.PercentHFJob >= 50)&(t.PercentHFJob < 100)  # should be at least this amount
-        #c4 =  t.Purpose.str.strip().str.lower().isin(self.wlst)
         slic = t[c1&c2&c3][['IngredientKey','UploadKey','CASNumber',
                             'IngredientName','Purpose','TradeName',
                              'PercentHFJob','bgCAS',#'maybe_water_by_MI','dens_test',
@@ -485,9 +409,6 @@ class Carrier_ID():
         """
         
         t = self.df.copy()
-        #gbp = t.groupby('UploadKey',as_index=False)['has_unrec_purp'].sum()
-        #t = t.drop('num_unrec_purp',axis=1)
-        #t = pd.merge(t,gbp,on='UploadKey',how='left')
         t.TradeName = t.TradeName.str.lower()
         t.TradeName.fillna('empty',inplace=True)
         c1 = t.Purpose == 'unrecorded purpose'
@@ -632,21 +553,14 @@ class Carrier_ID():
         print(f'Auto set 10: {len(res.UploadKey.unique()):9,}, with {len(self.df.UploadKey.unique()):10,} remaining')                
 
         self.autodf = pd.concat(results,sort=True)
-        # self.autodf.to_csv(os.path.join(self.out_dir,'carrier_list_auto.csv'),
-        #                    quotechar='$',
-        #                    encoding = 'utf-8',index=False)
         save_df(self.autodf,os.path.join(self.out_dir,'carrier_list_auto.parquet'))
    
-        
     def save_curation_candidates(self):
         self.df = pd.merge(self.df,self.disc[['UploadKey','percSumValid','percSumAll']],
                            on='UploadKey',how='left')
         c1 = self.df.Purpose.str.strip().str.lower().isin(self.wlst)
         c2 = self.df.PercentHFJob>=5
         self.curdf = self.df[c1|c2].copy()
-        #t['multi_rec'] = t.UploadKey.duplicated(keep=False)
-        #t['problem_disc'] = ''
-        #t['is_water_carrier'] = ''
         ukt = self.curdf.UploadKey.unique().tolist()
         
         print(f'Disclosures not caught: {len(self.curdf.UploadKey.unique())} ')
@@ -654,12 +568,6 @@ class Carrier_ID():
         self.curdf = pd.concat([self.curdf,pd.DataFrame({'UploadKey':ukt})],sort=True)
         self.curdf = self.curdf.sort_values(['UploadKey','PercentHFJob'],ascending=False)
         self.curdf['year'] = self.curdf.date.dt.year
-        # self.curdf[['UploadKey','IngredientKey','APINumber','is_valid_CAS','year',
-        #             'TotalBaseWaterVolume','CASNumber','bgCAS','IngredientName',
-        #             'Purpose','TradeName','PercentHFJob','percSumValid','percSumAll']]\
-        #             .to_csv(os.path.join(self.out_dir,'carrier_list_NOT_CURATED.csv'),
-        #                                  quotechar='$',
-        #                                  encoding='utf-8',index=False)
         store_df_as_csv(self.curdf[['UploadKey','IngredientKey','APINumber','is_valid_CAS','year',
                                     'TotalBaseWaterVolume','CASNumber','bgCAS','IngredientName',
                                     'Purpose','TradeName','PercentHFJob','percSumValid','percSumAll']],
@@ -668,10 +576,8 @@ class Carrier_ID():
         
     def remove_disclosures(self,sourcedf):
         upk = sourcedf.UploadKey.unique().tolist()
-        #print(f'Before len df = {len(self.df)}')
         self.df = self.df[~(self.df.UploadKey.isin(upk))]
         self.disc = self.disc[~(self.disc.UploadKey.isin(upk))]
-        #print(f'After len df = {len(self.df)}')
         
         
     def create_full_carrier_set(self):
@@ -683,46 +589,3 @@ class Carrier_ID():
         # except:
             # return False
         
-    # def process_curated_files(self):
-    #     try:
-    #         mod_df = pd.read_csv(os.path.join(self.ref_dir,'carrier_list_modified.csv'),
-    #                              quotechar='$',encoding='utf-8',
-    #                              dtype={'APINumber':'str'})
-    
-    #         # first process the newly curated carriers
-    #         newdf = mod_df[mod_df.is_water_carrier.isin(['X','x'])][['UploadKey','IngredientKey',
-    #                                                                  'APINumber','TotalBaseWaterVolume',
-    #                                                                  'CASNumber','bgCAS',
-    #                                                                  'IngredientName','Purpose',
-    #                                                                  'TradeName','PercentHFJob',
-    #                                                                  ]].copy()
-    #         newdf['first_date'] = 'D:'+today_str
-    #         print(f'  -- Newly curated carriers: {len(newdf.UploadKey.unique())}')
-    #         self.curdf = pd.concat([self.curdf,newdf],sort=True)\
-    #             [['UploadKey','IngredientKey','APINumber','TotalBaseWaterVolume',
-    #               'CASNumber','bgCAS','IngredientName','Purpose',
-    #               'TradeName','PercentHFJob','first_date']]
-    #         self.curdf.to_csv(os.path.join(self.out_dir,'carrier_list_curated.csv'),
-    #                           quotechar='$',encoding='utf-8')
-    #         if self.curdf.duplicated(['UploadKey','IngredientKey']).sum()>0:
-    #             print('    -- Removing duplicates (already added?)')
-    #             self.curdf = self.curdf[~self.curdf.duplicated(['UploadKey','IngredientKey'])]
-    #         print(f'  -- saved curated carrier disclosures: {len(self.curdf.UploadKey.unique())}')
-    
-    #         # now process the problem disclosures
-    #         newdf = mod_df[mod_df.problem_disc.isin(['X','x'])][['UploadKey',
-    #                                                              'APINumber']].copy()
-    #         newdf['first_date'] = 'D:'+today_str
-    #         print(f'  -- Newly curated problems: {len(newdf.UploadKey.unique())}')
-    #         self.curprobdf = pd.concat([self.curprobdf,newdf],sort=True)\
-    #             [['UploadKey','APINumber','first_date']]        
-    #         if self.curprobdf.duplicated('UploadKey').sum()>0:
-    #             print('    -- Removing duplicates (already added?)')
-    #             self.curprobdf = self.curprobdf[~self.curprobdf.duplicated('UploadKey')]
-    #         self.curprobdf.to_csv(os.path.join(self.out_dir,'curated_carrier_problems.csv'),
-    #                           quotechar='$',encoding='utf-8')
-    #         print(f'  -- saved curated problem disclosures: {len(self.curprobdf.UploadKey.unique())}')
-    #         return True
-    #     except:
-    #         return False
-                        

@@ -18,35 +18,25 @@ import numpy as np
 import geopandas
 import os
 import shutil
-from intg_support.file_handlers import store_df_as_csv, get_csv, save_df, get_df
-
-# import build_common
-# trans_dir = build_common.get_transformed_dir()
+from openFF.common.file_handlers import store_df_as_csv, get_csv, save_df, get_df
 
 final_crs = 4326 # EPSG value for bgLat/bgLon; 4326 for WGS84: Google maps
 
-
-#### ----------    end File Handles ----------  ####
 
 class Location_ID():
     def __init__(self,input_df,ref_dir='./ref_dir',out_dir='./out_dir',
                  ext_dir='./ext/'):
         self.df = input_df
-        # self.in_upk = self.df.UploadKey
-        # self.in_ik = self.df.IngredientKey
         self.ref_dir = ref_dir
         self.out_dir = out_dir
         self.ext_dir = ext_dir
         self.cur_tab_old = os.path.join(ref_dir,'curation_files','location_curated.csv')
         self.cur_tab = os.path.join(ref_dir,'curation_files','location_curated.parquet')
         self.api_code_ref = os.path.join(ref_dir,'curation_files','new_state_county_ref.csv')
-        # self.upload_ref_fn = os.path.join(self.out_dir,'uploadKey_ref.csv')
         self.upload_ref_fn = os.path.join(self.out_dir,'uploadKey_ref.parquet')
 
 
     def get_cur_table(self):
-        # if old:
-        #     return pd.read_csv(self.cur_tab_old,quotechar='$',encoding='utf-8')
         return get_df(self.cur_tab)
         
     def add_state_location_data(self,df):
@@ -55,11 +45,14 @@ class Location_ID():
          print('  -- importing state-derived location data')
          gb = df.groupby('api10',as_index=False)['UploadKey'].first()
          gb = gb[['api10']] # don't want UploadKey
-         ext_latlon = pd.read_csv(os.path.join(self.ext_dir,
-                                               # 'curation_files',
-                                               'state_latlon.csv'),
-                                  dtype={'api10':str},low_memory=False,
-                                  quotechar='$',encoding='utf-8')
+         # ext_latlon = pd.read_csv(os.path.join(self.ext_dir,
+         #                                       # 'curation_files',
+         #                                       'state_latlon.csv'),
+         #                          dtype={'api10':str},low_memory=False,
+         #                          quotechar='$',encoding='utf-8')
+         ext_latlon = get_df(os.path.join(self.ext_dir,
+                                          'state_latlon.parquet'))
+
          mg = pd.merge(gb,ext_latlon[['api10','stLatitude','stLongitude']],
                        on='api10',how='left',validate='1:1')
          out = pd.merge(df,mg,on='api10',how='left',validate='m:1')
@@ -83,7 +76,7 @@ class Location_ID():
         newlen = len(new)
         if newlen>0:    
             # fetch reference
-            ref = pd.read_csv(self.api_code_ref)
+            ref = get_df(self.api_code_ref)
             #print(ref.head())
             
             # merge them
@@ -93,7 +86,6 @@ class Location_ID():
             mg['st_ok'] = mg.StateName.str.lower()==mg.REF_StateName
             mg['ct_ok'] = mg.CountyName.str.lower()==mg.REF_CountyName
             mg['loc_name_mismatch'] = ~(mg.st_ok & mg.ct_ok)
-#            mg.loc_name_mismatch = np.where(mg.loc_name_mismatch,' ','False') # 4/27/23 - why did I do this?
             mg.drop(['ct_ok','st_ok'],inplace=True,axis=1)
             mg.rename({'REF_StateName':'bgStateName',
                        'REF_CountyName':'bgCountyName'},inplace=True,axis=1)
@@ -107,7 +99,6 @@ class Location_ID():
 
             return newlen,final
         else: # if no new, save original into working dir and leave
-            #save_df(old,os.path.join(self.ref_dir,'curation_files','location_curated.parquet'))
             shutil.copy(os.path.join(self.ref_dir,'curation_files','location_curated.parquet'),
                         self.out_dir)
         return newlen,old # if no new
@@ -222,9 +213,9 @@ class Location_ID():
         return final
         
 
-    def get_upload_ref_orig(self):
-        return pd.read_csv(self.upload_ref_fn,quotechar='$',encoding='utf-8',
-                           low_memory=False)
+    # def get_upload_ref_orig(self):
+    #     return pd.read_csv(self.upload_ref_fn,quotechar='$',encoding='utf-8',
+    #                        low_memory=False)
     
     def get_upload_ref(self):
         return get_df(self.upload_ref_fn)

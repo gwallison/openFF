@@ -13,12 +13,10 @@ import shutil
 import pandas as pd
 import numpy as np
 import intg_support.common
-from intg_support.file_handlers import store_df_as_csv, get_csv, save_df, get_df
+from  openFF.common.file_handlers import store_df_as_csv, get_csv, save_df, get_df
 
 def get_old_xlate_df(ref_dir):
     try:
-        # fn = os.path.join(ref_dir,'curation_files','company_xlate.csv')
-        # old = pd.read_csv(fn,quotechar='$')
         old = get_df(os.path.join(ref_dir,'curation_files','company_xlate.parquet'))
     except:
         print('NOT FOUND: Reference file of company names.')
@@ -28,7 +26,6 @@ def get_new_xlate_df(ref_dir):
     try:
         fn = os.path.join(ref_dir,'company_xlate_modified.csv')
         new = get_csv(fn)
-        # new = get_df(os.path.join(ref_dir,'company_xlate.parquet'))
     except:
         print('NOT FOUND: Modified file of company names.')
     return new
@@ -83,8 +80,6 @@ def add_new_to_Xlate(rawdf,ref_dir='./ref_data/',out_dir='./out/'):
             'OpCount', 'OperatorYears', 'SupCount','SupplierYears', 
             'status', 'first_date', 'change_date',
             'change_comment']]
-        # mg.to_csv(os.path.join(out_dir,'company_xlateNEW.csv'),
-        #           quotechar='$',encoding='utf-8',index=False)
         store_df_as_csv(mg,os.path.join(out_dir,'company_xlateNEW.csv'))
     return mg
 

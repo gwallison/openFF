@@ -7,7 +7,7 @@ Created on Mon Oct  4 13:09:22 2021
 
 import os
 import pandas as pd
-from intg_support.file_handlers import store_df_as_csv, get_csv, save_df, get_df
+from openFF.common.file_handlers import get_df
 
 def is_casing_complete(df,work_dir): 
     casing = df.groupby(['CASNumber','IngredientName'],as_index=False).size()

@@ -13,13 +13,10 @@ import pandas as pd
 import numpy as np
 import os
 import shutil
-import core.cas_tools as ct
-from core.file_handlers import store_df_as_csv, get_csv, save_df, get_df
+import openFF.build.core.cas_tools as ct
+from openFF.common.file_handlers import store_df_as_csv, get_csv, save_df, get_df
 import sys
         
-
-# def get_CAS_ref_df(work_dir='./work_dir/'):
-#     return get_df(os.path.join(work_dir,'CAS_ref_and_names.parquet'))
 
 def get_CAS_ref_df(ref_dir='orig_dir'):
     return get_df(os.path.join(ref_dir,'curation_files','master_cas_number_list.parquet'))
@@ -36,9 +33,10 @@ def get_new_curated_CAS_list(work_dir='./work_dir/'):
 def save_comptox_search_list(work_dir = './work_dir/'):
     df = get_new_curated_CAS_list(work_dir)
     gb = df.groupby('curatedCAS',as_index=False).size()
-    store_df_as_csv(gb,os.path.join(work_dir,'comptox_search_list.csv'))
+    store_df_as_csv(gb,os.path.join(work_dir,'COMPTOX_search_list.csv'))
 
 def is_new_complete(work_dir='/work_dir/'):
+    # test to see if CAS_curate work has been done (if it needs to)
     try:    
         df = get_new_curated_CAS_list()
         f1 = df.first_date.isna().sum()
@@ -77,7 +75,6 @@ def get_new_tentative_CAS_list(rawdf,orig_dir='./orig_dir/',work_dir='./work_dir
     new.auto_status = np.where((new.auto_status=='unk')&(new.valid_after_cleaning),
                                'cleaned',new.auto_status)
     # get CAS_ref_list
-    # CAS_ref = get_CAS_ref_df(work_dir)
     CAS_ref = get_CAS_ref_df(orig_dir)
     casreflist = CAS_ref.cas_number.tolist()
     new['tent_is_in_ref'] = new.tent_CAS.isin(casreflist)
@@ -94,59 +91,11 @@ def get_new_tentative_CAS_list(rawdf,orig_dir='./orig_dir/',work_dir='./work_dir
         
     return new
     
-###  OLD VERSION    
-# def first_pass_CAS_master_list(rawdf,orig_dir='./orig_dir/',work_dir='./out/'): # rawdf
-#     """this function is used on the first pass for the CAS master list. """
-    
-#     old = pd.read_csv(os.path.join(orig_dir,'curation_files','CAS_curated.csv'),
-#                       quotechar='$',
-#                       encoding='utf-8')
-#     old = old[['CASNumber']]
-#     ct.na_check(old,txt='CAS_1 for old')
-#     new = rawdf.groupby(['CASNumber'],as_index=False).size()
-
-#     # check if there are non-printable characters in CASNumbers
-#     new.CASNumber.map(lambda x: ct.has_non_printable(x))
-
-#     mg = pd.merge(new,old,on=['CASNumber'],
-#                   how = 'outer',indicator=True)
-#     ct.na_check(mg,txt='CAS_1 for mg')
-
-#     new = mg[mg['_merge']=='left_only'].copy() # only want new stuff
-#     new = new[['CASNumber']]    
-#     new['clean_wo_work'] = new.CASNumber.map(lambda x: ct.is_valid_CAS_code(x))
-    
-#     new['tent_CAS'] = new.CASNumber.map(lambda x:ct.cleanup_cas(x))
-#     new['valid_after_cleaning'] = new.tent_CAS.map(lambda x: ct.is_valid_CAS_code(x))
-#     ct.na_check(new,txt='CAS_1 for new')   
-#     new['auto_status'] = np.where(new.clean_wo_work,'perfect','unk')
-#     new.auto_status = np.where((new.auto_status=='unk')&(new.valid_after_cleaning),
-#                                'cleaned',new.auto_status)
-#     # get CAS_ref_list
-#     CAS_ref = pd.read_csv(os.path.join(work_dir,'CAS_ref_and_names.csv'),
-#                           quotechar='$',
-#                           encoding='utf-8')
-#     casreflist = CAS_ref.cas_number.tolist()
-#     new['tent_is_in_ref'] = new.tent_CAS.isin(casreflist)
-
-#     # check against deprecated
-#     deprecated = pd.read_csv(os.path.join(work_dir,'CAS_deprecated.csv'),
-#                           quotechar='$',
-#                           encoding='utf-8')
-#     deprecated.rename({'deprecated':'tent_CAS',
-#                        'cas_replacement':'deprecated_replacement'},axis=1,inplace=True)
-#     # print(deprecated.head())
-#     new = pd.merge(new,deprecated,on='tent_CAS',how='left')
-
-#     return new
 
 def make_CAS_to_curate_file(df,ref_dir='/old_dir/',work_dir = './work_dir/'):
     # df is the new cas values with cas_tool fields included
     # fetch the reference dataframes
 
-    # ref = pd.read_csv(os.path.join(work_dir,'CAS_ref_and_names.csv'),
-    #                   encoding='utf-8',quotechar='$')
-    # dep = pd.read_csv(os.path.join(work_dir,'CAS_deprecated.csv'),encoding='utf-8',quotechar='$')
     ref = get_df(os.path.join(work_dir,'master_cas_number_list.parquet'))
     dep = get_df(os.path.join(work_dir,'CAS_deprecated.parquet'))
     
@@ -183,7 +132,7 @@ def make_CAS_to_curate_file(df,ref_dir='/old_dir/',work_dir = './work_dir/'):
     test = test.drop(['_merge','cas_number'],axis=1) # clean up before next merge
     
     # mark the CAS numbers that are formally valid but without authoritative cas in ref.
-    #  these may be good targets for later curating
+    #  these are targets for later curating
     cond1 = test.valid_after_cleaning
     cond2 = test.on_ref_list=='unk'
     test['CAS_prospect'] = np.where(cond1&cond2,'valid_but_empty',test.tent_CAS)
@@ -200,17 +149,12 @@ def make_CAS_to_curate_file(df,ref_dir='/old_dir/',work_dir = './work_dir/'):
                     work_dir)
     else:
         # make curation file
-        # old = pd.read_csv(os.path.join(ref_dir,'curation_files','CAS_curated.csv'),quotechar='$',
-        #                         encoding='utf-8')
         old = get_df(os.path.join(ref_dir,'curation_files','CAS_curated.parquet'))
-        # old = old[['CASNumber','bgCAS','category',
-                    # 'close_syn','comment','first_date','change_date','change_comment']]
         old['is_new'] = False    
         test['is_new'] = True
         # Now concat with the old data (DONT MERGE - otherwise old gets clobbered!)
         out = pd.concat([test,old],sort=True)
         
-        # return out, len(test)   
         store_df_as_csv(out[['CASNumber','CAS_prospect','auto_status','on_ref_list',
                              'curatedCAS','categoryCAS','is_new',
                              'comment','first_date',

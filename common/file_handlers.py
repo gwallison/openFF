@@ -25,6 +25,15 @@ lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
                 'rawName','cleanName','xlateName',  # for companyXlate...
                 ]
 
+
+def is_remote():
+    # check if we are not working on a known local machine
+    import platform
+    locals = ['Dell_2023_Gary']
+    if platform.node() in locals:
+        return False
+    return True
+
 #### Interacting with files in local situations
 
 def store_df_as_csv(df,fn,encoding='utf-8',str_lst = lst_str_cols):

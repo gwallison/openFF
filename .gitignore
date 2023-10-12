@@ -1,5 +1,6 @@
 *.zip
 *.pyc
+browser/
 .ipynb_checkpoints/
 test_fixture/
 sandbox/

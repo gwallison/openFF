@@ -89,7 +89,9 @@ def create_and_fill_folders(download_repo=True,
             print(f'Creating directory: {d}')
             os.mkdir(d)
         if d==final_dir:
-            others = ['pickles','curation_files','CAS_ref_files','CompTox_ref_files','intg_support']
+            others = ['pickles','curation_files','CAS_ref_files',
+                      'CompTox_ref_files','ChemInfo_ref_files',
+                      'intg_support']
             for oth in others:   
                 subdir = os.path.join(d,oth)
                 if os.path.isdir(os.path.join(subdir)):
@@ -98,7 +100,8 @@ def create_and_fill_folders(download_repo=True,
                     print(f'Creating directory: {subdir}')
                     os.mkdir(subdir)
         if d==orig_dir:
-            others = ['pickles','curation_files','CAS_ref_files','CompTox_ref_files']
+            others = ['pickles','curation_files','CAS_ref_files',
+                      'CompTox_ref_files','ChemInfo_ref_files']
             for oth in others:   
                 subdir = os.path.join(d,oth)
                 if os.path.isdir(os.path.join(subdir)):
@@ -107,7 +110,7 @@ def create_and_fill_folders(download_repo=True,
                     print(f'Creating directory: {subdir}')
                     os.mkdir(subdir)
         if d==work_dir:
-            others = ['new_CAS_REF','new_COMPTOX_REF']
+            others = ['new_CAS_REF','new_COMPTOX_REF','new_CHEMINFO_REF']
             for oth in others:   
                 subdir = os.path.join(d,oth)
                 if os.path.isdir(os.path.join(subdir)):
@@ -129,7 +132,8 @@ def create_and_fill_folders(download_repo=True,
             completed(False,'Problem downloading file list from repository!')
         dir_df = pd.read_csv(dir_fn)
         # print(dir_df) 
-        tocopy = ['CAS_ref_files','CompTox_ref_files','curation_files','pickles']
+        tocopy = ['CAS_ref_files','CompTox_ref_files','ChemInfo_ref_files',
+                  'curation_files','pickles']
         print('\nFetching repository files:')
         for d in tocopy:
             print(f'  -- {d}')
@@ -274,6 +278,18 @@ def update_CompTox_lists():
     print('If your new chems are NOT on the list, but you were expecting them there, \nyou may have not saved the results file correctly.')
     iShow(t[['cas_number']])
     completed()
+    
+def update_ChemInformatics():
+    """
+    Process the files saved after running the Hazard and Safety modules
+    of ChemInformatics (EPA).
+    
+    Returns
+    -------
+    None.
+
+    """
+    print('Nothing happening yet')
     
 def casing_step1():
     import intg_support.CAS_2_build_casing as cas2
@@ -486,7 +502,7 @@ def make_repository(create_zip=False):
     directories = []
     filenames = []
     import shutil
-    repo_name = 'cloud_repo_new'
+    repo_name = 'final_repo_new'
     repodir = os.path.join(final_dir,repo_name)
     
     try:
@@ -494,7 +510,8 @@ def make_repository(create_zip=False):
     except:
         print(f'{repodir} already exists or other problem creating directory')
 
-    dirs = ['CAS_ref_files','CompTox_ref_files','curation_files','pickles']
+    dirs = ['CAS_ref_files','CompTox_ref_files','ChemInfo_ref_files',
+            'curation_files','pickles']
 
     for d in dirs:
         # ndir = os.path.join(repodir,d)         

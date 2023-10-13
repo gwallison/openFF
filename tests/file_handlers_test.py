@@ -1,11 +1,11 @@
 # tests for nb_helper.py
 import sys
 import os
-sys.path.insert(0,'c:/MyDocs/integrated/openFF') # adjust to your setup
+sys.path.insert(0,'c:/MyDocs/integrated') # adjust to your setup
 
 
-from common.file_handlers import *
-from common.nb_helper import make_sandbox
+from openFF.common.file_handlers import *
+from openFF.common.nb_helper import make_sandbox
 
 simp_url = "https://storage.googleapis.com/open-ff-common/test_fixtures/simple_df.parquet"
 simp_fn = os.path.join('test_fixture','simp_df.parquet')

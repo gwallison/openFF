@@ -18,6 +18,7 @@ import pandas as pd
 import os
 import requests
 import urllib
+from openFF.common.handles import curr_data
 
 # this is the list of FF fields that should be treated as text columns in CSV file
 lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
@@ -25,14 +26,6 @@ lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
                 'rawName','cleanName','xlateName',  # for companyXlate...
                 ]
 
-
-def is_remote():
-    # check if we are not working on a known local machine
-    import platform
-    locals = ['Dell_2023_Gary']
-    if platform.node() in locals:
-        return False
-    return True
 
 #### Interacting with files in local situations
 
@@ -109,3 +102,10 @@ def get_df_from_url(df_url,df_fn,force_freshen=False,inp_format='parquet'):
     assert inp_format=='parquet'
     return pd.read_parquet(df_fn)
 
+#### get specific data sets
+
+def get_curr_df(cols=[]):
+    # Fetch openFF data frame from the current repository
+    if cols!=[]: # not empty so filter
+        return pd.read_parquet(curr_data,columns=cols)
+    return pd.read_parquet(curr_data)    

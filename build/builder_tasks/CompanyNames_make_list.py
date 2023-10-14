@@ -12,9 +12,9 @@ import os
 import shutil
 import pandas as pd
 import numpy as np
-import intg_support.common
+# import intg_support.common
 from  openFF.common.file_handlers import store_df_as_csv, get_csv, save_df, get_df
-
+from  openFF.common.text_handlers import sort_id, xlate_to_str
 def get_old_xlate_df(ref_dir):
     try:
         old = get_df(os.path.join(ref_dir,'curation_files','company_xlate.parquet'))
@@ -35,8 +35,8 @@ def make_xlate_df(raw_df):
     gbo = gb.groupby('OperatorName',as_index=False)['UploadKey'].count().\
         rename({'UploadKey':'OpCount'},axis=1)
     gbyo = raw_df.groupby(['OperatorName'])['year'].apply(set).reset_index()
-    gbyo.year = gbyo.year.map(lambda x: intg_support.common.sort_id(x))
-    gbyo.year = gbyo.year.map(lambda x: intg_support.common.xlate_to_str(x,'; ',trunc=False))
+    gbyo.year = gbyo.year.map(lambda x: sort_id(x))
+    gbyo.year = gbyo.year.map(lambda x: xlate_to_str(x,'; ',trunc=False))
     gbyo.rename({'year':'OperatorYears'},axis=1,inplace=True)
     oout = pd.merge(gbo,gbyo,on='OperatorName',how='left')
     oout['rawName'] = oout.OperatorName
@@ -44,8 +44,8 @@ def make_xlate_df(raw_df):
     gbs = raw_df.groupby(['Supplier'],as_index=False)['CASNumber'].count().\
         rename({'CASNumber':'SupCount'},axis=1)
     gbys = raw_df.groupby(['Supplier'])['year'].apply(set).reset_index()
-    gbys.year = gbys.year.map(lambda x: intg_support.common.sort_id(x))
-    gbys.year = gbys.year.map(lambda x: intg_support.common.xlate_to_str(x,'; ',trunc=False))
+    gbys.year = gbys.year.map(lambda x: sort_id(x))
+    gbys.year = gbys.year.map(lambda x: xlate_to_str(x,'; ',trunc=False))
     gbys.rename({'year':'SupplierYears'},axis=1,inplace=True)
     sout = pd.merge(gbs,gbys,on='Supplier',how='left')
     sout['rawName'] = sout.Supplier
@@ -57,7 +57,7 @@ def make_xlate_df(raw_df):
     out.SupplierYears.fillna('',inplace=True)
     return out[['rawName','OpCount','OperatorYears','SupCount','SupplierYears']]
     
-def add_new_to_Xlate(rawdf,ref_dir='./ref_data/',out_dir='./out/'):
+def add_new_to_Xlate(rawdf,ref_dir,out_dir):
     old = get_old_xlate_df(ref_dir)
     #old['cleanName'] = old.rawName.str.lower()
     oldlst = old.rawName.unique().tolist()
@@ -83,13 +83,16 @@ def add_new_to_Xlate(rawdf,ref_dir='./ref_data/',out_dir='./out/'):
         store_df_as_csv(mg,os.path.join(out_dir,'company_xlateNEW.csv'))
     return mg
 
-def is_company_complete(work_dir='./work_dir/'):
+def is_company_complete(work_dir):
     try:
         companies = get_new_xlate_df(work_dir)
         c1 = companies.xlateName.isna().sum()==0
         c2 = companies.status.isna().sum()==0
         c3 = companies.first_date.isna().sum()==0
         save_df(companies,os.path.join(work_dir,'company_xlate.parquet'))
+        if ~(c1&c2&c3):
+            print(companies[c1|c2|c3])
+            print('Apparent incomplete companies_xlate_modified.csv file!')
         return (c1&c2&c3)    
     except:
         print('No file named "company_xlate_modified.csv" found.  Assuming you want to proceed...')

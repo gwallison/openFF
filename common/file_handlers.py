@@ -24,6 +24,7 @@ from openFF.common.handles import curr_data
 lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
                 'Supplier','OperatorName','TradeName','Purpose',
                 'rawName','cleanName','xlateName',  # for companyXlate...
+                'curatedCAS', # in CAS and casing curation files
                 ]
 
 
@@ -57,23 +58,25 @@ def save_df(df,fn):
     tup = os.path.splitext(fn)
     if tup[1]=='':
         df.to_parquet(fn+'.parquet')
-    elif tup[1]=='csv':
+    elif tup[1]=='.csv':
         store_df_as_csv(df,fn)
-    elif tup[1]=='parquet':
+    elif tup[1]=='.parquet':
         df.to_parquet(fn)
     else:
-        assert 1==0, f'File extension <{tup[1]}> not valid for "save_df"'
+        print(f'{fn}: Extention <{tup[1]}> not valid for "save_df"')
+        assert 1==0
     
 def get_df(fn,cols=None):
     tup = os.path.splitext(fn)
     if tup[1]=='':
         return pd.read_parquet(fn+'.parquet',columns=cols)
-    elif tup[1]=='csv':
+    elif tup[1]=='.csv':
         return get_csv(fn)
-    elif tup[1]=='parquet':
+    elif tup[1]=='.parquet':
         return pd.read_parquet(fn,columns=cols)
     else:
-        assert 1==0, f'File extension <{tup[1]}> not valid for "save_df"'
+        print(f'{fn}: Extention <{tup[1]}> not valid for "get_df"')
+        assert 1==0
 
 #####################  Interacting with remote files ##############
 

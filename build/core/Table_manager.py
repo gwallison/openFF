@@ -9,15 +9,15 @@ import numpy as np
 import gc
 import os
 import datetime
-import intg_support.mass_tools as mt
-import intg_support.cas_tools as ct
-import intg_support.external_dataset_tools as et
-from intg_support.file_handlers import store_df_as_csv, get_csv, save_df, get_df
+import openFF.build.core.mass_tools as mt
+#import openFF.build.core.cas_tools as ct
+import openFF.build.core.external_dataset_tools as et
+from openFF.common.file_handlers import save_df, get_df
 
 class Table_constructor():
     
-    def __init__(self,pkldir='./tmp/',sources='./sources/',
-                 outdir = './out/',extdir='./ext/'):
+    def __init__(self,pkldir,sources,
+                 outdir,extdir):
         self.pkldir = pkldir
         self.sources = sources
         self.trans_dir = os.path.join(self.sources,'curation_files')
@@ -97,15 +97,13 @@ class Table_constructor():
         df = pd.merge(df,ref,on='bgCAS',how='left')
         
         self.print_step('add external references such as TEDX and PFAS',1)
-        ext_sources_dir = self.extdir
-        df = et.add_all_bgCAS_tables(df,sources=ext_sources_dir,
-                                     comptox_dir = self.trans_dir,
+        df = et.add_all_bgCAS_tables(df,sources=self.extdir,
                                      outdir=self.outdir)
         self.tables['bgCAS'] = df
 
     def assemble_PADUS_data(self,df):
-        ext_sources_dir = self.extdir
-        return et.process_PADUS(df,sources=ext_sources_dir,
+        # ext_sources_dir = self.extdir
+        return et.process_PADUS(df,sources=self.extdir,
                                 outdir=self.outdir)
         
         

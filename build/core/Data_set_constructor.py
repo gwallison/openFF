@@ -10,16 +10,16 @@ the raw excel collection and creating the output data sets.
 This version created from openFF-build in Jan 2023    
 """
 import os
-import intg_support.Table_manager as c_tab
+import openFF.build.core.Table_manager as c_tab
 
 
 class Data_set_constructor():
-    def __init__(self,rawdf,ref_dir='./ref_dir',out_dir='./out_dir',extdir='./ext_dir/'):
+    def __init__(self,rawdf,ref_dir,out_dir,extdir):
         self.ref_dir = ref_dir
         self.out_dir = out_dir
         self.pickledir = os.path.join(self.out_dir,'pickles')
         self.raw_df = rawdf
-        self.ext_dir = r"C:\MyDocs\OpenFF\data\external_refs"
+        #self.ext_dir = r"C:\MyDocs\OpenFF\data\external_refs"
         self.ext_dir = extdir
                            
     def _banner(self,text):

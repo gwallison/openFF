@@ -15,8 +15,8 @@ import re
 import pandas as pd
 import numpy as np
 import os
-import intg_support.cas_tools as ct
-from intg_support.file_handlers import store_df_as_csv, get_csv, save_df, get_df
+# import openFF.build.core.cas_tools as ct
+from openFF.common.file_handlers import save_df
 
 
 class Read_FF():

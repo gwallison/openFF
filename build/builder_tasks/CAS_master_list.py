@@ -18,27 +18,27 @@ from openFF.common.file_handlers import store_df_as_csv, get_csv, save_df, get_d
 import sys
         
 
-def get_CAS_ref_df(ref_dir='orig_dir'):
+def get_CAS_ref_df(ref_dir):
     return get_df(os.path.join(ref_dir,'curation_files','master_cas_number_list.parquet'))
 
-def get_CAS_deprecated(ref_dir='orig_dir'):
+def get_CAS_deprecated(ref_dir):
     return get_df(os.path.join(ref_dir,'curation_files','CAS_deprecated.parquet'))
 
-def get_orig_curated_CAS_list(orig_dir='./orig_dir/'):
+def get_orig_curated_CAS_list(orig_dir):
     return get_df(os.path.join(orig_dir,'curation_files','CAS_curated.parquet'))
 
-def get_new_curated_CAS_list(work_dir='./work_dir/'):
+def get_new_curated_CAS_list(work_dir):
     return get_csv(os.path.join(work_dir,'CAS_curated_modified.csv'))
 
-def save_comptox_search_list(work_dir = './work_dir/'):
+def save_comptox_search_list(work_dir):
     df = get_new_curated_CAS_list(work_dir)
     gb = df.groupby('curatedCAS',as_index=False).size()
     store_df_as_csv(gb,os.path.join(work_dir,'COMPTOX_search_list.csv'))
 
-def is_new_complete(work_dir='/work_dir/'):
+def is_new_complete(work_dir):
     # test to see if CAS_curate work has been done (if it needs to)
     try:    
-        df = get_new_curated_CAS_list()
+        df = get_new_curated_CAS_list(work_dir=work_dir)
         f1 = df.first_date.isna().sum()
         f2 = df.curatedCAS.isna().sum()
         if f1+f2==0:
@@ -56,7 +56,7 @@ def copy_CAS_curated(source,dest):
     shutil.copy(os.path.join(source,'curation_files','CAS_curated.parquet'),dest)
 
 
-def get_new_tentative_CAS_list(rawdf,orig_dir='./orig_dir/',work_dir='./work_dir/'):
+def get_new_tentative_CAS_list(rawdf,orig_dir,work_dir):
     """Answers the question: are there new tentative CASNumbers that need to be
     added to the CAS SciFinder reference?"""
     old = get_orig_curated_CAS_list(orig_dir)
@@ -92,7 +92,7 @@ def get_new_tentative_CAS_list(rawdf,orig_dir='./orig_dir/',work_dir='./work_dir
     return new
     
 
-def make_CAS_to_curate_file(df,ref_dir='/old_dir/',work_dir = './work_dir/'):
+def make_CAS_to_curate_file(df,ref_dir,work_dir):
     # df is the new cas values with cas_tool fields included
     # fetch the reference dataframes
 

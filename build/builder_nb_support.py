@@ -47,7 +47,7 @@ completed()
         
 ####  ------- Utilities called by other functions in this file 
 
-def init_repo_info():
+def init_repo_info(repo_info_fn=repo_info_fn):
     if not os.path.exists(repo_info_fn):        
         with open(repo_info_fn,'w') as f:
             f.write('variable,value\n')
@@ -60,18 +60,18 @@ def add_to_repo_info(var,val):
     with open(repo_info_fn,'a') as f:
         f.write(f'{var},{val}\n')
         
-def get_new_repo_info(variable='FF_archive_filename'):
+def get_new_repo_info(variable='FF_archive_filename',work_dir=work_dir):
     t = pd.read_csv(os.path.join(work_dir,'repo_info.csv'))
     #print(t)
     return t[t.variable==variable].iloc[0]['value']
 
 
-def get_old_repo_info(variable='bulk_download_date'):
+def get_old_repo_info(variable='bulk_download_date',orig_dir=orig_dir):
     t = pd.read_csv(os.path.join(orig_dir,'old_repo_info.csv'))
     return t[t.variable==variable].iloc[0]['value']
 
 
-def get_raw_df(cols=None):
+def get_raw_df(cols=None,work_dir=work_dir):
   """without a list of cols, whole df will be returned"""
   return pd.read_parquet(os.path.join(work_dir,'raw_flat.parquet'),
                          columns=cols)
@@ -79,7 +79,11 @@ def get_raw_df(cols=None):
 ####  ------ Functions called by the builder notebook
 
 def create_and_fill_folders(download_repo=True,
-                            repo_root='https://storage.googleapis.com/open-ff-common/repos/current_repo'):   
+                            repo_root='https://storage.googleapis.com/open-ff-common/repos/current_repo',
+                            orig_dir=orig_dir,
+                            work_dir=work_dir,
+                            final_dir=final_dir,
+                            ext_dir=ext_dir):   
     import urllib.request
     dirs = [orig_dir,work_dir,final_dir,ext_dir]
     for d in dirs:
@@ -154,7 +158,7 @@ def create_and_fill_folders(download_repo=True,
     completed()    
 
 
-def get_external_files(download_ext=True):
+def get_external_files(download_ext=True,ext_dir=ext_dir):
     import urllib.request
     ext_name = os.path.join(ext_dir,'openff_ext_files.zip')
     if download_ext:
@@ -171,8 +175,8 @@ def get_external_files(download_ext=True):
     else:
         completed(True,'Completed without new external download')
 
-def download_raw_FF(download_FF=True):
-    import intg_support.fetch_new_bulk_data as fnbd
+def download_raw_FF(download_FF=True,work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.core.fetch_new_bulk_data as fnbd
     import datetime 
     today = datetime.datetime.today()
 
@@ -190,8 +194,8 @@ def download_raw_FF(download_FF=True):
         else:
             completed(False,'Could not find "testData.zip" in work_dir\nFix this issue before proceeding')
             
-def create_master_raw_df(create_raw=True):
-    import intg_support.Bulk_data_reader as bdr
+def create_master_raw_df(create_raw=True,work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.core.Bulk_data_reader as bdr
     if create_raw:
         rff = bdr.Read_FF(in_name='testData.zip', 
                           zipdir=work_dir,workdir = work_dir,
@@ -210,7 +214,7 @@ def create_master_raw_df(create_raw=True):
     else:
         completed(True,'No action taken; new FF download skipped')
         
-def update_upload_date_file():
+def update_upload_date_file(work_dir=work_dir,orig_dir=orig_dir):
     """this routine uses the previous upload_dates file to determine the new
     disclosures. It marks the previous ones as DONE - so they will not be included
     in the next "update".  """
@@ -236,7 +240,7 @@ def update_upload_date_file():
     completed()
     
 def cas_curate_step1():
-    import intg_support.CAS_master_list as casmaster
+    import openFF.build.builder_tasks.CAS_master_list as casmaster
     newcas = casmaster.get_new_tentative_CAS_list(get_raw_df(cols=['CASNumber']),orig_dir=orig_dir,work_dir=work_dir)
     if len(newcas)>0:
         iShow(newcas)
@@ -248,9 +252,9 @@ def cas_curate_step1():
         display(md('### No new CAS numbers to curate. '))
     completed() 
     
-def cas_curate_step2():
-    import intg_support.CAS_master_list as casmaster
-    import intg_support.make_CAS_ref_files as mcrf
+def cas_curate_step2(work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.builder_tasks.CAS_master_list as casmaster
+    import openFF.build.core.make_CAS_ref_files as mcrf
 # This first part creates a new reference file that includes the new SciFinder data.
 #   (we will run this again after we collect the CompTox data
     maker = mcrf.CAS_list_maker(orig_dir,work_dir)
@@ -260,16 +264,16 @@ def cas_curate_step2():
     newcas = casmaster.get_new_tentative_CAS_list(get_raw_df(cols=['CASNumber']),orig_dir=orig_dir,work_dir=work_dir)
     casmaster.make_CAS_to_curate_file(newcas,ref_dir=orig_dir,work_dir=work_dir)    
     
-def cas_curate_step3():
-    import intg_support.CAS_master_list as casmaster
+def cas_curate_step3(work_dir=work_dir):
+    import openFF.build.builder_tasks.CAS_master_list as casmaster
     flag = casmaster.is_new_complete(work_dir)
     if flag:
         completed()
     else:
         completed(False,"More CASNumbers remain to be curated. Don't proceed until corrected")
 
-def update_CompTox_lists():
-    import intg_support.make_CAS_ref_files as mcrf
+def update_CompTox_lists(work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.core.make_CAS_ref_files as mcrf
     maker = mcrf.CAS_list_maker(orig_dir,work_dir)
     maker.make_full_package()
     t = get_df(os.path.join(work_dir,"comptox_lists_table.parquet"))
@@ -279,21 +283,23 @@ def update_CompTox_lists():
     iShow(t[['cas_number']])
     completed()
     
-def update_ChemInformatics():
-    """
-    Process the files saved after running the Hazard and Safety modules
-    of ChemInformatics (EPA).
+def update_ChemInformatics(work_dir=work_dir,orig_dir=orig_dir):
+    "generate summary file from EPA's ChemInformatics modules"
+    from openFF.common.chem_info_tools import sdf_extract
     
-    Returns
-    -------
-    None.
-
-    """
-    print('Nothing happening yet')
+    ci_dir = os.path.join(work_dir,'new_CHEMINFO_REF')
+    lst = os.listdir(ci_dir)
+    if len(lst)==0:     # if work_dir does not have CI files, copy them from orig_dir
+        print(f'no files in {ci_dir}\nUsing files from current repo')
+        orig_ci = os.path.join(orig_dir,'ChemInfo_ref_files')
+        olst = os.listdir(orig_ci)
+        for fn in olst:
+            shutil.copy(os.path.join(orig_ci,fn),ci_dir)
+    sdf_extract(ci_source=ci_dir,out_dir=work_dir)
     
-def casing_step1():
-    import intg_support.CAS_2_build_casing as cas2
-    import intg_support.IngName_curator as IngNc
+def casing_step1(work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.builder_tasks.CAS_2_build_casing as cas2
+    import openFF.build.builder_tasks.IngName_curator as IngNc
     
     new_casing = cas2.make_casing(get_raw_df(cols=['CASNumber','IngredientName']),ref_dir=orig_dir,work_dir=work_dir) 
     t = new_casing[new_casing.first_date.isna()].copy()
@@ -315,7 +321,7 @@ def casing_step1():
         shutil.copy(os.path.join(orig_dir,'curation_files','casing_curated.parquet'),work_dir)
         completed(True,'No new CAS|Ing to process; skip next step')
         
-def casing_step2():
+def casing_step2(work_dir=work_dir,orig_dir=orig_dir):
     import datetime
     Today = datetime.datetime.today().strftime('%Y-%m-%d')
     try:
@@ -344,12 +350,12 @@ def casing_step2():
     completed()
     iShow(together,maxBytes=0,classes="display compact cell-border")
     
-def casing_step3():
-    import intg_support.CAS_2_build_casing as cas2
+def casing_step3(work_dir=work_dir):
+    import openFF.build.builder_tasks.CAS_2_build_casing as cas2
     completed(cas2.is_casing_complete(get_raw_df(cols=['CASNumber','IngredientName']),work_dir))
     
-def companies_step1():
-    import intg_support.CompanyNames_make_list as complist
+def companies_step1(work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.builder_tasks.CompanyNames_make_list as complist
     companies = complist.add_new_to_Xlate(get_raw_df(['CASNumber','OperatorName',
                                                       'Supplier','UploadKey','year']),
                                           ref_dir=orig_dir,out_dir=work_dir)
@@ -358,12 +364,12 @@ def companies_step1():
     iShow(companies.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}],
          classes="display compact cell-border", scrollX=True)  
     
-def companies_step2():
-    import intg_support.CompanyNames_make_list as complist
+def companies_step2(work_dir=work_dir):
+    import openFF.build.builder_tasks.CompanyNames_make_list as complist
     completed(complist.is_company_complete(work_dir))
     
-def location_step1():
-    import intg_support.Location_cleanup as loc_clean
+def location_step1(work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.builder_tasks.Location_cleanup as loc_clean
     locobj = loc_clean.Location_ID(get_raw_df(['api10','Latitude','Longitude',
                                               'Projection','UploadKey',
                                               'StateNumber','CountyNumber',
@@ -372,13 +378,13 @@ def location_step1():
     _ = locobj.clean_location()
     completed()
     
-def location_step2():
-    import intg_support.Location_cleanup as loc_clean
+def location_step2(work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.builder_tasks.Location_cleanup as loc_clean
     locobj = loc_clean.Location_ID(get_raw_df(),ref_dir=orig_dir,out_dir=work_dir)
     completed(locobj.is_location_complete())
     
-def carrier_step():
-    import intg_support.Carrier_1_identify_in_new as car1
+def carrier_step(work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.builder_tasks.Carrier_1_identify_in_new as car1
     
     carobj = car1.Carrier_ID(get_raw_df(cols=['CASNumber','IngredientName','UploadKey','APINumber',
                                               'PercentHFJob','TotalBaseWaterVolume','date',
@@ -386,7 +392,7 @@ def carrier_step():
                              ref_dir=orig_dir,out_dir=work_dir)
     completed(carobj.create_full_carrier_set())
     
-def builder_step1():
+def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
     # get all the CAS and CompTox ref files
     cdir = os.path.join(orig_dir,'CAS_ref_files')
     fdir = os.path.join(final_dir,"CAS_ref_files")
@@ -398,6 +404,10 @@ def builder_step1():
     
     cdir = os.path.join(work_dir,'new_CAS_REF')
     fdir = os.path.join(final_dir,"CAS_ref_files")
+    shutil.copytree(src=cdir,dst=fdir,dirs_exist_ok=True)
+    
+    cdir = os.path.join(work_dir,'new_CHEMINFO_REF')
+    fdir = os.path.join(final_dir,"ChemInfo_ref_files")
     shutil.copytree(src=cdir,dst=fdir,dirs_exist_ok=True)
     
     # get files from orig_dir
@@ -425,80 +435,38 @@ def builder_step1():
              'company_xlate.parquet',
              'location_curated.parquet',
              'uploadKey_ref.parquet', 
-             'upload_dates.parquet']
+             'upload_dates.parquet',
+             'CI_sdf_summary.parquet']
     for fn in files:
         shutil.copy(os.path.join(work_dir,fn),
                     os.path.join(final_dir,'curation_files',fn))
         
-def builder_step2():
+def builder_step2(final_dir=final_dir,ext_dir=ext_dir):
     # data_set_constructor
-    import intg_support.Data_set_constructor as dsc
+    import openFF.build.core.Data_set_constructor as dsc
     
-    dataobj = dsc.Data_set_constructor(get_raw_df(),final_dir,final_dir,ext_dir)
+    dataobj = dsc.Data_set_constructor(rawdf=get_raw_df(),
+                                       ref_dir=final_dir,
+                                       out_dir=final_dir,
+                                       extdir=ext_dir)
     _ = dataobj.create_full_set()
     completed()  
     
-def builder_step3():
-    # create parquet data set andn run tests
-    import intg_support.Analysis_set as a_set
-    import intg_support.Tests_of_final as tof
+def builder_step3(final_dir=final_dir):
+    # create parquet data set and run tests
+    import openFF.build.core.Analysis_set as a_set
+    import openFF.build.core.Tests_of_final as tof
 
-    # ana_set = a_set.Full_set(sources=final_dir,outdir=final_dir)
-    # print('Fetching full data set')
-    # df = ana_set.get_set(verbose=False)
     df = a_set.make_full_set_file(sources=final_dir,outdir=final_dir)
+
     # run tests
     print('Performing tests')
     tests = tof.final_test(df)
     tests.run_all_tests()
     completed()
     
-# def make_repository():
-#     import shutil
-#     repo_name = 'cloud_repo_new'
-#     repodir = os.path.join(final_dir,repo_name)
     
-#     try:
-#         os.mkdir(repodir)
-#     except:
-#         print(f'{repodir} already exists?')
-#     pickledir = os.path.join(repodir,'pickles')
-#     try:
-#         os.mkdir(pickledir)
-#     except:
-#         print(f'{pickledir} already exists?')
-#     curdir = os.path.join(repodir,'curation_files')
-#     try:
-#         os.mkdir(curdir)
-#     except:
-#         print(f'{curdir} already exists?')
-            
-#     # copy CAS and CompTox reference files
-#     cdir = os.path.join(repodir,'CAS_ref_files')
-#     sdir = os.path.join(final_dir,"CAS_ref_files")
-#     shutil.copytree(sdir,cdir,dirs_exist_ok=True)
-    
-#     cdir = os.path.join(repodir,'CompTox_ref_files')
-#     sdir = os.path.join(final_dir,"CompTox_ref_files")
-#     shutil.copytree(sdir,cdir,dirs_exist_ok=True)
-    
-#     # copy curation files
-#     cdir = os.path.join(repodir,'curation_files')
-#     sdir = os.path.join(final_dir,"curation_files")
-#     shutil.copytree(sdir,cdir,dirs_exist_ok=True)
-    
-#     # copy pickles
-#     cdir = os.path.join(repodir,'pickles')
-#     sdir = os.path.join(final_dir,"pickles")
-#     shutil.copytree(sdir,cdir,dirs_exist_ok=True)
-    
-#     # Other files to copy
-#     shutil.copy(os.path.join(final_dir,'full_df.parquet'),repodir)
-    
-#     print('Making archive...')
-#     completed(shutil.make_archive(repodir, 'zip', repodir))
-    
-def make_repository(create_zip=False):
+def make_repository(create_zip=False,final_dir=final_dir):
     directories = []
     filenames = []
     import shutil
@@ -528,13 +496,13 @@ def make_repository(create_zip=False):
             directories.append(d)
             filenames.append(item)
 
-    # get a copy of the code used
-    cdir = os.path.join(repodir,'intg_support')
-    shutil.copytree(code_dir,cdir,dirs_exist_ok=True)
-    dlst = os.listdir(cdir)
-    for item in dlst:
-        directories.append('intg_support')
-        filenames.append(item)
+    # # get a copy of the code used
+    # cdir = os.path.join(repodir,'intg_support')
+    # shutil.copytree(code_dir,cdir,dirs_exist_ok=True)
+    # dlst = os.listdir(cdir)
+    # for item in dlst:
+    #     directories.append('intg_support')
+    #     filenames.append(item)
             
 
     # Other files to copy

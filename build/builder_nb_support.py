@@ -94,8 +94,7 @@ def create_and_fill_folders(download_repo=True,
             os.mkdir(d)
         if d==final_dir:
             others = ['pickles','curation_files','CAS_ref_files',
-                      'CompTox_ref_files','ChemInfo_ref_files',
-                      'intg_support']
+                      'CompTox_ref_files','ChemInfo_ref_files']
             for oth in others:   
                 subdir = os.path.join(d,oth)
                 if os.path.isdir(os.path.join(subdir)):
@@ -122,8 +121,6 @@ def create_and_fill_folders(download_repo=True,
                 else:
                     print(f'Creating directory: {subdir}')
                     os.mkdir(subdir)
-    
-#    s_repo_name = os.path.join(orig_dir,'cloud_repo.zip')
     
     if download_repo:
         # first get file list
@@ -160,20 +157,20 @@ def create_and_fill_folders(download_repo=True,
 
 def get_external_files(download_ext=True,ext_dir=ext_dir):
     import urllib.request
-    ext_name = os.path.join(ext_dir,'openff_ext_files.zip')
+    root = "https://storage.googleapis.com/open-ff-common/ext_data/"
+    df = get_df("https://storage.googleapis.com/open-ff-common/ext_data/ext_data_master_list.csv")
+    verb = 'Connecting'
     if download_ext:
-        try:
-            print("This step may take several minutes. There are big files to transfer...")
-            url = 'https://storage.googleapis.com/open-ff-common/openff_ext_files.zip'
-            print(f'Downloading external files from {url}')
-            urllib.request.urlretrieve(url, ext_name)
-            print('Unpacking zip into "ext" directory')
-            shutil.unpack_archive(ext_name,ext_dir)
-            completed()
-        except:
-            completed(False,'Problem downloading external files!')
-    else:
-        completed(True,'Completed without new external download')
+        verb = 'Transferring'
+    for i,row in df[df.inc_remote=='Yes'].iterrows():
+        print(f'{verb} {row.filename} as {row.ref_handle}')
+        if download_ext:
+            url = root+row.filename
+            urllib.request.urlretrieve(url, os.path.join(ext_dir,row.filename))
+        pgm = f'{row.ref_handle} = r"{os.path.join(ext_dir,row.filename)}"'
+        exec(pgm)
+        
+    completed()        
 
 def download_raw_FF(download_FF=True,work_dir=work_dir,orig_dir=orig_dir):
     import openFF.build.core.fetch_new_bulk_data as fnbd

@@ -98,7 +98,7 @@ class Table_constructor():
         
         self.print_step('add external references such as TEDX and PFAS',1)
         df = et.add_all_bgCAS_tables(df,sources=self.extdir,
-                                     outdir=self.outdir)
+                                     ci_source=self.trans_dir)
         self.tables['bgCAS'] = df
 
     def assemble_PADUS_data(self,df):

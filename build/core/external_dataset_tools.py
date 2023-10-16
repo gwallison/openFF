@@ -8,11 +8,12 @@ import pandas as pd
 import numpy as np
 import os
 import geopandas
+from openFF.common.file_handlers import get_df
+
 final_crs = 4326 # EPSG value for bgLat/bgLon; 4326 for WGS84: Google maps
 
-
     
-def add_TEDX_ref(df,sources='./sources/',
+def add_TEDX_ref(df,sources,
                  tedx_fn = 'TEDX_EDC_trimmed.xls'):
     #print('Adding TEDX link to CAS table')
     tedxdf = pd.read_excel(os.path.join(sources,tedx_fn))
@@ -20,7 +21,7 @@ def add_TEDX_ref(df,sources='./sources/',
     df['is_on_TEDX'] = df.bgCAS.isin(tedx_cas)
     return df
     
-def add_Prop65_ref(df,sources='./sources/',
+def add_Prop65_ref(df,sources,
                  p65_fn = 'p65list12182020.csv'):
     #print('Adding California Prop 65 to CAS table')
     p65df = pd.read_csv(os.path.join(sources,p65_fn),encoding='iso-8859-1')
@@ -34,14 +35,14 @@ def add_diesel_list(df):
     df['is_on_diesel'] = df.bgCAS.isin(cas)
     return df
 
-def add_UVCB_list(df,sources='./sources/'):
+def add_UVCB_list(df,sources):
     print('     -- processing TSCA UVCB list')
     uvcb = pd.read_csv(os.path.join(sources,'TSCA_UVCB_202202.csv'))
     cas = uvcb.CASRN.unique().tolist()
     df['is_on_UVCB'] = df.bgCAS.isin(cas)
     return df
 
-def add_NPDWR_list(df,sources='./sources/'):
+def add_NPDWR_list(df,sources):
     # add list curated by Angelica
     print('     -- processing NPDWR list')
     npdwr = pd.read_csv(os.path.join(sources,'NationalPrimaryDrinkingWaterRegulations_machine_readable_NOV2022.csv'))
@@ -49,14 +50,14 @@ def add_NPDWR_list(df,sources='./sources/'):
     df['is_on_NPDWR'] = df.bgCAS.isin(cas)
     return df
 
-def add_RQ_list(df,sources='./sources/'):
+def add_RQ_list(df,sources):
     # variable added to some bgCAS is 'rq_lbs'
     print('     -- processing Reportable Quantity list')
     rq = pd.read_csv(os.path.join(sources,'RQ_final.csv'),quotechar='$',encoding='utf-8')
     df = pd.merge(df,rq,on='bgCAS',how='left')
     return df
     
-def add_CompTox_refs(df,sources='./sources/'):
+def add_CompTox_refs(df,sources):
     
     ctfiles = {'CWA': 'Chemical List CWA311HS-2022-03-31.csv',
                'DWSHA' : 'Chemical List EPADWS-2022-03-31.csv',
@@ -64,7 +65,8 @@ def add_CompTox_refs(df,sources='./sources/'):
                'HH_CWA': 'Chemical List NWATRQHHC-2022-03-31.csv',
                'IRIS': 'Chemical List IRIS-2022-03-31.csv',
                'PFAS_list': 'Chemical List PFASMASTER-2022-04-01.csv',
-               'volatile_list': 'Chemical List VOLATILOME-2022-04-01.csv'}
+               # 'volatile_list': 'Chemical List VOLATILOME-2022-04-01.csv'
+               }
     reffn = 'comptox_name_list.csv'
     for lst in ctfiles.keys():
         print(f'     -- processing {lst}')
@@ -83,10 +85,16 @@ def add_CompTox_refs(df,sources='./sources/'):
     df = pd.merge(df,refdf[['bgCAS','DTXSID','epa_pref_name','iupac_name']],
                   how='left',on='bgCAS')
     return df
-       
+ 
+def add_ChemInfo_list(df,ci_source):
+    print('     -- processing ChemInformatics list')
+    cidf = get_df(os.path.join(ci_source,'CI_sdf_summary.parquet'))
+    caslst = cidf.CAS.unique().tolist()
+    df['chemInfo_available'] = df.bgCAS.isin([caslst])
+    return df
     
-def add_all_bgCAS_tables(df,sources='./sources/external_refs/',
-                         outdir='./outdir/'):
+    
+def add_all_bgCAS_tables(df,sources,ci_source):
     df = add_CompTox_refs(df,sources)
     df = add_NPDWR_list(df,sources)
     df = add_Prop65_ref(df,sources)
@@ -94,6 +102,7 @@ def add_all_bgCAS_tables(df,sources='./sources/external_refs/',
     df = add_diesel_list(df)
     df = add_UVCB_list(df,sources)
     df = add_RQ_list(df,sources)
+    df = add_ChemInfo_list(df,ci_source)
     return df
 
 #################  PADUS shape files ############################

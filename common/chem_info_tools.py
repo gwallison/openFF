@@ -9,7 +9,10 @@ the results from the ChemInformatics modules.
 """
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from openFF.common.file_handlers import save_df
+from openFF.common.handles import pic_dir
 
 class Process_SDF():
     def __init__(self,fn):
@@ -83,5 +86,96 @@ def sdf_extract(ci_source,out_dir):
     pSDF.process_all_lines()
     save_df(pSDF.df,os.path.join(out_dir,'CI_sdf_summary.parquet'))
     
+######################  Used in catalog routines ############
+ci_dir = r"C:\MyDocs\OpenFF\src\testing\chemInfo"
+# report_dir = r"C:\MyDocs\OpenFF\data\external_refs\ChemInformatics"
+# im_dir = r"C:\MyDocs\OpenFF\src\openFF-catalog\pic_dir"
+
+
+def get_summary_from_xls(fn):
+    """This routine throws a warning for each file in the report dir. They are
+    harmless and difficult to remove."""
+    t = pd.read_excel(fn,skiprows=5)
+    cols = ['DTXSID','CASRN','Name','HH: Oral','HH: Inhalation','HH: Dermal','HH: Carcinogenicity',
+            'HH: Genotoxicity Mutagenicity','HH: Endocrine Disruption','HH: Reproductive','HH: Developmental',
+            'HH: Neurotoxicity: Repeat Exposure','HH: Neurotoxicity: Single Exposure',
+            'HH: Systemic Toxicity: Repeat Exposure','HH: Systemic Toxicity: Single Exposure',
+            'HH: Skin Sensitization','HH: Skin Irritation','HH: Eye Irritation',
+            'Ecotoxicity: Acute Aquatic Toxicity','Ecotoxicity: Chronic Aquatic Toxicity',
+            'Fate: Persistence','Fate: Bioaccumulation','Fate: Exposure']
+    t.columns = cols
+    return t
+
+
+def get_all_excel(inputdir=ci_dir, single_file = ''):
+    if single_file:
+        lst = [single_file]
+    else:
+        lst = os.listdir(inputdir)
+    dfs = []
+    for fn in lst:
+        if fn[-4:] != 'xlsx':
+            continue
+        filename = os.path.join(inputdir,fn)
+        dfs.append(get_summary_from_xls(filename))
+    out = pd.concat(dfs,sort=False)
+    print(len(out))
+    out = out[~out.duplicated(subset='DTXSID')]
+    print(len(out))
+    return out
+
+def getImage(path, zoom=.5):
+    return OffsetImage(plt.imread(path), zoom=zoom)
+
+def make_fingerprint(df,casrn = '107-19-7'):
+    #print(casrn)
+    t = df[df.CASRN==casrn].drop(['DTXSID','CASRN','Name'],axis=1)
+    t = t.fillna('ND')
+    #categ = ['VH','H','M','L','I','ND']
+    im_dic = {'I':os.path.join(pic_dir,'ci_icons','grey_question.png'),
+              'ND':os.path.join(pic_dir,'ci_icons','grey_square.png'),
+              'H':os.path.join(pic_dir,'ci_icons','orange_exclamation.png'),
+              'VH':os.path.join(pic_dir,'ci_icons','red_skull.png'),
+              'M':os.path.join(pic_dir,'ci_icons','yellow-minus.png'),
+              'L':os.path.join(pic_dir,'ci_icons','green-minus.png'),
+              'noval':os.path.join(pic_dir,'ci_icons','brown-x.png')}
+
+    out = t.values.flatten().tolist()
+    
+    # handle chem without ci data
+    if len(out) == 0: # don't save anything
+        #for i in range(20): out.append('noval') 
+        return
+    x = []; y = []; paths = []          
+    for i,val in enumerate(out):
+        x.append(i%5)
+        y.append(3 - i//5)
+        paths.append(im_dic[val])
+    # for i in zip(x, y,paths): print(i)
+    fig, ax = plt.subplots(facecolor='black')
+    ax.scatter(x, y) 
+    # ax.set_title(casrn)
+
+    for x0, y0, path in zip(x, y,paths):
+        ab = AnnotationBbox(getImage(path,zoom=0.75), (x0, y0), frameon=False)
+                           # bboxprops = dict(facecolor='wheat',boxstyle='round',color='black'))
+        ax.add_artist(ab)
+        ax.set_facecolor('black')
+    plt.savefig(os.path.join(pic_dir,casrn,'haz_fingerprint.png'))    
+
+def make_all_fingerprints(caslst,hazdf):
+    cas_ignore = ['proprietary','ambiguousID','sysAppMeta','conflictingID']
+    for i,cas in enumerate(caslst):
+        print(f'{i}: {cas}')
+        if not cas in cas_ignore:            
+            make_fingerprint(hazdf,cas)
         
+# def remove_all(caslst):
+#     for cas in caslst:
+#         try:
+#             os.remove(os.path.join(pic_dir,cas,'haz_fingerprint.png'))        
+#         except:
+#             print(f'Not there: {cas}')
+            
+                    
                 

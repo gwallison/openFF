@@ -19,7 +19,7 @@ import geopandas
 import os
 import shutil
 from openFF.common.file_handlers import store_df_as_csv, get_csv, save_df, get_df
-
+from openFF.common.file_handlers import ext_fn
 final_crs = 4326 # EPSG value for bgLat/bgLon; 4326 for WGS84: Google maps
 
 
@@ -30,11 +30,11 @@ class Location_ID():
         self.ref_dir = ref_dir
         self.out_dir = out_dir
         self.ext_dir = ext_dir
+    
         self.cur_tab_old = os.path.join(ref_dir,'curation_files','location_curated.csv')
         self.cur_tab = os.path.join(ref_dir,'curation_files','location_curated.parquet')
         self.api_code_ref = os.path.join(ref_dir,'curation_files','new_state_county_ref.csv')
         self.upload_ref_fn = os.path.join(self.out_dir,'uploadKey_ref.parquet')
-
 
     def get_cur_table(self):
         return get_df(self.cur_tab)
@@ -50,8 +50,10 @@ class Location_ID():
          #                                       'state_latlon.csv'),
          #                          dtype={'api10':str},low_memory=False,
          #                          quotechar='$',encoding='utf-8')
-         ext_latlon = get_df(os.path.join(self.ext_dir,
-                                          'state_latlon.parquet'))
+         # ext_latlon = get_df(os.path.join(self.ext_dir,
+         #                                  'state_latlon.parquet'))
+         latlonfn = ext_fn(self.ext_dir,'state_latlon')
+         ext_latlon = get_df(latlonfn)
 
          mg = pd.merge(gb,ext_latlon[['api10','stLatitude','stLongitude']],
                        on='api10',how='left',validate='1:1')
@@ -132,14 +134,19 @@ class Location_ID():
     def fetch_shapefiles(self):
         print('  -- fetching shapefiles')
         # url = 'https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_state_500k.zip'
-        url = os.path.join(self.ext_dir,'shape_files','cb_2018_us_state_500k.zip')
+        # url = os.path.join(self.ext_dir,'shape_files','cb_2018_us_state_500k.zip')
 
-        states = geopandas.read_file(url).rename({'NAME':'StateName'},axis=1)
+
+        # states = geopandas.read_file(url).rename({'NAME':'StateName'},axis=1)
+        stfn = ext_fn(self.ext_dir,'state_shape')
+        states = geopandas.read_file(stfn).rename({'NAME':'StateName'},axis=1)
         states.StateName = states.StateName.str.lower()
 
         # url = 'https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_county_500k.zip'
-        url = os.path.join(self.ext_dir,'shape_files','cb_2018_us_county_500k.zip')
-        counties = geopandas.read_file(url).rename({'NAME':'CountyName'},axis=1)
+        # url = os.path.join(self.ext_dir,'shape_files','cb_2018_us_county_500k.zip')
+        # counties = geopandas.read_file(url).rename({'NAME':'CountyName'},axis=1)
+        ctyfn = ext_fn(self.ext_dir,'county_shape')
+        counties = geopandas.read_file(ctyfn).rename({'NAME':'CountyName'},axis=1)
         counties.CountyName = counties.CountyName.str.lower()
         # get StateName into counties
         counties = pd.merge(counties,states[['StateName','STATEFP']],

@@ -112,3 +112,23 @@ def get_curr_df(cols=[]):
     if cols!=[]: # not empty so filter
         return pd.read_parquet(curr_data,columns=cols)
     return pd.read_parquet(curr_data)    
+
+##### external file dictionary handler
+def get_ext_master_dic(url="https://storage.googleapis.com/open-ff-common/ext_data/ext_data_master_list.csv"):
+    # pulling from main cloud source
+    df = get_df(url)
+    out = {}
+    for i,row in df[df.inc_remote=='Yes'].iterrows():
+        out[row.ref_handle] = row.filename
+        
+    return out
+
+def ext_fn(ext_dir="https://storage.googleapis.com/open-ff-common/ext_data/",
+           handle='state_latlon'):
+    masterfn = 'ext_data_master_list.csv'
+    if ext_dir[:4] == 'http': # through urls
+        ext_dict = get_ext_master_dic(ext_dir+masterfn)
+        return ext_dir+ext_dict[handle]
+    # through files
+    ext_dict = get_ext_master_dic(os.path.join(ext_dir,masterfn))
+    return os.path.join(ext_dir,ext_dict[handle])

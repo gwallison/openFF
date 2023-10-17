@@ -16,7 +16,8 @@ import pandas as pd
 from IPython.display import display
 from IPython.display import Markdown as md
 
-from openFF.common.file_handlers import store_df_as_csv, save_df, get_df
+from openFF.common.file_handlers import store_df_as_csv, save_df 
+from openFF.common.file_handlers import get_df, get_ext_master_dic
 from openFF.common.nb_helper import completed, make_sandbox
 
 use_itables = True
@@ -158,7 +159,8 @@ def create_and_fill_folders(download_repo=True,
 def get_external_files(download_ext=True,ext_dir=ext_dir):
     import urllib.request
     root = "https://storage.googleapis.com/open-ff-common/ext_data/"
-    df = get_df("https://storage.googleapis.com/open-ff-common/ext_data/ext_data_master_list.csv")
+    masterfn = "https://storage.googleapis.com/open-ff-common/ext_data/ext_data_master_list.csv"
+    df = get_df(masterfn)
     verb = 'Connecting'
     if download_ext:
         verb = 'Transferring'
@@ -167,10 +169,10 @@ def get_external_files(download_ext=True,ext_dir=ext_dir):
         if download_ext:
             url = root+row.filename
             urllib.request.urlretrieve(url, os.path.join(ext_dir,row.filename))
-        pgm = f'{row.ref_handle} = r"{os.path.join(ext_dir,row.filename)}"'
-        exec(pgm)
-        
-    completed()        
+        # pgm = f'{row.ref_handle} = r"{os.path.join(ext_dir,row.filename)}"'
+        # exec(pgm)       
+    completed()    
+    # return get_ext_master_dic(masterfn)  
 
 def download_raw_FF(download_FF=True,work_dir=work_dir,orig_dir=orig_dir):
     import openFF.build.core.fetch_new_bulk_data as fnbd
@@ -365,7 +367,7 @@ def companies_step2(work_dir=work_dir):
     import openFF.build.builder_tasks.CompanyNames_make_list as complist
     completed(complist.is_company_complete(work_dir))
     
-def location_step1(work_dir=work_dir,orig_dir=orig_dir):
+def location_step1(work_dir=work_dir,orig_dir=orig_dir,ext_dict=''):
     import openFF.build.builder_tasks.Location_cleanup as loc_clean
     locobj = loc_clean.Location_ID(get_raw_df(['api10','Latitude','Longitude',
                                               'Projection','UploadKey',
@@ -438,7 +440,7 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
         shutil.copy(os.path.join(work_dir,fn),
                     os.path.join(final_dir,'curation_files',fn))
         
-def builder_step2(final_dir=final_dir,ext_dir=ext_dir):
+def builder_step2(final_dir=final_dir,ext_dir=ext_dir,ext_dict=''):
     # data_set_constructor
     import openFF.build.core.Data_set_constructor as dsc
     

@@ -13,6 +13,7 @@ import os
 import openFF.build.core.Table_manager as c_tab
 
 
+
 class Data_set_constructor():
     def __init__(self,rawdf,ref_dir,out_dir,extdir):
         self.ref_dir = ref_dir
@@ -21,6 +22,7 @@ class Data_set_constructor():
         self.raw_df = rawdf
         #self.ext_dir = r"C:\MyDocs\OpenFF\data\external_refs"
         self.ext_dir = extdir
+        
                            
     def _banner(self,text):
         print()

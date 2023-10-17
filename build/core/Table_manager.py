@@ -53,6 +53,7 @@ class Table_constructor():
 
         self.loc_ref_df = pd.merge(self.loc_ref_df,dates[['UploadKey','date_added']],
                            on='UploadKey',how='left',validate='1:1')
+
         
     def print_step(self,txt,indent=0,newlinefirst=False):
         if newlinefirst:

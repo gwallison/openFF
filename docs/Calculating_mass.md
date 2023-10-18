@@ -52,10 +52,11 @@ For item 2, this value is clear for a large majority of disclosures. But in the 
 For item 3, we assume simple water is the carrier for our denisty multiplier when the density is not specified directly.  While this simplifying assumption may be off when recycled or produced water is used, those other products are typically of higher density.  Therefore our simple assumption likely underestimates masses.
 
 #### An important caveat
-The quantity as recorded in disclosures is the "Maximum Ingredient Concentration in Additive (by % mass)." The mass we calculate is a MAXIMUM in a range of possibilities. This comes about because chemical information in a disclosure is often extracted from Material Safety Data Sheets (MSDS) for a trade-named product in a fracking job. In the MSDS, the amount of each component in the product is usually given as a range. Manufacturers of these products may report a range to reflect variation in the manufacturing process or to protect confidential recipes. Here's an example of a product by Chemplex:
+The quantity as recorded in disclosures is the "Maximum Ingredient Concentration in Additive (by % mass)." The mass we calculate is a MAXIMUM in a range of possibilities. This comes about because chemical information in a disclosure is often extracted from Material Safety Data Sheets (MSDS) for a trade-named product in a fracking job. In the MSDS, the amount of each component in the product is usually given as a range. Manufacturers of these products may report a range to reflect variation in the manufacturing process or to protect confidential recipes. Here's an example of a product by Chemplex[^2]:
 
 <center> <img src="images/Plexbor_msds.png" width="700"/></center>
-<font size="1">*The figure shows a portion of an MSDS downloaded from https://ohiodnr.gov/wps/portal/gov/odnr/discover-and-learn/safety-conservation/about-ODNR/oil-gas/sds in Aug., 2021.*</font>
+
+[^2]:The figure shows a portion of an MSDS downloaded from https://ohiodnr.gov/wps/portal/gov/odnr/discover-and-learn/safety-conservation/about-ODNR/oil-gas/sds in Aug., 2021.
 
 In this case, Ethylene glycol may be as low as 12% in the product or as high as 15%. FracFocus requires companies using this product to report the 15% number in the disclosure and this will be reflected in the PercentHFJob value and, therefore, our calculated mass.
 

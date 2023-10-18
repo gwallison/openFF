@@ -11,7 +11,7 @@ Chemicals in FracFocus are disclosed with two identifiers: a name and a CAS Regi
 ## Methods
 Resolving chemical identity is centered on two FracFocus fields: `CASNumber` and `IngredientName` with the goal of generating the  Open-FF field, `bgCAS` (our best-guess CASRN).  
 
-<center> <img src="images/casing.png" width="400"/></center>
+<center> <img src="images/casIng.png" width="400"/></center>
 
 The first step when analyzing new data from FracFocus is to identify novel `CASNumber`s.  If necessary, the prospective CASRN is coerced into a valid format and is checked against SciFinder (the Chemical Abstract Service's research tool) to verify that it is a valid chemical.  Typographically errors are frequent and can often be corrected.   Non-valid `CASNumber`s are assigned as "proprietary" or "ambiguous." Currently there are over 2,800 unique values in `CASNumber`.
 

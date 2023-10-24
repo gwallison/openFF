@@ -11,7 +11,7 @@ Currently this is performed about monthly under [FracTracker](https://www.fractr
 - [Resolving chemical identity](Resolving_chemical_identity.md)
 - [Calculating mass](Calculating_mass.md)
 - [Standardizing text fields](Standardizing_text_fields.md)
-- [Proprietary claims](Proprietary_claims.md)
+- [Proprietary records](Proprietary_records.md)
 - [Generating the Open-FF data set](Generating_the_Open-FF_data_set.md)
 - [Open-FF's use of external data](External_data_in_Open-FF.md)
 - [The Open-FF data repo](The_Open-FF_data_repo.md)

@@ -10,7 +10,7 @@ To do:
 Currently this is performed about monthly under [FracTracker](https://www.fractracker.org/)'s sponsorship.  While most users don't need to create a data set from scratch, understanding **how** the data are generated is often helpful to getting the most from the data. 
 - [Resolving chemical identity](Resolving_chemical_identity.md)
 - [Calculating mass](Calculating_mass.md)
-- [Standardizing text fields](Standardizing_text_fields.md)
+- [Standardizing text and numeric fields](Standardizing_text_fields.md)
 - [Proprietary records](Proprietary_records.md)
 - [Generating the Open-FF data set](Generating_the_Open-FF_data_set.md)
 - [Open-FF's use of external data](External_data_in_Open-FF.md)

@@ -24,10 +24,10 @@ Like the Open-FF data set, the  Data Browser is also updated regularly and users
 - [Browser overview](Browser_overview.md)
 - [Generating the Browser](Generating_the_Browser.md)
 
-### Interactive Notebooks - UNDER CONSTRUCTION
+### Interactive Notebooks 
 These notebooks are code Jupyter notebooks, but are designed to be used by people with no coding experience.  There are used to do targeted, well defined tasks that need user input.
 - [Notebook overview](Notebook_overview.md)
-- [How to use notebooks]()
+- [How to use notebooks](How_to_use_notebooks.md)
 
 ### Other Features - UNDER CONSTRUCTION
 - [Flaw database]()

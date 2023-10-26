@@ -25,18 +25,3 @@ Open-FF’s development between 2019 and 2023 is documented at [CodeOcean](https
 The [Data Browser](https://storage.googleapis.com/open-ff-browser/Open-FF_Catalog.html) began in 2020 and was hosted on a Google Drive through [drive2web](https://www.drv.tw/).  The intention of the Browser is to allow a user to get a perspective on fracking's chemical activity without requiring the user to download data or perform analysis.  It's tools continue to expand.
 
 Furthermore, Open-FF is currently developing more specific tools using jupyter notebooks that are geared to helping non-progammers answer more targetted questions than could be answered by the Data Browser.  These notebooks are intended to be used on a resource such as [Google's Colaboratory](https://colab.google/).
-
-
-<!--
-### Other features
-1. Links to ChemInformatics and other data sources of chemical and health/env summaries
-1. Attempts to standarize and/or aggregate text fields to help searching across the whole data set
-1. Cross-checking location data to verify that reported locations are consistent and flagging them when they are not.
-1. An online "browser" with which users can explore many features of the FracFocus data without needing to download files. The browser lets users explore:
-    - detailed chemical reports of how more than 1,300 materials are used across FracFocus
-    - detailed company reports of operators - where and when they are active, their water use, their suppliers, their use of classes of known "chemicals of concern" and the frequency of their proprietary claims.
-    - summaries based on state and county uses.
-    - big picture summaries of the FracFocus data
-    - a data dictionary for the Open-FF data set
-    - an interactive chemical synonym table to help connect chemical names with their CAS numbers.
--->

@@ -39,13 +39,13 @@ The code in this repository has been designed to run in a python environment. To
     > conda activate openff
 - Install the modules for this environment.  First activate the environment (above), then execute each of the following:
 
-> conda install spyder
+    > conda install spyder
 
-> pip install geopandas
+    > pip install geopandas
 
-> conda install -c conda-forge matplotlib jupyterlab geopy openpyxl ipyleaflet pyarrow plotly nodejs  folium pytest statsmodels
+    > conda install -c conda-forge matplotlib jupyterlab geopy openpyxl ipyleaflet pyarrow plotly nodejs  folium pytest statsmodels
 
-> pip install requests-html
+    > pip install requests-html
 
-> pip install itables
+    > pip install itables
 

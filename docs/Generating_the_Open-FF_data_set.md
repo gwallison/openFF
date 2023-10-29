@@ -2,7 +2,7 @@
 <!-- this is a test of a comment 
 To do:
 --->
-
+|[Prev](Proprietary_records.md)|[Index](Top.md)|[Next](External_data_in_Open-FF.md)|
 # Generating the Open-FF data set
 
 The Open-FF data set is regenerated roughly every month to update with new fracking disclosures and to incorporate and changes that were make to existing disclosures.  The process is performed by the developers of Open-FF and is sponsored by the FracTracker Alliance.  
@@ -36,3 +36,4 @@ The process has many steps, some automated, some manual.  It is guided by [a jup
 15. Perform dataset-wide integrity tests
 1. Construct a full data repository
 
+|[Prev](Proprietary_records.md)|[Index](Top.md)|[Next](External_data_in_Open-FF.md)|

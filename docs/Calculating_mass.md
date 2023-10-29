@@ -3,6 +3,7 @@
 To do:
 --->
 
+|[Prev](Resolving_chemical_identity.md)|[Index](Top.md)|[Next](Standardizing_text_fields.md)|
 # Calculating Mass
 
 
@@ -70,3 +71,5 @@ There is a field in the bulk download of FracFocus, `MassIngredient`, that is un
 Currently, there are over 2.7 million records in which the `calcMass` and `MassIngredient` agree and only around 50,000 where they do not (and therefore we do not report `calcMass`). When we have investigated those discrepancies, they seem often attributable to `MassIngredient` issues.
 
 [^3]: Because FracFocus typically provides both the mass (`MassIngredient`) and the percentage of the whole fracking fluid (`PercentHFJob`), we can calculate the total mass of the fracking fluid from *every record* in a disclosure.  We judge `MassIngredient` values to be internally consistent when this set of calculated total mass values are essentially the same (within a tolerance).  When they are not, we flag the `MassIngredient` values for that disclosure as internally inconsistent and do not use them for comparisons to Open-FF's `calcMass`. Currently there are about 24,000 *disclosures* with inconsistent `MassIngredient`.
+
+|[Prev](Resolving_chemical_identity.md)|[Index](Top.md)|[Next](Standardizing_text_fields.md)|

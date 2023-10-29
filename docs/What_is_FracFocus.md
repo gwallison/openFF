@@ -10,7 +10,7 @@ Xnot responsible for accuracy of data
 overview of complaints
 list of obstacles
 -->
-
+|[Prev](What_is_FracFocus.md)|[Index](Top.md)|[Next](Open-FF_overview.md)|
 # What is FracFocus?
 
 In its own words, the [FracFocus website](https://fracfocus.org/) is the "national hydraulic fracturing chemical disclosure registry." FracFocus serves as the collector and manager of fracking chemical disclosures of the oil and gas industry. It delivers published disclosures to state regulators and its website  makes those disclosures public, allowing anyone to view the industry's reports. While it started in 2011 as an experiment, its use is now required by many states.
@@ -46,3 +46,5 @@ While the FracFocus data set is one onf the largest single collections documenti
 
 ### An important but flawed resource
 Despite these weaknesses, FracFocus remains the primary instrument by which we can learn of chemical uses in the fracking industry.  Working to overcome these weaknesses can lead to a better public understanding of this controversial process.
+
+|[Prev](What_is_FracFocus.md)|[Index](Top.md)|[Next](Open-FF_overview.md)|

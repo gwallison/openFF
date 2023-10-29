@@ -2,7 +2,7 @@
 <!-- this is a test of a comment 
 To do:
 --->
-
+|[Prev](Getting_Open-FF_data.md)|[Index](Top.md)|[Next](Generating_the_Browser.md)|
 # Browser overview
 
 The Open-FF [Data Browser](https://storage.googleapis.com/open-ff-browser/Open-FF_Catalog.html) aims to provide a quick but comprehensive way for users to interact with the Open-FF data.  
@@ -35,3 +35,5 @@ The Open-FF [Data Dictionary](https://storage.googleapis.com/open-ff-browser/Ope
 
 ## Chemical Synonyms
 For most CAS Numbers, there is more than on names that are acceptable. The [Chemical Synonym](https://storage.googleapis.com/open-ff-browser/Open-FF_Synonyms.html) table helps the user find the range of names for a chemical or, alternatively, find a CAS number for a known name.  The chemicals coverd in this include all in the FracFocus data set and a large set of related chemicals used in the industy.  There are over 170,000 entries.    
+
+|[Prev](Getting_Open-FF_data.md)|[Index](Top.md)|[Next](Generating_the_Browser.md)|

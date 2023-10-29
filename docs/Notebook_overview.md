@@ -2,7 +2,7 @@
 <!-- this is a test of a comment 
 To do:
 --->
-
+|[Prev](Generating_the_Browser.md)|[Index](Top.md)|[Next](How_to_use_notebooks.md)|
 # Notebook Overview
 
 Open-FF offers three forms of access to the Open-FF data: 
@@ -20,3 +20,5 @@ In this example, the user needs only to know the target location and to follow t
 We are just staring to build these notebooks but are excited about the possibilites they can give to anyone wanting to know more about fracking chemicals.
 
 These notebooks are modeled after the work of the [Environmental Enforcement Watch](https://www.environmentalenforcementwatch.org/) of EDGI.  Their notebooks allowed non-programmers do sophisticated analysis report generation from complicated EPA data sets. 
+
+|[Prev](Generating_the_Browser.md)|[Index](Top.md)|[Next](How_to_use_notebooks.md)|

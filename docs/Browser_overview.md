@@ -2,7 +2,9 @@
 <!-- this is a test of a comment 
 To do:
 --->
+
 |[Prev](Getting_Open-FF_data.md)|[Index](Top.md)|[Next](Generating_the_Browser.md)|
+
 # Browser overview
 
 The Open-FF [Data Browser](https://storage.googleapis.com/open-ff-browser/Open-FF_Catalog.html) aims to provide a quick but comprehensive way for users to interact with the Open-FF data.  

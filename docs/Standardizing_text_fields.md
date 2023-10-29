@@ -2,7 +2,9 @@
 <!-- this is a test of a comment 
 To do:
 --->
+
 |[Prev](Calculating_mass.md)|[Index](Top.md)|[Next](Proprietary_records.md)|
+
 # Normalizing Text and Numeric Fields
 
 The fields in FracFocus that specify companies, commercial names of products, names and purposes of chemicals and several location names are text fields.  These can be important fields for searching through the entire data set (for example: finding all chemicals supplied by Halliburton).  Therefore, consistency throughout the data set is essential.  Unfortunately, consistency is apparently not enforced at the data-entry stage at FracFocus.  For example, the company Halliburton is represented by over 100 unique labels which include formal names, shortened names, abbreviations, typos, and combinations with other companies.  Searching for all records of this company with the raw `Supplier` values is very frustrating and tedious.  

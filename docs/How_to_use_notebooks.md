@@ -2,7 +2,10 @@
 <!-- this is a test of a comment 
 To do:
 --->
+
 |[Prev](Notebook_overview.md)|[Index](Top.md)|# How to use Notebooks
+
+# How to use notebooks
 
 "Notebooks" are files that are combination of code and text that can guide the user throug execution.  Open-FF's notebooks are 'jupyter' notebooks and the programming language used is Python.  However, the user does not need to know any of this.  
 

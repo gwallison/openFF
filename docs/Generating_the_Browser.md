@@ -2,7 +2,9 @@
 <!-- this is a test of a comment 
 To do:
 --->
+
 |[Prev](Browser_overview.md)|[Index](Top.md)|[Next](Notebook_overview.md)|
+
 # Generating the Browser
 
 Open-FF's Data Browser is designed to give quick access to the FracFocus data from several perspectives without downloading any data or executing any code.  

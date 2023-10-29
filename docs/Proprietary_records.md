@@ -2,7 +2,9 @@
 <!-- this is a test of a comment 
 To do:
 --->
+
 |[Prev](Standardizing_text_fields.md)|[Index](Top.md)|[Next](Generating_the_Open-FF_data_set.md)|
+
 # Proprietary records
 
 Most states allow companies to designate some chemical records as Trade Secrets.   Within FracFocus, the typical way those designations are expressed is by reporting the `CASNumber` as something like "trade secrets" or "proprietary" or "confidential business information,"  but the format is not standarized and for a user to find all of them is a chore.

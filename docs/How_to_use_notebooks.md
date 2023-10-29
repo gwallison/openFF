@@ -3,7 +3,7 @@
 To do:
 --->
 
-|[Prev](Notebook_overview.md)|[Index](Top.md)|# How to use Notebooks
+|[Prev](Notebook_overview.md)|[Index](Top.md)|
 
 # How to use notebooks
 

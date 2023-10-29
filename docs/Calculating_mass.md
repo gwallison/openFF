@@ -8,7 +8,7 @@ To do:
 
 
 ### Quantity by percentage...
-FracFocus provides a limited perspective of chemical quantity, that is, FracFocus  reports quantity as the percentage (by weight) of the chemical compared to the overall fracking fluid. So, for the chemical “water,” FracFocus may record something like 85%.  For “sand,” it will probably be something like 14%. The fracking “additives” together are typically less than 1%. (The figure below is modelled after a figure from the [FracFocus website](https://fracfocus.org/learn/what-is-fracturing-fluid-made-of)[^1].)The percentages of individual additives are often tiny.  Viewing chemical quantity from only this perspective does indeed make the chemical’s contribution seem insignificant. 
+FracFocus provides a limited perspective of chemical quantity; that is, FracFocus  reports quantity as the percentage (by weight) of the chemical compared to the overall fracking fluid. So, for the chemical “water,” FracFocus may record something like 85%.  For “sand,” it will probably be something like 14%. The fracking “additives” together are typically less than 1%. (The figure below is modelled after a figure from the [FracFocus website](https://fracfocus.org/learn/what-is-fracturing-fluid-made-of)[^1].)The percentages of individual additives are often tiny.  Viewing chemical quantity from only this perspective does indeed make the chemical’s contribution seem insignificant. 
 
 [^1]: Accessed Sept. 30, 2023.
 

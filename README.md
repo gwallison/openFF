@@ -8,12 +8,12 @@ To do:
 An open source project to make the fracking industry's chemical disclosures accessible 
 
 
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10050984.svg)](https://doi.org/10.5281/zenodo.10050984)
 
 ---
 
    
-|[Read <br>the documents](docs/Top.md)|[Browse <br>the data](https://storage.googleapis.com/open-ff-browser/Open-FF_Catalog.html)|[Visit <br>the Blog]()|
+|[Read <br>the documents](docs/Top.md)|[Browse <br>the data](https://storage.googleapis.com/open-ff-browser/Open-FF_Catalog.html)|[Visit <br>the Blog](https://frackingchemicaldisclosure.wordpress.com/)|
 | --- | --- | --- |
 ---
 

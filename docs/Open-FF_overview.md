@@ -22,7 +22,7 @@ In addition to these two core features, Open-FF performs other checks and clarif
 
 Open-FF’s development between 2019 and 2023 is documented at [CodeOcean](https://codeocean.com/) in three projects, ["FracFocus Cleanup - Proof of Concept"](https://doi.org/10.24433/CO.8896584.v6) to v6, ["query-FF"](https://doi.org/10.24433/CO.5619215.v7) (a tool to help novice programmers extract data) to v7, and ["Open-FF"](https://doi.org/10.24433/CO.1058811.v16) to v16.  These projects included the code that generated the final data sets and the data sets themselves, but did not include the portions of the code that aided the curation phase of the generation nor the other features of Open-FF.
 
-The [Data Browser](https://storage.googleapis.com/open-ff-browser/Open-FF_Catalog.html) began in 2020 and was hosted on a Google Drive through [drive2web](https://www.drv.tw/).  The intention of the Browser is to allow a user to get a perspective on fracking's chemical activity without requiring the user to download data or perform analysis.  It's tools continue to expand.
+The [Data Browser](https://storage.googleapis.com/open-ff-browser/Open-FF_Catalog.html) began in 2020 and was hosted on a Google Drive through [drive2web](https://www.drv.tw/).  The intention behind the Browser is to allow a user to get a perspective on fracking's chemical activity without requiring that user to download data or perform analysis.  It's tools continue to expand.
 
 Furthermore, Open-FF is currently developing more specific tools using jupyter notebooks that are geared to helping non-progammers answer more targetted questions than could be answered by the Data Browser.  These notebooks are intended to be used on a resource such as [Google's Colaboratory](https://colab.google/).
 

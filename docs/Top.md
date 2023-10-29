@@ -3,10 +3,12 @@
 To do:
 --->
 
+|[Index](Top.md)|[Next](What_is_FracFocus.md)| 
+
 # Open-FF documentation
 - [What is FracFocus?](What_is_FracFocus.md)
 - [Open-FF Overview](Open-FF_overview.md)
-- [Quick tour of Open-FF](https://frackingchemicaldisclosure.wordpress.com/introduction-and-tour/)
+- [Quick tour of Open-FF](https://frackingchemicaldisclosure.wordpress.com/introduction-and-tour/) (external site)
 ### Creating a new Open-FF data set
 Currently this is performed about monthly under [FracTracker](https://www.fractracker.org/)'s sponsorship.  While most users don't need to create a data set from scratch, understanding **how** the data are generated is often helpful to getting the most from the data. 
 - [Resolving chemical identity](Resolving_chemical_identity.md)
@@ -20,7 +22,7 @@ Currently this is performed about monthly under [FracTracker](https://www.fractr
 
 
 ### The Data Browser
-Like the Open-FF data set, the  Data Browser is also updated regularly and users will likely have no need to generate them independently.  Nevertheless, its features and construction are also documented below.
+Like the Open-FF data set, the  Data Browser is also updated regularly and users will likely have no need to generate them independently.  Nevertheless, its features and construction are also documented below. The repository for this code is [openFF-catalog](https://github.com/gwallison/openFF-catalog).
 - [Browser overview](Browser_overview.md)
 - [Generating the Browser](Generating_the_Browser.md)
 
@@ -29,7 +31,5 @@ These notebooks are code Jupyter notebooks, but are designed to be used by peopl
 - [Notebook overview](Notebook_overview.md)
 - [How to use notebooks](How_to_use_notebooks.md)
 
-### Other Features - UNDER CONSTRUCTION
-- [Flaw database]()
 
-
+|[Index](Top.md)|[Next](What_is_FracFocus.md)|

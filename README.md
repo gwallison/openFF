@@ -43,9 +43,10 @@ The code in this repository has been designed to run in a python environment. To
 
     > pip install geopandas
 
-    > conda install -c conda-forge matplotlib jupyterlab geopy openpyxl ipyleaflet pyarrow plotly nodejs  folium pytest statsmodels
+    > conda install -c conda-forge matplotlib jupyterlab geopy openpyxl ipyleaflet pyarrow plotly nodejs folium pytest statsmodels
 
     > pip install requests-html
 
     > pip install itables
 
+A simpler approach may be to execute the code remotely.  You can use services such as Google's Colaboratry.  The notebooks of this repository are setup to run in Colab. 

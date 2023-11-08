@@ -7,6 +7,9 @@ Created on Thu Oct 12 12:40:16 2023
 Handles for file and url locations used throughout Open-FF
 
 """
+
+# in this version, repo data is fetched from the directory "current_repo"
+
 import os
 import platform
 locals = ['Dell_2023_Gary']
@@ -31,19 +34,16 @@ repo_dir = os.path.join(root_data,'repos')
 ext_data = os.path.join(root_data,'ext_data')
 ext_data_master_list = os.path.join(ext_data,'ext_data_master_list.csv')
 
-#curr_data
-
 
 ######################  for Browser generation #######
-repo_name = 'cloud_repo_2023_09_20'
+repo_name = 'current_repo'
 data_source = 'bulk'  # can be 'bulk', 'FFV1_scrape' or 'SkyTruth'
                                     # or 'NM_scrape_2022_05'
-bulkdata_date = 'September 20, 2023'
 
  # output folder is outside of main code repo
 browser_out_dir = os.path.join(root_data,"browser_out")
 
-wells_in_dist_fn = './work/FFwells_in_school_districts.csv'
+# wells_in_dist_fn = './work/FFwells_in_school_districts.csv'
 
 #####################  Image locations
 

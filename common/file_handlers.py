@@ -78,6 +78,11 @@ def get_df(fn,cols=None):
         print(f'{fn}: Extention <{tup[1]}> not valid for "get_df"')
         assert 1==0
 
+def get_table(repo_dir='', repo_name='current_repo',tname='disclosures',cols=[]):
+    """ Used to pull in repo's pickled tables"""
+    return pd.read_parquet(os.path.join(repo_dir,repo_name,'pickles',tname+'.parquet'),
+                           columns=cols)
+
 #####################  Interacting with remote files ##############
 
 def get_size_of_url_file(url):
@@ -107,7 +112,7 @@ def get_df_from_url(df_url,df_fn,force_freshen=False,inp_format='parquet'):
 
 #### get specific data sets
 
-def get_curr_df(cols=[]):
+def get_curr_df(curr_data=curr_data,cols=[]):
     # Fetch openFF data frame from the current repository
     if cols!=[]: # not empty so filter
         return pd.read_parquet(curr_data,columns=cols)

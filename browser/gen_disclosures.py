@@ -6,8 +6,8 @@ import shutil
 import subprocess
 from datetime import datetime
 from openFF.common.file_handlers import get_table
-from openFF.common.text_handlers import round_sig
-from openFF.common.handles import repo_name, repo_dir, data_source, browser_out_dir
+# from openFF.common.text_handlers import round_sig
+from openFF.common.handles import repo_name, repo_dir, data_source, browser_out_dir, browser_nb_dir
 from openFF.common.nb_helper import make_sandbox
 
 today = datetime.today()
@@ -19,9 +19,15 @@ class Disc_gen():
         self.repo_name = repo_name # pulls from handles
         self.repo_dir = repo_dir
         self.data_source = data_source # just from common.handles
+        self.disc_index_fn = os.path.join(browser_nb_dir,'Open-FF_Disclosure_Index.ipynb')
         # print(' -- fetching chemrecs', end=' ')
         self.allrec = get_table(repo_dir=self.repo_dir,
-                                tname='chemrecs')
+                                tname='chemrecs',
+                                cols = ['TradeName','Purpose','Supplier','bgSupplier',
+                                        'CASNumber','bgCAS','IngredientName',
+                                        'PercentHighAdditive','PercentHFJob','calcMass','MassIngredient',
+                                        'is_water_carrier','dup_rec',
+                                        'UploadKey','ingKeyPresent']) 
         
         # identify disclosures without chemicals
         gb = self.allrec[['UploadKey','ingKeyPresent']]\
@@ -38,12 +44,18 @@ class Disc_gen():
         # print(self.alldisc.columns)   
         self.alldisc['st_cnty'] = self.alldisc.api10.str[:5]
 
+        self.allCAS = get_table(repo_dir=self.repo_dir,tname='bgCAS',
+                                cols=['bgCAS','epa_pref_name','bgIngredientName',
+                                      'is_on_AQ_CWA','is_on_CWA','is_on_DWSHA','is_on_HH_CWA',
+                                      'is_on_IRIS','is_on_NPDWR', 'is_on_PFAS_list',
+                                      'is_on_TEDX','is_on_UVCB','is_on_diesel','is_on_prop65'])
         self.out_dir = os.path.join(browser_out_dir,'disclosures')
         self.tmp = 'tmp'
         self.disclosure_fn = r"C:\MyDocs\integrated\openFF\browser\notebooks\disclosure_report.html"
         self.make_api_list()
         self.make_outdirs()
         self.make_all_files()
+        self.make_disc_index_page()
         
     
     def make_api_list(self):
@@ -78,20 +90,6 @@ class Disc_gen():
         s= 'jupyter nbconvert --no-input --template basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute browser/notebooks/disclosure_report.ipynb --to=html '
         subprocess.run(s)
 
-    # def fix_disclosure_title(self,disc_title):
-    #     # also adds favicon to browser tab
-    #     with open(self.disclosure_fn,'r',encoding='utf-8') as f:
-    #         alltext = f.read()
-    #     alltext  = alltext.replace('<title>disclosure_report</title>',
-    #                                f'<title>{disc_title}: Open-FF report</title>\n<link rel="icon" href="https://storage.googleapis.com/open-ff-common/favicon.ico">',1)
- 
-    #     # add bootstrap 5
-    #     alltext = alltext.replace('<head>',
-    #                               f'<head>\n<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">')
-   
-    #     with open(self.disclosure_fn,'w',encoding='utf-8') as f:
-    #         f.write(alltext)
-
     def compile_page(self,disc_title='empty title'):
         # also adds favicon to browser tab
         with open(self.disclosure_fn,'r',encoding='utf-8') as f:
@@ -107,10 +105,12 @@ class Disc_gen():
                 <!-- Bootstrap CSS -->
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
+                
                 <title>{disc_title}: Open-FF report</title>\n<link rel="icon" href="https://storage.googleapis.com/open-ff-common/favicon.ico">
         </head>
         <body>
             {alltext}
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
         </body>
         </html>
         """
@@ -137,6 +137,7 @@ class Disc_gen():
             for i,upk in enumerate(upks):
                 meta = metas[metas.UploadKey==upk]
                 chem = self.allrec[self.allrec.UploadKey==upk]
+                chem = pd.merge(chem,self.allCAS,on='bgCAS',how='left')
                 meta.to_parquet(os.path.join(self.tmp,'meta.parquet'))
                 chem.to_parquet(os.path.join(self.tmp,'chem.parquet'))
                 self.make_disclosure_output()
@@ -144,3 +145,8 @@ class Disc_gen():
                 self.compile_page(disc_title)
                 self.move_and_rename(apicode,upk)
  
+
+    def make_disc_index_page(self):
+        name = self.disc_index_fn[:-6] + '.html'
+        s= f'jupyter nbconvert --no-input --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_index_fn} --to=html --output-dir={browser_out_dir}'
+        subprocess.run(s)

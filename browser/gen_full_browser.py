@@ -8,7 +8,7 @@ from openFF.common.handles import browser_out_dir
 
 import openFF.browser.gen_disclosures as gen_disc
 
-dg = gen_disc.Disc_gen()
+_ = gen_disc.Disc_gen()
 
 if __name__ == '__main__':
     print('ran it')

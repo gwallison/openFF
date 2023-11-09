@@ -40,6 +40,7 @@ repo_name = 'current_repo'
 data_source = 'bulk'  # can be 'bulk', 'FFV1_scrape' or 'SkyTruth'
                                     # or 'NM_scrape_2022_05'
 
+browser_nb_dir = os.path.join(root_code,'browser','notebooks')
  # output folder is outside of main code repo
 browser_out_dir = os.path.join(root_data,"browser_out")
 

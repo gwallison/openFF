@@ -16,6 +16,62 @@ def make_sandbox(name='sandbox'):
     except:
         print(f'{name} already exists')
 
+def compile_nb_page(fn,nb_title='empty title',incFavIcon=True,incBootStrap=True,des_content=None):
+    """Use this to transform the output of a jupyter nbconvert (template=basic) to a more complete webpage - typically
+    for the browser pages. With the basic template, no head or body tags are included, 
+    so this provides that and situates various code sections
+    in their proper location. The process is done in-place. 
+    The optional additions are:
+        - favicon
+        - bootstrap styling
+        - a meta tag with a file description for seo
+        """
+    with open(fn,'r',encoding='utf-8') as f:
+        inputtext = f.read()
+
+    # favicon setting
+    favicon = ''
+    if incFavIcon: # goes in head
+        favicon = '<link rel="icon" href="https://storage.googleapis.com/open-ff-common/favicon.ico">'
+
+    # bootstrap settings
+    bscss = ''
+    bsscript = ''
+    if incBootStrap:
+        bscss = """            <!-- Required meta tags -->
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+
+            <!-- Bootstrap CSS -->
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+             """
+        bsscript = """        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+                """
+
+    # file description
+    des_cont = ''
+    if des_content:
+        des_cont = f'<meta name="description" content="{des_content}">'
+
+    s = f"""<!DOCTYPE html>
+    <html lang="en">
+        <head>
+            {bscss}
+            
+            <title>{nb_title}</title>
+            {favicon}
+            {des_cont}
+    </head>
+    <body>
+        {inputtext}
+        {bsscript}
+    </body>
+    </html>
+    """
+    with open(fn,'w',encoding='utf-8') as f:
+        f.write(s)
+    
+
 def clr_cell(txt='Cell Completed', color = '#669999'):
     import datetime    
     from IPython.display import display

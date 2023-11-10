@@ -90,33 +90,6 @@ class Disc_gen():
         s= 'jupyter nbconvert --no-input --template basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute browser/notebooks/disclosure_report.ipynb --to=html '
         subprocess.run(s)
 
-    # def compile_page(self,disc_title='empty title'):
-    #     # also adds favicon to browser tab
-    #     with open(self.disclosure_fn,'r',encoding='utf-8') as f:
-    #         alltext = f.read()
-
-    #     s = f"""<!DOCTYPE html>
-    #     <html lang="en">
-    #         <head>
-    #             <!-- Required meta tags -->
-    #             <meta charset="utf-8">
-    #             <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    #             <!-- Bootstrap CSS -->
-    #             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-                
-    #             <title>{disc_title}: Open-FF report</title>\n<link rel="icon" href="https://storage.googleapis.com/open-ff-common/favicon.ico">
-    #     </head>
-    #     <body>
-    #         {alltext}
-    #         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    #     </body>
-    #     </html>
-    #     """
-    #     with open(self.disclosure_fn,'w',encoding='utf-8') as f:
-    #         f.write(s)
-    
 
     def move_and_rename(self,apicode,uploadKey):
         shutil.copyfile(self.disclosure_fn,

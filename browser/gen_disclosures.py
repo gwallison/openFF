@@ -10,6 +10,7 @@ from openFF.common.file_handlers import get_table
 from openFF.common.handles import repo_name, repo_dir, data_source, browser_out_dir, browser_nb_dir
 from openFF.common.nb_helper import make_sandbox, compile_nb_page
 
+
 today = datetime.today()
 
 class Disc_gen():
@@ -21,6 +22,7 @@ class Disc_gen():
         self.data_source = data_source # just from common.handles
         self.disc_index_fn = os.path.join(browser_nb_dir,'Open-FF_Disclosure_Index.ipynb')
         # print(' -- fetching chemrecs', end=' ')
+
         self.allrec = get_table(repo_dir=self.repo_dir,
                                 tname='chemrecs',
                                 cols = ['TradeName','Purpose','Supplier','bgSupplier',
@@ -99,6 +101,7 @@ class Disc_gen():
 
 
     def make_all_files(self):
+        self.allCAS.to_parquet(os.path.join(self.tmp,'cas.parquet'))
         for api in self.apis[:2]:
             apicode = api[:5]
             metas = self.alldisc[self.alldisc.api10==api].copy()
@@ -110,7 +113,7 @@ class Disc_gen():
             for i,upk in enumerate(upks):
                 meta = metas[metas.UploadKey==upk]
                 chem = self.allrec[self.allrec.UploadKey==upk]
-                chem = pd.merge(chem,self.allCAS,on='bgCAS',how='left')
+                # chem = pd.merge(chem,self.allCAS,on='bgCAS',how='left')
                 meta.to_parquet(os.path.join(self.tmp,'meta.parquet'))
                 chem.to_parquet(os.path.join(self.tmp,'chem.parquet'))
                 self.make_disclosure_output()

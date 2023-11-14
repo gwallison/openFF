@@ -89,7 +89,7 @@ def getFingerprintImg(cas):
     fp_path = os.path.join(pic_dir,cas,'haz_fingerprint.png')
     # take comptox version if it exists
     if os.path.exists(fp_path):
-        return f"""<center><img src="https://storage.googleapis.com/open-ff-browser/images/{cas}/haz_fingerprint.png" onerror="this.onerror=null; this.remove();" width="200"></center>"""
+        return f"""<center><img src="https://storage.googleapis.com/open-ff-browser/images/{cas}/haz_fingerprint.png" onerror="this.onerror=null; this.remove();" width="100"></center>"""
     return "<center>ChemInformatics not available</center>"
     
 def getFingerprintStatus(cas):

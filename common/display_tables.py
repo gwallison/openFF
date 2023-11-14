@@ -24,8 +24,8 @@ def make_chem_single_disclosure(rec_table,cas_table,
     chem_df = pd.merge(rec_table,cas_table,on='bgCAS',how='left')
 
 
-    chem_df['CASRN'] = chem_df.bgCAS+'<br>('+chem_df.CASNumber+')'
-    chem_df['name'] = chem_df.epa_pref_name+'<br>('+chem_df.IngredientName+')'
+    chem_df['CASRN'] = chem_df.bgCAS+'<br><em>('+chem_df.CASNumber+')</em>'
+    chem_df['name'] = chem_df.epa_pref_name+'<br><em>('+chem_df.IngredientName+')</em>'
     chem_df['extrnl'] = np.where(chem_df.is_on_CWA,'CWA<br>','    ')
     chem_df.extrnl = np.where(chem_df.is_on_AQ_CWA,chem_df.extrnl+'AQ_CWA<br>',chem_df.extrnl)
     chem_df.extrnl = np.where(chem_df.is_on_HH_CWA,chem_df.extrnl+'HH_CWA<br>',chem_df.extrnl)
@@ -40,6 +40,10 @@ def make_chem_single_disclosure(rec_table,cas_table,
     chem_df.extrnl = '<p style="color:green;font-size:105%;text-align:center;background-color:lightgrey;">'+chem_df.extrnl.str[:-4]+'</p>'
 
     chem_df['Hazard fingerprint'] = chem_df.bgCAS.map(lambda x: getFingerprintImg(x))
+
+    chem_df.TradeName = '<em>'+chem_df.TradeName+'</em>'
+    chem_df.Supplier = '<em>'+chem_df.Supplier+'</em>'
+    # chem_df.PercentHFJob = '<em>'+chem_df.PercentHFJob+'</em>'
 
     return chem_df[['TradeName','Supplier','CASRN','name','PercentHFJob',
                     'calcMass','extrnl','Hazard fingerprint','is_water_carrier','dup_rec']]

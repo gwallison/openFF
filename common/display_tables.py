@@ -24,8 +24,8 @@ def make_chem_single_disclosure(rec_table,cas_table,
     chem_df = pd.merge(rec_table,cas_table,on='bgCAS',how='left')
 
 
-    chem_df['CASRN'] = chem_df.bgCAS+'<br><em>('+chem_df.CASNumber+')</em>'
-    chem_df['name'] = chem_df.epa_pref_name+'<br><em>('+chem_df.IngredientName+')</em>'
+    # chem_df['CASRN'] = chem_df.bgCAS+'<br><em>('+chem_df.CASNumber+')</em>'
+    # chem_df['name'] = chem_df.epa_pref_name+'<br><em>('+chem_df.IngredientName+')</em>'
     chem_df['extrnl'] = np.where(chem_df.is_on_CWA,'CWA<br>','    ')
     chem_df.extrnl = np.where(chem_df.is_on_AQ_CWA,chem_df.extrnl+'AQ_CWA<br>',chem_df.extrnl)
     chem_df.extrnl = np.where(chem_df.is_on_HH_CWA,chem_df.extrnl+'HH_CWA<br>',chem_df.extrnl)
@@ -41,12 +41,14 @@ def make_chem_single_disclosure(rec_table,cas_table,
 
     chem_df['Hazard fingerprint'] = chem_df.bgCAS.map(lambda x: getFingerprintImg(x))
 
-    chem_df.TradeName = '<em>'+chem_df.TradeName+'</em>'
-    chem_df.Supplier = '<em>'+chem_df.Supplier+'</em>'
+    # chem_df.TradeName = chem_df.TradeName+
+    # chem_df.Supplier = '<em>'+chem_df.Supplier+'</em>'
     # chem_df.PercentHFJob = '<em>'+chem_df.PercentHFJob+'</em>'
 
-    return chem_df[['TradeName','Supplier','CASRN','name','PercentHFJob',
-                    'calcMass','extrnl','Hazard fingerprint','is_water_carrier','dup_rec']]
+    return chem_df[['TradeName','Supplier','CASNumber','bgCAS','IngredientName','bgIngredientName','epa_pref_name',
+                    'PercentHighAdditive','PercentHFJob',
+                    'MassIngredient','calcMass',
+                    'extrnl','Hazard fingerprint','is_water_carrier','dup_rec']]
 
 def make_html_for_chem_table(df):
     cols = df.columns.tolist()
@@ -57,7 +59,7 @@ def make_html_for_chem_table(df):
     jdata = df.to_json(orient='values')
 
     template =  f""" <div id="datatable-container">
-    <table id="data-table" class="display compact cell-border" style="table-layout:auto;width:auto;margin:auto;caption-side:bottom">
+    <table id="data-table" class="display compact cell-border" style="table-layout:auto;width:80%;margin:auto;caption-side:bottom">
       <thead>
         <tr>
     {header_str}
@@ -83,6 +85,9 @@ def make_html_for_chem_table(df):
         columnDefs: [{"width": "100px", "targets": 2},
                      {"render": $.fn.dataTable.render.number(',', '.', 0), "targets": 5}],
       });
+      new $.fn.dataTable.FixedHeader( table, {  //needed to combine fixheader with colvis
+      alwaysCloneTop: true
+      } );
     });
   </script>
   """

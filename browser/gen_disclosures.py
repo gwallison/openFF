@@ -9,7 +9,8 @@ from datetime import datetime
 from openFF.common.file_handlers import get_table
 # from openFF.common.text_handlers import round_sig
 from openFF.common.handles import repo_name, repo_dir, data_source, browser_out_dir, browser_nb_dir
-from openFF.common.nb_helper import make_sandbox, compile_nb_page
+from openFF.common.nb_helper import compile_std_page, compile_nb_page
+from openFF.common.display_tables import make_html_for_chem_table, make_chem_single_disclosure
 
 
 today = datetime.today()
@@ -101,40 +102,11 @@ class Disc_gen():
                                      uploadKey+'.html'))
 
 
-    # def replacenth(self, string, sub, wanted, n):
-    #     """From https://stackoverflow.com/questions/35091557/replace-nth-occurrence-of-substring-in-string"""
-
-    #     where = [m.start() for m in re.finditer(sub, string)][n-1]
-    #     print(where)
-    #     before = string[:where]
-    #     after = string[where:]
-    #     after = after.replace(sub, wanted, 1)
-    #     return before + after
-
-    # def add_DataTable_fixedHeader(self,fn,table=2):
-    #     # adds the fixed header feature to the datatable (indexed by 'table') by inserting code into html
-    #     find1 = "import 'https://code.jquery.com/jquery-3.6.0.min.js';"
-    #     ins1  = "import 'https://code.jquery.com/jquery-3.6.0.min.js';\n    import 'https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js';" 
-
-    #     find2 = 'dt_args["data"] = data;'
-    #     ins2 = 'dt_args["data"] = data;\n    dt_args["fixedHeader"] = true;'
-
-    #     with open(fn,'r') as f:
-    #         txt = f.read()
-        
-    #     print(txt.find(find1))
-    #     print(txt.find(find2))
-    #     txt = txt.replace(find1,ins1)        
-    #     txt = txt.replace(find2,ins2)        
-    #     # txt = self.replacenth(txt,find1,ins1,table)
-    #     # txt = self.replacenth(txt,find2,ins2,table)
-
-    #     with open(fn,'w') as f:
-    #         f.write(txt)
 
     def make_all_files(self):
         self.allCAS.to_parquet(os.path.join(self.tmp,'cas.parquet'))
-        for api in self.apis[:2]:
+        for j,api in enumerate(self.apis):
+            print(f'{j}/{len(self.apis)}:{api}')
             apicode = api[:5]
             metas = self.alldisc[self.alldisc.api10==api].copy()
             upks = metas.UploadKey.unique().tolist()
@@ -146,13 +118,16 @@ class Disc_gen():
                 meta = metas[metas.UploadKey==upk]
                 chem = self.allrec[self.allrec.UploadKey==upk]
                 # chem = pd.merge(chem,self.allCAS,on='bgCAS',how='left')
-                meta.to_parquet(os.path.join(self.tmp,'meta.parquet'))
-                chem.to_parquet(os.path.join(self.tmp,'chem.parquet'))
-                self.make_disclosure_output()
+                # meta.to_parquet(os.path.join(self.tmp,'meta.parquet'))
+                # chem.to_parquet(os.path.join(self.tmp,'chem.parquet'))
+                # self.make_disclosure_output()
+                t = make_chem_single_disclosure(chem,self.allCAS)
+                out = make_html_for_chem_table(t)
                 # self.add_DataTable_fixedHeader(self.disclosure_fn)
                 disc_title = api+'-disclosure_'+str(i+1)
-                compile_nb_page(fn=self.disclosure_fn,
-                                nb_title=disc_title)
+                compile_std_page(fn=self.disclosure_fn,
+                                nb_title=disc_title,
+                                bodytext=[out])
                 self.move_and_rename(apicode,upk)
  
 
@@ -161,6 +136,6 @@ class Disc_gen():
         outfn = os.path.join(browser_out_dir,os.path.basename(name))
         s= f'jupyter nbconvert --no-input --template=basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_index_fn} --to=html --output-dir={browser_out_dir}'
         subprocess.run(s)
-        compile_nb_page(fn=outfn,nb_title='Open-FF Disclosure Index')
+        compile_nb_page(fn=outfn,nb_title='Disclosure Index of Open-FF')
         # self.add_DataTable_fixedHeader(outfn)
 

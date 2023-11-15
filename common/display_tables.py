@@ -48,6 +48,45 @@ def make_chem_single_disclosure(rec_table,cas_table,
     return chem_df[['TradeName','Supplier','CASRN','name','PercentHFJob',
                     'calcMass','extrnl','Hazard fingerprint','is_water_carrier','dup_rec']]
 
+def make_html_for_chem_table(df):
+    cols = df.columns.tolist()
+    header_str = ''
+    for col in cols:
+        header_str += f'       <th>{col}</th>\n'
+    
+    jdata = df.to_json(orient='values')
+
+    template =  f""" <div id="datatable-container">
+    <table id="data-table" class="display compact cell-border" style="table-layout:auto;width:auto;margin:auto;caption-side:bottom">
+      <thead>
+        <tr>
+    {header_str}
+
+      </tr>
+      </thead>
+      <tbody> 
+      </tbody>
+    </table>
+  </div>
+  <script>
+    $(document).ready(function() {{
+      // Data to be displayed in the DataTable
+  """
+    template += f'const data = {jdata}'
+    template += """  // Initialize DataTables
+      $('#data-table').DataTable({
+        data: data,
+        paging: false,
+        fixedHeader: true,
+        dom: 'Bfrtip',
+        buttons: [{extend: 'colvis',text: 'Columns'}],
+        columnDefs: [{"width": "100px", "targets": 2},
+                     {"render": $.fn.dataTable.render.number(',', '.', 0), "targets": 5}],
+      });
+    });
+  </script>
+  """
+    return template
 
 # def make_chem_summary(df_cas):
 #     chem_df = df_cas.groupby('bgCAS',as_index=False)[['UploadKey']].count()

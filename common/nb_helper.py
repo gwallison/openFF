@@ -16,6 +16,67 @@ def make_sandbox(name='sandbox'):
     except:
         print(f'{name} already exists')
 
+def compile_std_page(fn,nb_title='empty title',headtext=[],
+                    bodytext=[],
+                    incFavIcon=True,des_content=None, use_std_css_and_scripts=True):
+    """Use this to create a standard browser webpage based on a template and sections passed here. 
+    The optional additions are:
+        - favicon
+        - a meta tag with a file description for seo
+    Currently, this is just used for a disclosure report.
+        """
+    with open(fn,'r',encoding='utf-8') as f:
+        inputtext = f.read()
+
+    # standard css and scripts
+    css_js = ''
+    if use_std_css_and_scripts:
+        css_js = """<link href="https://cdn.datatables.net/v/dt/jq-3.7.0/dt-1.13.7/b-2.4.2/b-colvis-2.4.2/datatables.min.css" rel="stylesheet">
+                <script src="https://cdn.datatables.net/v/dt/jq-3.7.0/dt-1.13.7/b-2.4.2/b-colvis-2.4.2/datatables.min.js"></script>
+                """       
+        # """  <link href="https://cdn.datatables.net/v/dt/jq-3.7.0/dt-1.13.7/fh-3.4.0/datatables.min.css" rel="stylesheet">
+        # <script src="https://cdn.datatables.net/v/dt/jq-3.7.0/dt-1.13.7/fh-3.4.0/datatables.min.js"></script>
+        # """
+    # favicon setting
+    favicon = ''
+    if incFavIcon: # goes in head
+        favicon = '<link rel="icon" href="https://storage.googleapis.com/open-ff-common/favicon.ico">'
+
+    # file description
+    des_cont = ''
+    if des_content:
+        des_cont = f'<meta name="description" content="{des_content}">'
+
+    s = f"""<!DOCTYPE html>
+    <html lang="en">
+        <head>
+            
+            <title>{nb_title}</title>
+            {favicon}
+            {des_cont}
+            {css_js}
+    """
+    s += """<style>
+            * {
+                font-family: sans-serif;
+            }
+            </style>
+            """
+    for item in headtext:
+        s+= f'    {item}\n'
+
+    s+= """</head>
+    <body>
+    """
+    for item in bodytext:
+        s+= f'    {item}\n'
+
+    s+= """</body>
+    </html>
+    """
+    with open(fn,'w',encoding='utf-8') as f:
+        f.write(s)
+    
 def compile_nb_page(fn,nb_title='empty title',incFavIcon=True,incBootStrap=True,des_content=None):
     """Use this to transform the output of a jupyter nbconvert (template=basic) to a more complete webpage - typically
     for the browser pages. With the basic template, no head or body tags are included, 
@@ -70,7 +131,7 @@ def compile_nb_page(fn,nb_title='empty title',incFavIcon=True,incBootStrap=True,
     """
     with open(fn,'w',encoding='utf-8') as f:
         f.write(s)
-    
+
 
 def clr_cell(txt='Cell Completed', color = '#669999'):
     import datetime    

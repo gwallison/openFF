@@ -12,7 +12,7 @@ Handles for file and url locations used throughout Open-FF
 
 import os
 import platform
-locals = ['Dell_2023_Gary']
+locals = ['Dell_2023_Gary','M2']
 
 curr_platform = ''
 if not platform.node() in locals:
@@ -33,6 +33,8 @@ else:
 repo_dir = os.path.join(root_data,'repos')
 ext_data = os.path.join(root_data,'ext_data')
 ext_data_master_list = os.path.join(ext_data,'ext_data_master_list.csv')
+sandbox_dir = os.path.join(root_code,'sandbox')
+local_includes = os.path.join(root_code,'includes')
 
 
 ######################  for Browser generation #######
@@ -43,6 +45,7 @@ data_source = 'bulk'  # can be 'bulk', 'FFV1_scrape' or 'SkyTruth'
 browser_nb_dir = os.path.join(root_code,'browser','notebooks')
  # output folder is outside of main code repo
 browser_out_dir = os.path.join(root_data,"browser_out")
+browser_inc_dir = os.path.join(browser_out_dir,"includes")
 
 # wells_in_dist_fn = './work/FFwells_in_school_districts.csv'
 

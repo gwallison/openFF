@@ -1,0 +1,17 @@
+.collapsible {
+    margin-bottom: 10px;
+  }
+  
+  .collapsible-toggle {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+  
+  .collapsible-content {
+    display: none;
+  }
+  
+  .collapsible .collapsible-toggle:active + .collapsible-content {
+    display: block;
+  }

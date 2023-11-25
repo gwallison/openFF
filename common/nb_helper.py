@@ -25,8 +25,8 @@ def compile_std_page(fn,nb_title='empty title',headtext=[],
         - a meta tag with a file description for seo
     Currently, this is just used for a disclosure report.
         """
-    with open(fn,'r',encoding='utf-8') as f:
-        inputtext = f.read()
+    # with open(fn,'r',encoding='utf-8') as f:
+    #     inputtext = f.read()
 
     # standard css and scripts
     css_js = ''

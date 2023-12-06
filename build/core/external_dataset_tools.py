@@ -59,7 +59,7 @@ def add_RQ_list(df,sources):
     df = pd.merge(df,rq,on='bgCAS',how='left')
     return df
     
-def add_CompTox_refs(df,sources):
+def add_CompTox_refs(df,sources,ci_source):
     
     ctfiles = {'CWA': 'cwa_list',
                'DWSHA' : 'dwsha_list',
@@ -69,7 +69,8 @@ def add_CompTox_refs(df,sources):
                'PFAS_list': 'pfas_list',
                # 'volatile_list': 'Chemical List VOLATILOME-2022-04-01.csv'
                }
-    compreffn = 'comptox_name_list.csv'
+    # compreffn = 'comptox_name_list.csv'
+    compreffn = 'master_cas_number_list.parquet'
     for lst in ctfiles.keys():
         print(f'     -- processing {lst}')
         reffn = ext_fn(ext_dir=sources,handle=ctfiles[lst])
@@ -79,11 +80,12 @@ def add_CompTox_refs(df,sources):
         df['is_on_'+lst] = df.bgCAS.isin(clst)
         
     # now add the epa ref numbers and names
-    refdf = pd.read_csv(os.path.join(sources,compreffn),quotechar='$',encoding='utf-8')
+    # refdf = pd.read_csv(os.path.join(sources,compreffn),quotechar='$',encoding='utf-8')
+    refdf = pd.read_parquet(os.path.join(ci_source,compreffn))
     # we currently use CASRN for bgIngredientName because of duplicate synonyms
-    refdf = refdf[['CASRN','epa_preferred_name',
+    refdf = refdf[['cas_number','epa_preferred_name',
                    'DTXSID','iupac_name']]\
-            .rename({'CASRN':'bgCAS','epa_preferred_name':'epa_pref_name'},axis=1)
+            .rename({'cas_number':'bgCAS','epa_preferred_name':'epa_pref_name'},axis=1)
     refdf = refdf[~refdf.bgCAS.duplicated()] # get rid of double callouts
     df = pd.merge(df,refdf[['bgCAS','DTXSID','epa_pref_name','iupac_name']],
                   how='left',on='bgCAS')
@@ -98,7 +100,7 @@ def add_ChemInfo_list(df,ci_source):
     
     
 def add_all_bgCAS_tables(df,sources,ci_source):
-    df = add_CompTox_refs(df,sources)
+    df = add_CompTox_refs(df,sources,ci_source)
     df = add_NPDWR_list(df,sources)
     df = add_Prop65_ref(df,sources)
     df = add_TEDX_ref(df,sources)

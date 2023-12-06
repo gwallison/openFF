@@ -9,6 +9,7 @@ Handles for file and url locations used throughout Open-FF
 """
 
 # in this version, repo data is fetched from the directory "current_repo"
+from datetime import datetime
 
 import os
 import platform
@@ -23,7 +24,8 @@ else:
 if curr_platform=='remote':
     root_code = "openFF"
     root_data = ""
-    curr_data = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
+    # curr_data = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
+    curr_data = "full_df.parquet"
 
 else:     
     root_code = r"C:\MyDocs\integrated\openFF"
@@ -35,12 +37,13 @@ ext_data = os.path.join(root_data,'ext_data')
 ext_data_master_list = os.path.join(ext_data,'ext_data_master_list.csv')
 sandbox_dir = os.path.join(root_code,'sandbox')
 local_includes = os.path.join(root_code,'includes')
-
+full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
 
 ######################  for Browser generation #######
-repo_name = 'current_repo'
+repo_name = 'openFF_data_2023_11_25'
 data_source = 'bulk'  # can be 'bulk', 'FFV1_scrape' or 'SkyTruth'
                                     # or 'NM_scrape_2022_05'
+cat_creation_date = datetime.now()
 
 browser_nb_dir = os.path.join(root_code,'browser','notebooks')
  # output folder is outside of main code repo

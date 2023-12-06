@@ -20,52 +20,120 @@ def build_collapsible(toggle_text,content=[],clr='black'):
     return f"""    
     <div class="collapsible">
     <div class="collapsible-toggle" style="color: {clr}">{toggle_text} <span class="icon">&#x25BC;</span></div>
-    <div class="collapsible-content">{cntstr}</div>
+    <div class="content">{cntstr}</div>
     </div>\n
     """    
+def collapse_object(button_txt,content_lst=['NO CONTENT'],has_flags=False):
+    return (button_txt,content_lst,has_flags)
+
+def build_collapsible_set(lst):
+    s = ''
+    for i in lst:
+        clr_change = ''
+        if i[2]: # has_flags
+            clr_change = 'style="background-color: #8a1003" '
+        s+= f'<button class="collapsible" {clr_change}>{i[0]}</button>\n'
+        s+= '<div class="content"><p>\n'
+        for item in i[1]:
+            s+= item + '<br>\n'
+        s+= '</p></div>\n'
+    return s
 
 def make_html_of_disclosure_meta(disc_table):
-    """Use collabsibles to keep visibilty managable"""
-    s = "<h2> Fracking Job Details </h2>\n"
-    s+= build_collapsible(f'<b>APINumber</b>: {disc_table.APINumber.iloc[0]}',
-                          ["Well Number registered with the state"])
-    s+= build_collapsible(f'<b>JobStartDate</b>: {disc_table.JobStartDate.iloc[0]},<br><b>JobEndDate</b>: {disc_table.JobEndDate.iloc[0]}',
-                          [f'date (Open-FF): {disc_table.date.iloc[0]}'])
-    s+= build_collapsible(f'<b>OperatorName</b>: {disc_table.OperatorName.iloc[0]}',
-                          [f'bgOperatorName: {disc_table.OperatorName.iloc[0]}',
-                           f'primarySupplier (the most common supplier on the disclosure): {disc_table.primarySupplier.iloc[0]} '])
-
-    c = 'black'
-    if (disc_table.loc_name_mismatch.iloc[0])|(disc_table.loc_within_county.iloc[0]=='NO'): c = 'red'
-    s+= build_collapsible(f'<b>StateName</b>: {disc_table.StateName.iloc[0]},<br><b>CountyName</b>: {disc_table.CountyName.iloc[0]}',
-                          [f'bgStateName: {disc_table.bgStateName.iloc[0]}', f'bgCountyName: {disc_table.bgCountyName.iloc[0]}',
-                           f'loc_name_mismatch: {disc_table.loc_name_mismatch.iloc[0]}',
-                           f'loc_within_county: {disc_table.loc_within_county.iloc[0]}',
-                           f'loc_within_state: {disc_table.loc_within_state.iloc[0]}'])
-
-    c = 'black'
-    if not disc_table.has_TBWV.iloc[0]: c = 'red'
-    s+= build_collapsible(f'<b>TotalBaseWaterVolume</b>: {disc_table.TotalBaseWaterVolume.iloc[0]:,} gallons',
-                          ["Volume of water used as the carrier in the fracking job","Note that while disclosures usually report this water as the single chemical water (7732-18-5), FracFocus disclosures include the disclaimer that the carrier may include recycled and/or produced water."],
-                          clr = c)
-
-    s+= build_collapsible('<b>Click here for more info about this disclosure</b>',
+    """Use collapsibles to keep visibilty managable"""
+    row = disc_table.iloc[0]
+    colls = []
+    # APINumber, etc
+    colls.append(collapse_object(f'<b>IDENTITY: APINumber</b>: {row.APINumber}',
+                                 [f"WellName: {row.WellName}",
+                                  f"UploadKey: {row.UploadKey}",
+                                  f"api10: {row.api10}"])
+   )
+    # dates, etc
+    delay = row.pub_delay_days
+    # if row.date.year < 2019:
+    #     delay = 'unknown'
+    colls.append(collapse_object(f'<b>DATES:  Job Start and End</b>: {row.JobStartDate.split()[0]}, {row.JobEndDate.split()[0]}',
+                                 [f'date (Open-FF): {row.date}',
+                                  f'date_added (first detected by Open-FF): {row.date_added}',
+                                  f'publication delay: {delay} days'])
+   )
+    # operators
+    colls.append(collapse_object(f'<b>COMPANIES:  OperatorName</b>: {row.OperatorName}',
+                                 [f'bgOperatorName: {row.bgOperatorName}',
+                                 f'primarySupplier (the most common supplier on the disclosure): {row.primarySupplier} '])
+    )
+    # state and county
+    flag = row.loc_name_mismatch | (row.loc_within_county=='NO') | (row.loc_within_state=='NO')
+    colls.append(collapse_object(f'<b>LOCATION: </b> {row.CountyName} County, {row.StateName}',
+                                 [f'bgStateName: {row.bgStateName}', f'bgCountyName: {row.bgCountyName}',
+                                 f'loc_name_mismatch: {row.loc_name_mismatch}',
+                                 f'loc_within_county: {row.loc_within_county}',
+                                 f'loc_within_state: {row.loc_within_state}',
+                                 ' ',
+                                 f'FederalWell: {row.FederalWell}',
+                                 f'IndianWell: {row.IndianWell}',
+                                 f'bgFederalLand: {row.bgFederalLand}',
+                                 f'bgNativeAmericanLand: {row.bgNativeAmericanLand}',
+                                 f'bgStateLand: {row.bgStateLand}'],
+                                 flag)
+    )
+    # TBWV
+    flag = ~(row.TotalBaseWaterVolume>0) | ~row.has_water_carrier
+    colls.append(collapse_object(f'<b>CARRIER: TotalBaseWaterVolume</b>: {row.TotalBaseWaterVolume:,} gallons',
+                          [f'TotalBaseNonWaterVolume: {row.TotalBaseNonWaterVolume:,}',
+                           f'carrier status: {row.carrier_status}',
+                           f'auto_carrier_type: {row.auto_carrier_type}',
+                           f'carrier Problem Flags: {row.carrier_problem_flags}'],
+                          flag)
+    )    
+    # Status flags
+    flag = ~(row.within_total_tolerance) | row.no_chem_recs | row.is_duplicate
+    colls.append(collapse_object(f'<b>STATUS: </b>  ',
+                          [f'no chemical records: {row.no_chem_recs}',
+                           f'is_duplicate: {row.is_duplicate}',
+                           f'within_total_tolerance: {row.within_total_tolerance}',
+                           f'FracFocus version: {row.FFVersion}',
+                           f'MI_inconsistent: {row.MI_inconsistent}'],
+                           flag)
+    )    
+    colls.append(collapse_object('<b>Click here for more details</b>',
                           ['<b>Provided by FracFocus:</b>',
                           f'{indent_txt}',
-                          f'UploadKey: {disc_table.UploadKey.iloc[0]}',f'WellName: {disc_table.WellName.iloc[0]}',
-                          f'TVD: {disc_table.TVD.iloc[0]} feet',
-                          f'FracFocus version: {disc_table.FFVersion.iloc[0]}',
-                          f'FederalWell: {disc_table.FederalWell.iloc[0]}',
-                          f'IndianWell: {disc_table.IndianWell.iloc[0]}',
+                          # f'UploadKey: {row.UploadKey}',f'WellName: {row.WellName}',
+                          f'TVD: {row.TVD} feet',
+                          # f'TotalBaseNonWaterVolume: {row.TotalBaseNonWaterVolume} gallons',
+                          f'FracFocus version: {row.FFVersion}',
+                          # f'FederalWell: {row.FederalWell}',
+                          # f'IndianWell: {row.IndianWell}',
                           f'{end_indent}',
                           '<b>Generated by Open-FF:</b>',
                           f'{indent_txt}',
-                          f'bgFederalLand: {disc_table.bgFederalLand.iloc[0]}',
-                          f'bgNativeAmericanLand: {disc_table.bgNativeAmericanLand.iloc[0]}',
-                          f'bgStateLand: {disc_table.bgStateLand.iloc[0]}',
+                          # f'bgFederalLand: {row.bgFederalLand}',
+                          # f'bgNativeAmericanLand: {row.bgNativeAmericanLand}',
+                          # f'bgStateLand: {row.bgStateLand}',
                           f'{end_indent}'
                           ])
+    )                        
+    s = "<h2> Fracking Job Details </h2>\n"
+    s += build_collapsible_set(colls)
     return s
+
+def make_extrnl_column(chem_df):
+    chem_df['extrnl'] = np.where(chem_df.is_on_CWA,'CWA<br>','    ')
+    chem_df.extrnl = np.where(chem_df.is_on_AQ_CWA,chem_df.extrnl+'AQ_CWA<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_HH_CWA,chem_df.extrnl+'HH_CWA<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_NPDWR,chem_df.extrnl+'NPDWR<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_DWSHA,chem_df.extrnl+'DWSHA<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_TEDX,chem_df.extrnl+'TEDX<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_prop65,chem_df.extrnl+'prop65<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_PFAS_list,chem_df.extrnl+'EPA_PFAS<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_UVCB,chem_df.extrnl+'UVCB<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_diesel,chem_df.extrnl+'diesel<br>',chem_df.extrnl)
+    chem_df.extrnl = np.where(chem_df.is_on_IRIS,chem_df.extrnl+'IRIS    ',chem_df.extrnl)
+    chem_df.extrnl = '<p style="color:green;font-size:105%;text-align:center;background-color:lightgrey;">'+chem_df.extrnl.str[:-4]+'</p>'
+    return chem_df
+
 
 def make_chem_single_disclosure(rec_table,cas_table,
                                  show_dup_recs=True,
@@ -84,26 +152,14 @@ def make_chem_single_disclosure(rec_table,cas_table,
 
     # chem_df['CASRN'] = chem_df.bgCAS+'<br><em>('+chem_df.CASNumber+')</em>'
     # chem_df['name'] = chem_df.epa_pref_name+'<br><em>('+chem_df.IngredientName+')</em>'
-    chem_df['extrnl'] = np.where(chem_df.is_on_CWA,'CWA<br>','    ')
-    chem_df.extrnl = np.where(chem_df.is_on_AQ_CWA,chem_df.extrnl+'AQ_CWA<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_HH_CWA,chem_df.extrnl+'HH_CWA<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_NPDWR,chem_df.extrnl+'NPDWR<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_DWSHA,chem_df.extrnl+'DWSHA<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_TEDX,chem_df.extrnl+'TEDX<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_prop65,chem_df.extrnl+'prop65<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_PFAS_list,chem_df.extrnl+'EPA_PFAS<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_UVCB,chem_df.extrnl+'UVCB<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_diesel,chem_df.extrnl+'diesel<br>',chem_df.extrnl)
-    chem_df.extrnl = np.where(chem_df.is_on_IRIS,chem_df.extrnl+'IRIS    ',chem_df.extrnl)
-    chem_df.extrnl = '<p style="color:green;font-size:105%;text-align:center;background-color:lightgrey;">'+chem_df.extrnl.str[:-4]+'</p>'
-
-    chem_df['Hazard fingerprint'] = chem_df.bgCAS.map(lambda x: getFingerprintImg(x))
+    chem_df = make_extrnl_column(chem_df)
+    chem_df['hazard fingerprint'] = chem_df.bgCAS.map(lambda x: getFingerprintImg(x))
 
 
     return chem_df[['TradeName','Supplier','Purpose','CASNumber','bgCAS','IngredientName','bgIngredientName','epa_pref_name',
                     'PercentHighAdditive','PercentHFJob',
                     'MassIngredient','calcMass',
-                    'extrnl','Hazard fingerprint','is_water_carrier','dup_rec']]
+                    'extrnl','hazard fingerprint','is_water_carrier','dup_rec']]
 
 def make_html_for_chem_table(df):
     cols = df.columns.tolist()
@@ -113,7 +169,7 @@ def make_html_for_chem_table(df):
     
     jdata = df.to_json(orient='values')
 
-    template =  f""" "<h2> Fracking Chemical Details </h2>\n"
+    template =  f""" <h2> Fracking Chemical Details </h2>
     <div id="datatable-container">
     <table id="data-table" class="display compact cell-border" style="table-layout:auto;width:80%;margin:auto;caption-side:bottom">
       <thead>

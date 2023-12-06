@@ -16,9 +16,64 @@ def make_sandbox(name='sandbox'):
     except:
         print(f'{name} already exists')
 
-def compile_std_page(fn,nb_title='empty title',headtext=[],
-                    bodytext=[],
-                    incFavIcon=True,des_content=None, use_std_css_and_scripts=True):
+def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
+              incl_links=True,link_up_level=0,repo_name='',cat_creation_date='',
+              show_source=True):
+    #print(f'{cat_creation_date:%B %d, %Y}')
+    local_prefix = ''
+    if link_up_level>0:
+        for i in range(link_up_level):
+            local_prefix+= '../'
+        
+    logo = """<a href="https://frackingchemicaldisclosure.wordpress.com/" title="Open-FF home page, tour and blog"><img src="https://storage.googleapis.com/open-ff-common/openFF_logo.png" alt="openFF logo" width="100" height="100"></a>"""
+    logoFT = """<center><a href="https://www.fractracker.org/" title="FracTracker Alliance"><img src="https://storage.googleapis.com/open-ff-common/2021_FT_logo_icon.png" alt="FracTracker logo" width="100" height="100"><br>Sponsored by FracTracker Alliance</a></center>"""
+
+    if show_source:
+        source = f"""This file was generated on {cat_creation_date:%B %d, %Y} <br>from data repository: {repo_name}."""
+    else:
+        source = ''
+
+    cat_links = f"""<p style="text-align: center; font-size:100%"> Links: 
+                      <a href="{local_prefix}Open-FF_Catalog.html" title="Local Navigator"> Navigator Page </a>|
+                      <a href="{local_prefix}Open-FF_Chemicals.html" title="OpenFF Chemical index"> Chemical Index </a>|
+                      <a href="{local_prefix}Open-FF_States_and_Counties.html" title="OpenFF States index"> State Index </a>|
+                      <a href="{local_prefix}Open-FF_Operator_Index.html" title="OpenFF Operator index"> Operator Index </a>
+                    </p>
+                """
+
+    if incl_links: cat_txt = cat_links
+    else: cat_txt = ''
+    line2_alt = ''
+    if line2:
+        line2_alt = f'<p style="text-align: center; font-size:250%">{line2}</p><br>'
+    subtitle_alt = ''
+    if subtitle:
+        subtitle_alt = f'<p style="text-align: center; font-size:180%">{subtitle}</p>'
+    image_alt = ''
+    if imagelink:
+        image_alt = f'<center>{imagelink}</center>'
+    
+    table = f"""<style>
+                </style>{cat_txt}<hr>
+                <table style='margin: 0 auto' >
+                <tr>
+                <td width=15%>{logo}</td>
+                <td><p style="text-align: center; font-size:300%">{title}</p><br> 
+                    {line2_alt} 
+                    {subtitle_alt} 
+                    {image_alt}
+                    <p style="text-align: center; font-size:100%">{source}
+                </td>
+                <td width=15%>{logoFT}</td>
+                </tr>
+            </table><hr>"""
+    return table
+
+
+def compile_std_page(fn,nb_title='empty title',
+                     headtext=[],
+                     bodytext=[],
+                     incFavIcon=True,des_content=None, use_std_css_and_scripts=True):
     """Use this to create a standard browser webpage based on a template and sections passed here. 
     The optional additions are:
         - favicon
@@ -46,6 +101,7 @@ def compile_std_page(fn,nb_title='empty title',headtext=[],
     des_cont = ''
     if des_content:
         des_cont = f'<meta name="description" content="{des_content}">'
+    
 
     s = f"""<!DOCTYPE html>
     <html lang="en">
@@ -77,7 +133,7 @@ def compile_std_page(fn,nb_title='empty title',headtext=[],
     with open(fn,'w',encoding='utf-8') as f:
         f.write(s)
     
-def compile_nb_page(fn,nb_title='empty title',incFavIcon=True,incBootStrap=True,des_content=None):
+def compile_nb_page(fn,nb_title='empty title',header='',incFavIcon=True,incBootStrap=True,des_content=None):
     """Use this to transform the output of a jupyter nbconvert (template=basic) to a more complete webpage - typically
     for the browser pages. With the basic template, no head or body tags are included, 
     so this provides that and situates various code sections
@@ -122,6 +178,7 @@ def compile_nb_page(fn,nb_title='empty title',incFavIcon=True,incBootStrap=True,
             <title>{nb_title}</title>
             {favicon}
             {des_cont}
+            {header}
     </head>
     <body>
         {inputtext}

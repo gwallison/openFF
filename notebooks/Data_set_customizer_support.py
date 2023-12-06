@@ -2,14 +2,16 @@
 #import numpy as np
 import os
 
-
-# handles to use in notebook
-out_dir = 'sandbox'
-df_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
-df_fn = os.path.join(out_dir,'full_df.parquet')
-
+from openFF.common.handles import sandbox_dir, full_url
 from openFF.common.nb_helper import make_sandbox, completed
 from openFF.common.file_handlers import get_df_from_url, store_df_as_csv
+
+# handles to use in notebook
+out_dir = sandbox_dir
+df_url = full_url
+df_fn = os.path.join(out_dir,'full_df.parquet')
+
+
 
 ##### execute the following on run 
 make_sandbox(out_dir)

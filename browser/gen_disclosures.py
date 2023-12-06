@@ -9,8 +9,8 @@ from datetime import datetime
 from openFF.common.file_handlers import get_table
 # from openFF.common.text_handlers import round_sig
 from openFF.common.handles import repo_name, repo_dir, data_source, browser_nb_dir, sandbox_dir, local_includes
-from openFF.common.handles import browser_out_dir, browser_inc_dir
-from openFF.common.nb_helper import make_sandbox, compile_std_page, compile_nb_page
+from openFF.common.handles import browser_out_dir, browser_inc_dir, cat_creation_date
+from openFF.common.nb_helper import make_sandbox, compile_std_page, compile_nb_page, get_common_header
 from openFF.common.display_tables import make_html_for_chem_table, make_chem_single_disclosure, make_html_of_disclosure_meta
 
 
@@ -139,9 +139,13 @@ class Disc_gen():
                 self.chem_disc = make_chem_single_disclosure(chem,self.allCAS) # save df in self for later use
                 chemout = make_html_for_chem_table(self.chem_disc)
                 disc_title = api+'-disclosure_'+str(i+1)
+                header = get_common_header(title=f'{api[:2]}-{api[2:5]}-{api[5:]}',
+                                           #subtitle=f'FracFocus ID: {upk}',
+                                           repo_name=repo_name,cat_creation_date=cat_creation_date,
+                                           link_up_level=2)
                 compile_std_page(fn=self.disclosure_fn,
                                 nb_title=disc_title,
-                                headtext=['<link rel="stylesheet" href="../disclosures.css">'],
+                                headtext=['<link rel="stylesheet" href="../disclosures.css">',header],
                                 bodytext=[meta_html,chemout,
                                           '\n <script src="../collapsible.js"></script>'])
                 self.move_and_rename(apicode,upk)
@@ -160,5 +164,8 @@ class Disc_gen():
         outfn = os.path.join(browser_out_dir,os.path.basename(name))
         s= f'jupyter nbconvert --no-input --template=basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_index_fn} --to=html --output-dir={browser_out_dir}'
         subprocess.run(s)
-        compile_nb_page(fn=outfn,nb_title='Disclosure Index of Open-FF')
+        compile_nb_page(fn=outfn,
+                        header = get_common_header(title='Open-FF Disclosure Index',repo_name=repo_name,
+                                                   cat_creation_date=cat_creation_date),
+                        nb_title='Disclosure Index of Open-FF')
  

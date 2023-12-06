@@ -133,6 +133,7 @@ def create_and_fill_folders(download_repo=True,
         except:
             completed(False,'Problem downloading file list from repository!')
         dir_df = pd.read_csv(dir_fn)
+        dir_df = dir_df[~(dir_df.filename.str[0] == '.')] # drop any "hidden" files
         # print(dir_df) 
         tocopy = ['CAS_ref_files','CompTox_ref_files','ChemInfo_ref_files',
                   'curation_files','pickles']
@@ -492,6 +493,8 @@ def make_repository(create_zip=False,final_dir=final_dir):
         shutil.copytree(sdir,cdir,dirs_exist_ok=True)
         dlst = os.listdir(cdir)
         for item in dlst:
+            if item[0]=='.':  # ignore caches
+                continue
             directories.append(d)
             filenames.append(item)
 

@@ -3,6 +3,9 @@
 import sys
 sys.path.insert(0,'c:/MyDocs/integrated/') # adjust to your setup
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 from openFF.common.handles import repo_name,  data_source 
 from openFF.common.handles import browser_out_dir
 

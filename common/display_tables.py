@@ -50,10 +50,14 @@ def make_html_of_disclosure_meta(disc_table):
                                   f"api10: {row.api10}"])
    )
     # dates, etc
+    try: jstart = row.JobStartDate.split()[0]
+    except: jstart = row.JobStartDate
+    try: jend = row.JobEndDate.split()[0]
+    except: jend = row.JobEndDate
+
     delay = row.pub_delay_days
-    # if row.date.year < 2019:
-    #     delay = 'unknown'
-    colls.append(collapse_object(f'<b>DATES:  Job Start and End</b>: {row.JobStartDate.split()[0]}, {row.JobEndDate.split()[0]}',
+
+    colls.append(collapse_object(f'<b>DATES:  Job Start and End</b>: {jstart}, {jend}',
                                  [f'date (Open-FF): {row.date}',
                                   f'date_added (first detected by Open-FF): {row.date_added}',
                                   f'publication delay: {delay} days'])

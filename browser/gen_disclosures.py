@@ -119,12 +119,23 @@ class Disc_gen():
                                      apicode,
                                      uploadKey+'.html'))
 
+    def get_time_left(self,start,total,current):
+        now = datetime.now()
+        worked = now-start
+        frac = current/total
+        rate = worked/(current+1)
+        remaining_work = total-current
+        remaining_time = remaining_work*rate
+        return remaining_time
 
 
     def make_all_files(self):
         self.allCAS.to_parquet(os.path.join(self.tmp,'cas.parquet'))
+        starttime = datetime.now()
         for j,api in enumerate(self.apis):
-            print(f'{j}/{len(self.apis)}:{api}')
+            if j%100==1:
+                time_left = self.get_time_left(starttime,len(self.apis),j)
+                print(f'{j}/{len(self.apis)}, minutes left: {round(time_left.total_seconds()/60,1)} : API {api}')
             apicode = api[:5]
             metas = self.alldisc[self.alldisc.api10==api].copy()
             upks = metas.UploadKey.unique().tolist()

@@ -164,7 +164,7 @@ def make_chem_single_disclosure(rec_table,cas_table,
 
     return chem_df[['TradeName','Supplier','Purpose','CASNumber','bgCAS','IngredientName','bgIngredientName','epa_pref_name',
                     'PercentHighAdditive','PercentHFJob',
-                    'MassIngredient','calcMass',
+                    'cleanMI','calcMass',
                     'extrnl','hazard fingerprint','compTox','is_water_carrier','dup_rec']]
 
 def make_html_for_chem_table(df):

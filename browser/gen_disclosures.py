@@ -33,7 +33,7 @@ class Disc_gen():
                                 tname='chemrecs',
                                 cols = ['TradeName','Purpose','Supplier','bgSupplier',
                                         'CASNumber','bgCAS','IngredientName',
-                                        'PercentHighAdditive','PercentHFJob','calcMass','MassIngredient',
+                                        'PercentHighAdditive','PercentHFJob','calcMass','cleanMI',
                                         'is_water_carrier','dup_rec',
                                         'UploadKey','ingKeyPresent']) 
         

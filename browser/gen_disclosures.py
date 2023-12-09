@@ -11,6 +11,7 @@ from openFF.common.file_handlers import get_table
 from openFF.common.handles import repo_name, repo_dir, data_source, browser_nb_dir, sandbox_dir, local_includes
 from openFF.common.handles import browser_out_dir, browser_inc_dir, cat_creation_date
 from openFF.common.nb_helper import make_sandbox, compile_std_page, compile_nb_page, get_common_header
+
 from openFF.common.display_tables import make_html_for_chem_table, make_chem_single_disclosure, make_html_of_disclosure_meta
 
 
@@ -52,7 +53,7 @@ class Disc_gen():
         self.alldisc['st_cnty'] = self.alldisc.api10.str[:5]
 
         self.allCAS = get_table(repo_dir=self.repo_dir,tname='bgCAS',
-                                cols=['bgCAS','epa_pref_name','bgIngredientName',
+                                cols=['bgCAS','epa_pref_name','bgIngredientName','DTXSID',
                                       'is_on_AQ_CWA','is_on_CWA','is_on_DWSHA','is_on_HH_CWA',
                                       'is_on_IRIS','is_on_NPDWR', 'is_on_PFAS_list',
                                       'is_on_TEDX','is_on_UVCB','is_on_diesel','is_on_prop65'])

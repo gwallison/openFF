@@ -6,7 +6,7 @@ Created on Fri Jun  9 16:43:00 2023
 """
 import pandas as pd
 import numpy as np
-from openFF.common.text_handlers import getFingerprintImg
+from openFF.common.text_handlers import getFingerprintImg, getCompToxRef, getMapLink
 
 indent_txt = '<span style="padding-left: 20px; display:block">'
 end_indent = '</span>'
@@ -118,8 +118,10 @@ def make_html_of_disclosure_meta(disc_table):
                           # f'bgStateLand: {row.bgStateLand}',
                           f'{end_indent}'
                           ])
-    )                        
+    )  
+                         
     s = "<h2> Fracking Job Details </h2>\n"
+    s+= f'<h3>{getMapLink(row.bgLatitude,row.bgLongitude,"Google Map")}</h3>'
     s += build_collapsible_set(colls)
     return s
 
@@ -158,12 +160,12 @@ def make_chem_single_disclosure(rec_table,cas_table,
     # chem_df['name'] = chem_df.epa_pref_name+'<br><em>('+chem_df.IngredientName+')</em>'
     chem_df = make_extrnl_column(chem_df)
     chem_df['hazard fingerprint'] = chem_df.bgCAS.map(lambda x: getFingerprintImg(x))
-
+    chem_df['compTox'] = chem_df.DTXSID.map(lambda x: getCompToxRef(x))
 
     return chem_df[['TradeName','Supplier','Purpose','CASNumber','bgCAS','IngredientName','bgIngredientName','epa_pref_name',
                     'PercentHighAdditive','PercentHFJob',
                     'MassIngredient','calcMass',
-                    'extrnl','hazard fingerprint','is_water_carrier','dup_rec']]
+                    'extrnl','hazard fingerprint','compTox','is_water_carrier','dup_rec']]
 
 def make_html_for_chem_table(df):
     cols = df.columns.tolist()
@@ -199,8 +201,8 @@ def make_html_for_chem_table(df):
         dom: 'Bfrtip',
         buttons: [{extend: 'colvis',text: 'Columns'}],
         columnDefs: [{"width": "100px", "targets": 2},
-                     {"targets": [0,1,2,3,5,6,8,10,14,15], "visible": false},
-                     {"render": $.fn.dataTable.render.number(',', '.', 0), "targets": 11}]
+                     {"targets": [0,1,2,3,5,6,8,10,15,16], "visible": false},
+                     {"render": $.fn.dataTable.render.number(',', '.', 0), "targets": [10,11]}]
       });
     });
     </script>

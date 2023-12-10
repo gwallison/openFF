@@ -121,7 +121,8 @@ def make_html_of_disclosure_meta(disc_table):
     )  
                          
     s = "<h2> Fracking Job Details </h2>\n"
-    s+= f'<h3>{getMapLink(row.bgLatitude,row.bgLongitude,"Google Map")}</h3>'
+    s+= f'<h3>{getMapLink(row.bgLatitude,row.bgLongitude,"Google Map ; ")} '
+    s+= f'<a href="https://fracfocus.org/wells/{row.APINumber}"  target="_blank"> Disclosure at FracFocus</a></h3>\n'
     s += build_collapsible_set(colls)
     return s
 

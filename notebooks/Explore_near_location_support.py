@@ -14,7 +14,7 @@ from openFF.common.handles import sandbox_dir, full_url
 from openFF.common.nb_helper import make_sandbox, completed
 from openFF.common.file_handlers import get_df_from_url
 from openFF.common.mapping import find_wells_near_point, show_simple_map, showWells, make_as_well_gdf
-
+from openFF.common.display_tables import make_compact_chem_summary
 
 # handles to use in notebook
 out_dir = sandbox_dir
@@ -52,14 +52,14 @@ def show_water_used(dgb):
     ax = gca().yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     
 def show_chem_summary(t):
-    import intg_support.construct_tables_for_display as ctfd
+    # import intg_support.construct_tables_for_display as ctfd
 
     cgb = t.groupby('bgCAS',as_index=False)['calcMass'].sum().sort_values('calcMass',ascending=False)
     cgb1 = t.groupby('bgCAS',as_index=False)['epa_pref_name'].first()
     mg = pd.merge(cgb,cgb1,on='bgCAS',how='left')
     # mg[['bgCAS','epa_pref_name','calcMass']]
 
-    chem_df = ctfd.make_compact_chem_summary(t)
+    chem_df = make_compact_chem_summary(t)
     # chem_df.sort_values('Total mass used (lbs)',ascending=False,inplace=True)
     iShow(chem_df.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}])
 

@@ -10,8 +10,9 @@ often in relation to getting a url or displaying in HTML.
 """
 import os
 from math import log10
+from openFF.common.handles import pic_dir
 
-pic_dir = r"C:\MyDocs\OpenFF\src\openFF-catalog\pic_dir"
+# pic_dir = r"C:\MyDocs\OpenFF\src\openFF-catalog\pic_dir"
 
 def sort_id(st):
     l = list(st)

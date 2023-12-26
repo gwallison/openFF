@@ -27,6 +27,9 @@ class Location_ID():
     def __init__(self,input_df,ref_dir='./ref_dir',out_dir='./out_dir',
                  ext_dir='./ext/'):
         self.df = input_df
+        self.df['StateNumber'] = self.df.api10.str[:2].astype('int64')
+        self.df['CountyNumber'] = self.df.api10.str[2:5].astype('int64')
+        #print(self.df.head())
         self.ref_dir = ref_dir
         self.out_dir = out_dir
         self.ext_dir = ext_dir
@@ -34,7 +37,9 @@ class Location_ID():
         self.cur_tab_old = os.path.join(ref_dir,'curation_files','location_curated.csv')
         self.cur_tab = os.path.join(ref_dir,'curation_files','location_curated.parquet')
         self.api_code_ref = os.path.join(ref_dir,'curation_files','new_state_county_ref.csv')
-        self.upload_ref_fn = os.path.join(self.out_dir,'uploadKey_ref.parquet')
+        # self.upload_ref_fn = os.path.join(self.out_dir,'uploadKey_ref.parquet')
+
+        self.disclosureId_ref_fn = os.path.join(self.out_dir,'disclosureId_ref.parquet')
 
     def get_cur_table(self):
         return get_df(self.cur_tab)
@@ -43,7 +48,7 @@ class Location_ID():
          """used to import state-derived latlon data into dataframe
          see get_state_data directory for updating the master data file"""
          print('  -- importing state-derived location data')
-         gb = df.groupby('api10',as_index=False)['UploadKey'].first()
+         gb = df.groupby('api10',as_index=False)['DisclosureId'].first()
          gb = gb[['api10']] # don't want UploadKey
          # ext_latlon = pd.read_csv(os.path.join(self.ext_dir,
          #                                       # 'curation_files',
@@ -64,16 +69,16 @@ class Location_ID():
         latlon_df.StateName.fillna('missing',inplace=True)
         latlon_df.CountyName.fillna('missing',inplace=True)
         old = self.get_cur_table()
-        #print(f'old: {old.columns}')
-        #print(f'latlon: {latlon_df.columns}')    
+        # print(f'old: {old.columns}')
+        # print(f'latlon: {latlon_df.columns}')    
         mg = pd.merge(latlon_df,old[['StateName','StateNumber',
                                       'CountyName','CountyNumber']],
                        on=['StateName','StateNumber','CountyName','CountyNumber'],
                        how='left',indicator=True)
-        #print(mg.head())
+        # print(mg.head())
         new = mg[mg._merge=='left_only'].groupby(['StateName','StateNumber',
                                                   'CountyName','CountyNumber'],
-                                                 as_index=False)['UploadKey'].count()
+                                                 as_index=False)['DisclosureId'].count()
         print(f'Number of new locations: {len(new)}')
         newlen = len(new)
         if newlen>0:    
@@ -114,10 +119,15 @@ class Location_ID():
         df.epsg = np.where(df.Projection.str.lower()=='wgs84',4326,df.epsg)
     
         crs_types = df.epsg.unique().tolist()
-        #print(f'Types of EPSG in input frame: {crs_types}')
+        # print(f'Types of EPSG in input frame: {crs_types}')
         dfs = []
+        # It appears that FF v4 drops invalid lat and lon, but leaves them empty, which disrupts reprojecting
+        # For now, replace na lat and lons with dummy values
         for in_epsg in crs_types:
-            t = df[df.epsg==in_epsg]
+            t = df[df.epsg==in_epsg].copy()
+            t.Latitude.fillna(0,inplace=True)
+            t.Longitude.fillna(0,inplace=True)
+            # print(f'{in_epsg}, Num na in lat: {t[t.Latitude.isna()].api10.tolist()}, tot: {len(t)}')
             t = geopandas.GeoDataFrame(t, geometry= geopandas.points_from_xy(t.Longitude, t.Latitude,crs=in_epsg))
             if in_epsg != final_crs:
                 t.to_crs(final_crs,inplace=True)
@@ -127,8 +137,8 @@ class Location_ID():
         new['bgLongitude'] = new.geometry.x
     
         df.drop('epsg',axis=1,inplace=True)
-        df = pd.merge(df,new[['UploadKey','bgLatitude','bgLongitude']],
-                      on='UploadKey',how='left') 
+        df = pd.merge(df,new[['DisclosureId','bgLatitude','bgLongitude']],
+                      on='DisclosureId',how='left') 
         return df
 
     def fetch_shapefiles(self):
@@ -183,7 +193,7 @@ class Location_ID():
         st_collect = []
         ct_collect = []
         st_ct_lst = locdf.groupby(['bgStateName','bgCountyName'],as_index=False)\
-                     ['UploadKey'].count()
+                     ['DisclosureId'].count()
     
         print('  -- checking against shapefiles')
         for i,row in st_ct_lst.iterrows():
@@ -197,7 +207,7 @@ class Location_ID():
     
             t = locdf[(locdf.bgStateName==row.bgStateName)&\
                       (locdf.bgCountyName==row.bgCountyName)]\
-                .groupby('UploadKey',as_index=False)\
+                .groupby('DisclosureId',as_index=False)\
                 [['bgLatitude','bgLongitude']].first()
             gdf = geopandas.GeoDataFrame(t,
                                          geometry= geopandas.points_from_xy(t.bgLongitude, 
@@ -205,15 +215,15 @@ class Location_ID():
                                                                             crs=final_crs))
             points_in_st = geopandas.sjoin(gdf,state_geo,how='left')  
             points_in_st['loc_within_state'] = np.where(points_in_st.STATEFP.isna(),'NO','YES')
-            st_collect.append(points_in_st[['UploadKey','loc_within_state']])
+            st_collect.append(points_in_st[['DisclosureId','loc_within_state']])
             points_in_ct = geopandas.sjoin(gdf,county_geo,how='left')  
             points_in_ct['loc_within_county'] = np.where(points_in_ct.STATEFP.isna(),'NO','YES')
-            ct_collect.append(points_in_ct[['UploadKey','loc_within_county']])
+            ct_collect.append(points_in_ct[['DisclosureId','loc_within_county']])
     
         state_flag = pd.concat(st_collect,sort=True)
-        final = pd.merge(locdf,state_flag,on='UploadKey',how='left')
+        final = pd.merge(locdf,state_flag,on='DisclosureId',how='left')
         county_flag = pd.concat(ct_collect,sort=True)
-        final = pd.merge(final,county_flag,on='UploadKey',how='left')
+        final = pd.merge(final,county_flag,on='DisclosureId',how='left')
     
         final.loc_within_state.fillna('unknown',inplace=True)        
         final.loc_within_county.fillna('unknown',inplace=True)        
@@ -224,29 +234,44 @@ class Location_ID():
     #     return pd.read_csv(self.upload_ref_fn,quotechar='$',encoding='utf-8',
     #                        low_memory=False)
     
-    def get_upload_ref(self):
-        return get_df(self.upload_ref_fn)
+    # def get_upload_ref(self):
+    #     return get_df(self.upload_ref_fn)
     
-    def save_upload_ref(self,df):
-        """save the data frame that serves as an uploadKey reference; in particular
+    def get_disclosureId_ref(self):
+        return get_df(self.disclosureId_ref_fn)
+    
+    # def save_upload_ref(self,df):
+    #     """save the data frame that serves as an uploadKey reference; in particular
+    #     best guesses on location data """
+    
+    #     # df[['UploadKey','StateName','bgStateName','CountyName','bgCountyName',
+    #     #     'Latitude','bgLatitude','stLatitude',
+    #     #     'Longitude','bgLongitude','stLongitude',
+    #     #     'bgLocationSource',
+    #     #     'latlon_too_coarse','loc_name_mismatch',
+    #     #     'loc_within_state','loc_within_county']]\
+    #     #         .to_csv(self.upload_ref_fn,quotechar='$',
+    #     #                                  encoding='utf-8',
+    #     #                                  index=False)
+    #     save_df(df[['UploadKey','StateName','bgStateName','CountyName','bgCountyName',
+    #                 'Latitude','bgLatitude','stLatitude',
+    #                 'Longitude','bgLongitude','stLongitude',
+    #                 'bgLocationSource',
+    #                 'latlon_too_coarse','loc_name_mismatch',
+    #                 'loc_within_state','loc_within_county']],               
+    #             self.upload_ref_fn)
+        
+    def save_disclosureId_ref(self,df):
+        """save the data frame that serves as a disclosureId reference; in particular
         best guesses on location data """
     
-        # df[['UploadKey','StateName','bgStateName','CountyName','bgCountyName',
-        #     'Latitude','bgLatitude','stLatitude',
-        #     'Longitude','bgLongitude','stLongitude',
-        #     'bgLocationSource',
-        #     'latlon_too_coarse','loc_name_mismatch',
-        #     'loc_within_state','loc_within_county']]\
-        #         .to_csv(self.upload_ref_fn,quotechar='$',
-        #                                  encoding='utf-8',
-        #                                  index=False)
-        save_df(df[['UploadKey','StateName','bgStateName','CountyName','bgCountyName',
+        save_df(df[['DisclosureId','StateName','bgStateName','CountyName','bgCountyName',
                     'Latitude','bgLatitude','stLatitude',
                     'Longitude','bgLongitude','stLongitude',
                     'bgLocationSource',
                     'latlon_too_coarse','loc_name_mismatch',
                     'loc_within_state','loc_within_county']],               
-                self.upload_ref_fn)
+                self.disclosureId_ref_fn)
         
 
     def get_decimal_len(self,s):
@@ -266,10 +291,10 @@ class Location_ID():
 
     def get_latlon_df(self,rawdf):
         rawdf = self.add_state_location_data(rawdf)
-        return rawdf.groupby('UploadKey',as_index=False)\
+        return rawdf.groupby('DisclosureId',as_index=False)\
                                     [['Latitude','Longitude',
                                       'stLatitude','stLongitude',
-                                      'Projection',
+                                      'Projection','api10',
                                       'StateNumber','CountyNumber',
                                       'StateName','CountyName']].first()
     
@@ -287,7 +312,7 @@ class Location_ID():
         #rawdf = add_state_location_data(rawdf)
         locdf = self.get_latlon_df(self.df)
         rawlen = len(locdf)
-        assert locdf.UploadKey.duplicated().sum()==0
+        assert locdf.DisclosureId.duplicated().sum()==0
         locdf = self.find_latlon_problems(locdf)
         assert len(locdf)== rawlen
         
@@ -295,13 +320,10 @@ class Location_ID():
         return newlen        
 
     def is_location_complete(self):
-        t = self.get_upload_ref()
-        f1 = len(t)==len(self.df.UploadKey.unique())
-        #print(f'F1: T: {len(t)}; DF: {len(self.df.UploadKey.unique())}')
+        t = self.get_disclosureId_ref()
+        f1 = len(t)==len(self.df.DisclosureId.unique())
         f2 = t.bgStateName.isna().sum()==0
-        #print(f'F2: {t.bgStateName.isna().sum()}')
         f3 = t.bgCountyName.isna().sum()==0
-        #print(f'F3: {t.bgCountyName.isna().sum()}\n')
         
         try:
             curtab = get_csv(os.path.join(self.out_dir,'location_curated_modified.csv'))
@@ -312,7 +334,6 @@ class Location_ID():
             shutil.copy(os.path.join(self.ref_dir,'curation_files','location_curated.parquet'),
                         os.path.join(self.out_dir,'location_curated.parquet'))
             f4 = True
-        #print(f'Flag 1 {f1}; Flag 2 {f2}; Flag 3 {f3}; Flag 4 {f4}')
         return (f1&f2&f3&f4)
 
     ##########  Main script ###########
@@ -321,14 +342,14 @@ class Location_ID():
         #rawdf = add_state_location_data(rawdf)
         locdf = self.get_latlon_df(self.df)
         rawlen = len(locdf)
-        assert locdf.UploadKey.duplicated().sum()==0
+        assert locdf.DisclosureId.duplicated().sum()==0
         locdf = self.find_latlon_problems(locdf)
         assert len(locdf)== rawlen
         
         newlen,clean_names = self.fetch_clean_loc_names(locdf)
     
         reproj_df = self.reproject(locdf)
-        assert reproj_df.UploadKey.duplicated().sum()==0
+        assert reproj_df.DisclosureId.duplicated().sum()==0
         assert len(reproj_df)== rawlen
     
         # merge them
@@ -339,7 +360,7 @@ class Location_ID():
                                        'loc_name_mismatch']],
                           on=['StateName','CountyName','StateNumber','CountyNumber'],
                           how='left')
-        assert locdf.UploadKey.duplicated().sum()==0
+        assert locdf.DisclosureId.duplicated().sum()==0
         assert len(locdf)== rawlen
         final = self.check_against_shapefiles(locdf)
         final['bgLocationSource'] = 'FF'
@@ -351,9 +372,9 @@ class Location_ID():
         final.bgLongitude = np.where(c1,final.stLongitude,final.bgLongitude)
         final.bgLocationSource = np.where(c1,"state data",final.bgLocationSource)
         
-        assert final.UploadKey.duplicated().sum()==0
+        assert final.DisclosureId.duplicated().sum()==0
         assert len(final)== rawlen
     
-        self.save_upload_ref(final)
+        self.save_disclosureId_ref(final)
         return newlen
     

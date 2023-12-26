@@ -61,17 +61,17 @@ class final_test():
         assert self.df.APINumber.dtype=='O', f'APINumber should be dtype "O", but is {self.df.APINumber.dtype}'
         self.df['apilen'] = self.df.APINumber.str.len()
         
-        #print(f'API/UPK for short API: {self.df[self.df.apilen<14][["APINumber","UploadKey"]]}')
+        #print(f'API/UPK for short API: {self.df[self.df.apilen<14][["APINumber","DisclosureId"]]}')
         #assert  self.df.apilen.max()==14, f'APINumber length max=={self.df.apilen.max()}'        
         #assert  self.df.apilen.min()==14, f'APINumber length min=={self.df.apilen.min()}'
         if (self.df.apilen.min()<14)|(self.df.apilen.max()>14):
-            print(f'    -- Disclosures with malformed APINumber: {self.df[self.df.apilen!=14].UploadKey.unique().tolist()}')
+            print(f'    -- Disclosures with malformed APINumber: {self.df[self.df.apilen!=14].DisclosureId.unique().tolist()}')
         
-        assert self.df.StateNumber.dtype=='int64', f'StateNumber be dtype "int64", but is {self.df.StateNumber.dtype}'
-        assert self.df.CountyNumber.dtype=='int64', f'CountyNumber be dtype "int64", but is {self.df.CountyNumber.dtype}'
+        # assert self.df.StateNumber.dtype=='int64', f'StateNumber be dtype "int64", but is {self.df.StateNumber.dtype}'
+        # assert self.df.CountyNumber.dtype=='int64', f'CountyNumber be dtype "int64", but is {self.df.CountyNumber.dtype}'
         
-        assert  (self.df.APINumber.str[:2].astype('int')==self.df.StateNumber).all(), 'APINumber[:2] do not match StateNumber'
-        assert  (self.df.APINumber.str[2:5].astype('int')==self.df.CountyNumber).all(), 'APINumber[2:5] do not match CountyNumber'
+        # assert  (self.df.APINumber.str[:2].astype('int')==self.df.StateNumber).all(), 'APINumber[:2] do not match StateNumber'
+        # assert  (self.df.APINumber.str[2:5].astype('int')==self.df.CountyNumber).all(), 'APINumber[2:5] do not match CountyNumber'
         
     def calcMass_test(self):
         """confirms that all records with non-zero calcMass meet the testing

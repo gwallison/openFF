@@ -15,6 +15,7 @@ Currently this is performed about monthly under [FracTracker](https://www.fractr
 - [Calculating mass](Calculating_mass.md)
 - [Standardizing text and numeric fields](Standardizing_text_fields.md)
 - [Proprietary records](Proprietary_records.md)
+- [Duplication in FracFocus](Duplication_in_FracFocus.md)
 - [Generating the Open-FF data set](Generating_the_Open-FF_data_set.md)
 - [Open-FF's use of external data](External_data_in_Open-FF.md)
 - [The Open-FF data repo](The_Open-FF_data_repo.md)

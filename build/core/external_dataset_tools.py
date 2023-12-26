@@ -142,7 +142,7 @@ def process_PADUS(df,sources='./sources/external_refs/',
                                       crs=allshp[0].crs)
         shdf.to_pickle(reffn)
     
-    t = df.groupby('UploadKey',as_index=False)[['bgLatitude','bgLongitude',
+    t = df.groupby('DisclosureId',as_index=False)[['bgLatitude','bgLongitude',
                                             'bgStateName','APINumber']].first()
     gdf = geopandas.GeoDataFrame(t,
                                  geometry= geopandas.points_from_xy(t.bgLongitude, 
@@ -150,15 +150,15 @@ def process_PADUS(df,sources='./sources/external_refs/',
                                                                     crs=final_crs))
 
     hits = geopandas.sjoin(gdf,shdf,how='left')  
-    fed = hits[hits.Own_Type=='FED'].UploadKey.unique().tolist()
-    stat = hits[hits.Own_Type=='STAT'].UploadKey.unique().tolist()
-    nat = hits[(hits.Mang_Type=='TRIB') | (hits.Des_Tp=='TRIBL')].UploadKey.unique().tolist()
-    hits['bgFederalLand'] = hits.UploadKey.isin(fed)
-    hits['bgStateLand'] = hits.UploadKey.isin(stat)
-    hits['bgNativeAmericanLand'] = hits.UploadKey.isin(nat)
-    df['bgFederalLand'] = df.UploadKey.isin(fed)
-    df['bgStateLand'] = df.UploadKey.isin(stat)
-    df['bgNativeAmericanLand'] = df.UploadKey.isin(nat)
+    fed = hits[hits.Own_Type=='FED'].DisclosureId.unique().tolist()
+    stat = hits[hits.Own_Type=='STAT'].DisclosureId.unique().tolist()
+    nat = hits[(hits.Mang_Type=='TRIB') | (hits.Des_Tp=='TRIBL')].DisclosureId.unique().tolist()
+    hits['bgFederalLand'] = hits.DisclosureId.isin(fed)
+    hits['bgStateLand'] = hits.DisclosureId.isin(stat)
+    hits['bgNativeAmericanLand'] = hits.DisclosureId.isin(nat)
+    df['bgFederalLand'] = df.DisclosureId.isin(fed)
+    df['bgStateLand'] = df.DisclosureId.isin(stat)
+    df['bgNativeAmericanLand'] = df.DisclosureId.isin(nat)
     hits[hits.index_right.notna()].to_csv(out_name,quotechar='$',
                                           encoding='utf-8')
     return df

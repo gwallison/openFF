@@ -3,7 +3,7 @@
 To do:
 --->
 
-|[Prev](Proprietary_records.md)|[Index](Top.md)|[Next](External_data_in_Open-FF.md)|
+|[Prev](Duplication_in_FracFocus.md)|[Index](Top.md)|[Next](External_data_in_Open-FF.md)|
 
 # Generating the Open-FF data set
 
@@ -38,4 +38,4 @@ The process has many steps, some automated, some manual.  It is guided by [a jup
 15. Perform dataset-wide integrity tests
 1. Construct a full data repository
 
-|[Prev](Proprietary_records.md)|[Index](Top.md)|[Next](External_data_in_Open-FF.md)|
+|[Prev](Duplication_in_FracFocus.md)|[Index](Top.md)|[Next](External_data_in_Open-FF.md)|

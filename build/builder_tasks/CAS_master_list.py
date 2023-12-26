@@ -85,6 +85,16 @@ def get_new_tentative_CAS_list(rawdf,orig_dir,work_dir):
                        'cas_replacement':'deprecated_replacement'},axis=1,inplace=True)
     new = pd.merge(new,deprecated,on='tent_CAS',how='left')
 
+    # create list of where API's there were found
+    apis = []
+    num = []
+    for i,row in new.iterrows():
+        api = rawdf[rawdf.CASNumber==row.CASNumber].APINumber.tolist()
+        apis.append(api[0])
+        num.append(len(api))
+    new['ex_API'] = apis
+    new['count'] = num
+    
     if len(new)==0:
         # No curation necessary; copy original CAS_curated to the working dir.
         copy_CAS_curated(orig_dir, work_dir)

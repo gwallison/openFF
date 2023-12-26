@@ -27,18 +27,18 @@ def calc_overall_percentages(rec_df,disc_df):
                                                      True,rec_df.is_valid_cas)
 
     valid = rec_df[rec_df.is_valid_cas|rec_df.is_water_carrier]\
-        .groupby('UploadKey',as_index=False)['PercentHFJob'].sum()
-    valid.columns = ['UploadKey','total_percent_of_valid']
+        .groupby('DisclosureId',as_index=False)['PercentHFJob'].sum()
+    valid.columns = ['DisclosureId','total_percent_of_valid']
     c1 = valid.total_percent_of_valid>lower_perc_tolerance
     c2 = valid.total_percent_of_valid<upper_perc_tolerance
     valid['within_total_tolerance'] =c2&c1
     if 'within_total_tolerance' in disc_df.columns:
         disc_df = disc_df.drop(['within_total_tolerance'],axis=1)
     
-    allrecs = rec_df.groupby('UploadKey',as_index=False)['PercentHFJob'].sum()
-    allrecs.columns = ['UploadKey','total_percent_all_records']
-    disc_df = pd.merge(disc_df,valid,on='UploadKey',how='left')
-    disc_df = pd.merge(disc_df,allrecs,on='UploadKey',how='left')
+    allrecs = rec_df.groupby('DisclosureId',as_index=False)['PercentHFJob'].sum()
+    allrecs.columns = ['DisclosureId','total_percent_all_records']
+    disc_df = pd.merge(disc_df,valid,on='DisclosureId',how='left')
+    disc_df = pd.merge(disc_df,allrecs,on='DisclosureId',how='left')
     # make sure disclosures without chem records are also marked as out of tolerance
     disc_df.within_total_tolerance = disc_df.within_total_tolerance.fillna(False) 
     
@@ -67,27 +67,27 @@ def calc_MI_values(rec_df,disc_df):
     
     # Look for inconsistencies in MassIngredient at the disclosure level,
     #   generate cleanMI
-    gb = rec_df.groupby('UploadKey',as_index=False)['job_mass_MI'].agg(['max','min'])
+    gb = rec_df.groupby('DisclosureId',as_index=False)['job_mass_MI'].agg(['max','min'])
     gb['frac_dev'] = (gb['max']-gb['min'])/gb['max']
     gb['MI_inconsistent'] = gb.frac_dev>max_dev
     gb = gb.reset_index() # collapse multilevel index
     disc_df = pd.merge(disc_df,
-                       gb[['UploadKey','MI_inconsistent']],on='UploadKey',
+                       gb[['DisclosureId','MI_inconsistent']],on='DisclosureId',
                        how='left',validate='1:1')
-    rec_df = pd.merge(rec_df,disc_df[['UploadKey','MI_inconsistent']],
-                  on='UploadKey',how='left')
+    rec_df = pd.merge(rec_df,disc_df[['DisclosureId','MI_inconsistent']],
+                  on='DisclosureId',how='left')
     rec_df['cleanMI'] = np.where(rec_df.MI_inconsistent,np.NaN,rec_df.MassIngredient)
     rec_df = rec_df.drop('MI_inconsistent',axis=1)
 
-    gb2 = rec_df[rec_df.is_water_carrier].groupby('UploadKey',as_index=False)[['PercentHFJob','MassIngredient']].sum()
-    gb2.columns = ['UploadKey','carrier_percent','carrier_mass_MI']
+    gb2 = rec_df[rec_df.is_water_carrier].groupby('DisclosureId',as_index=False)[['PercentHFJob','MassIngredient']].sum()
+    gb2.columns = ['DisclosureId','carrier_percent','carrier_mass_MI']
     disc_df = pd.merge(disc_df,
-                       gb2,on='UploadKey',
+                       gb2,on='DisclosureId',
                        how='left',validate='1:1')
-    gb3 = rec_df[rec_df.is_water_carrier].groupby('UploadKey',as_index=False)['density_from_comment'].mean()
-    gb3.columns = ['UploadKey','carrier_density_from_comment']
+    gb3 = rec_df[rec_df.is_water_carrier].groupby('DisclosureId',as_index=False)['density_from_comment'].mean()
+    gb3.columns = ['DisclosureId','carrier_density_from_comment']
     disc_df = pd.merge(disc_df,
-                       gb3,on='UploadKey',
+                       gb3,on='DisclosureId',
                        how='left',validate='1:1')
     
     disc_df['carrier_density_MI'] = np.where(disc_df.within_total_tolerance & (~disc_df.MI_inconsistent),
@@ -108,14 +108,14 @@ def prep_datasets(rec_df,disc_df):
     #print(f'in prep: {len(disc_df)}')
     disc_df['has_TBWV'] = disc_df.TotalBaseWaterVolume>0
     disc_df = calc_overall_percentages(rec_df, disc_df)
-    #upk = disc_df[disc_df.within_total_tolerance].UploadKey.unique().tolist()
+    #upk = disc_df[disc_df.within_total_tolerance].DisclosureId.unique().tolist()
     #rec_df['large_percent_rec'] = rec_df.PercentHFJob>large_perc_value
     #rec_df['is_water_carrier'] = rec_df.large_percent_rec & \
     #                             (rec_df.bgCAS=='7732-18-5') &\
     #                             ~(rec_df.dup_rec) 
-    #hasWC = rec_df[rec_df.is_water_carrier].UploadKey.unique().tolist()
-    #disc_df['has_water_carrier'] = disc_df.UploadKey.isin(hasWC)
-    #rec_df.is_water_carrier= rec_df.is_water_carrier & rec_df.UploadKey.isin(upk)
+    #hasWC = rec_df[rec_df.is_water_carrier].DisclosureId.unique().tolist()
+    #disc_df['has_water_carrier'] = disc_df.DisclosureId.isin(hasWC)
+    #rec_df.is_water_carrier= rec_df.is_water_carrier & rec_df.DisclosureId.isin(upk)
     # rec_has_it(rec_df, '3')
     
     return rec_df,disc_df                             
@@ -127,8 +127,8 @@ def calc_mass(rec_df,disc_df):
     # rec_has_it(rec_df, '4')
     
     rec_df,disc_df = calc_MI_values(rec_df, disc_df)
-    #upk = disc_df[disc_df.within_total_tolerance].UploadKey.unique().tolist()
-    #cond = rec_df.UploadKey.isin(upk)                             
+    #upk = disc_df[disc_df.within_total_tolerance].DisclosureId.unique().tolist()
+    #cond = rec_df.DisclosureId.isin(upk)                             
 
     # because we are dependent on 50% and within tolerance, we
     # don't merge for those disclosures out of tolerance, too many multiple 50%'ers. 
@@ -142,8 +142,8 @@ def calc_mass(rec_df,disc_df):
     disc_df['carrier_mass'] = disc_df.TotalBaseWaterVolume * disc_df.bgDensity
     disc_df['job_mass'] = disc_df.carrier_mass/(disc_df.carrier_percent/100)
     
-    rec_df = pd.merge(rec_df,disc_df[['UploadKey','job_mass']],
-                      on='UploadKey',how='left',validate='m:1')
+    rec_df = pd.merge(rec_df,disc_df[['DisclosureId','job_mass']],
+                      on='DisclosureId',how='left',validate='m:1')
     rec_df['calcMass'] = (rec_df.PercentHFJob/100)*rec_df.job_mass
 
     # a calcMass of ZERO is a non-disclosure, so set to NaN (added Dec 2021)
@@ -165,7 +165,7 @@ def calc_massComp(rec_df,disc_df):
     rec_df['massComp'] = ((rec_df[c1&c2].calcMass - rec_df[c1&c2].cleanMI).abs())/rec_df[c1&c2].calcMass
     print(f'{sp}Number of disclosures with inconsistent MI:        {len(disc_df[disc_df.MI_inconsistent]):,}')
     print(f'{sp}Number of records with both calcMass and cleanMI: {len(rec_df[rec_df.massComp.notna()]):,}')
-    print(f'{sp}   Number of disclosures with both: {len(rec_df[rec_df.massComp.notna()].UploadKey.unique()):,}')
+    print(f'{sp}   Number of disclosures with both: {len(rec_df[rec_df.massComp.notna()].DisclosureId.unique()):,}')
     print(f'{sp}Number where only calcMass is non-zero:             {len(rec_df[c1&~(c2)]):,}')
     print(f'{sp}Number where only cleanMI is non-zero:              {len(rec_df[~(c1)&(c2)]):,}')
 

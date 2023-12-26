@@ -3,7 +3,7 @@
 To do:
 --->
 
-|[Prev](Standardizing_text_fields.md)|[Index](Top.md)|[Next](Generating_the_Open-FF_data_set.md)|
+|[Prev](Standardizing_text_fields.md)|[Index](Top.md)|[Next](Duplication_in_FracFocus.md)|
 
 # Proprietary records
 
@@ -13,4 +13,4 @@ In Open-FF's curation of chemical identity, a `bgCAS` value is assigned to "prop
 
 By labelling all trade secret records with a single label, Open-FF helps users look across all such records to see the big picture of how widely they are used, what companies use them and how their use changes over time.
 
-|[Prev](Standardizing_text_fields.md)|[Index](Top.md)|[Next](Generating_the_Open-FF_data_set.md)|
+|[Prev](Standardizing_text_fields.md)|[Index](Top.md)|[Next](Duplication_in_FracFocus.md)|

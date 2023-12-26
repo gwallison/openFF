@@ -222,12 +222,14 @@ def update_upload_date_file(work_dir=work_dir,orig_dir=orig_dir):
     today = datetime.datetime.today()
     datefn= os.path.join(orig_dir,'curation_files','upload_dates.parquet')
     outdf = get_df(datefn)
-    uklst = outdf.UploadKey.unique()
+    # uklst = outdf.UploadKey.unique()
+    disclst = outdf.DisclosureId.unique()
     
-    df = get_raw_df(cols=['UploadKey','OperatorName'])
-    ndf = df[~df.UploadKey.isin(uklst)].copy() # just the new ones
+    df = get_raw_df(cols=['DisclosureId','OperatorName'])
+    c = ~df.DisclosureId.isin(disclst)
+    ndf = df[c].copy() # just the new ones
     
-    gb = ndf.groupby('UploadKey',as_index=False)['OperatorName'].count()
+    gb = ndf.groupby('DisclosureId',as_index=False)['OperatorName'].count()
     gb['date_added'] = today.strftime("%Y-%m-%d")
     gb.rename({'OperatorName':'num_records'}, inplace=True,axis=1)
     print(f'Number of new disclosures added to list: {len(gb)}')
@@ -241,7 +243,8 @@ def update_upload_date_file(work_dir=work_dir,orig_dir=orig_dir):
     
 def cas_curate_step1():
     import openFF.build.builder_tasks.CAS_master_list as casmaster
-    newcas = casmaster.get_new_tentative_CAS_list(get_raw_df(cols=['CASNumber']),orig_dir=orig_dir,work_dir=work_dir)
+    newcas = casmaster.get_new_tentative_CAS_list(get_raw_df(cols=['CASNumber','APINumber']),
+                                                  orig_dir=orig_dir,work_dir=work_dir)
     if len(newcas)>0:
         iShow(newcas)
         if len(newcas[newcas.tent_is_in_ref==False])>0:
@@ -261,7 +264,7 @@ def cas_curate_step2(work_dir=work_dir,orig_dir=orig_dir):
     maker.make_partial_set()
     
     # Next we make a list of CAS records that need to be curated
-    newcas = casmaster.get_new_tentative_CAS_list(get_raw_df(cols=['CASNumber']),orig_dir=orig_dir,work_dir=work_dir)
+    newcas = casmaster.get_new_tentative_CAS_list(get_raw_df(cols=['CASNumber','APINumber']),orig_dir=orig_dir,work_dir=work_dir)
     casmaster.make_CAS_to_curate_file(newcas,ref_dir=orig_dir,work_dir=work_dir)    
     
 def cas_curate_step3(work_dir=work_dir):
@@ -357,7 +360,7 @@ def casing_step3(work_dir=work_dir):
 def companies_step1(work_dir=work_dir,orig_dir=orig_dir):
     import openFF.build.builder_tasks.CompanyNames_make_list as complist
     companies = complist.add_new_to_Xlate(get_raw_df(['CASNumber','OperatorName',
-                                                      'Supplier','UploadKey','year']),
+                                                      'Supplier','DisclosureId','year']),
                                           ref_dir=orig_dir,out_dir=work_dir)
     
     completed()
@@ -371,8 +374,8 @@ def companies_step2(work_dir=work_dir):
 def location_step1(work_dir=work_dir,orig_dir=orig_dir,ext_dict=''):
     import openFF.build.builder_tasks.Location_cleanup as loc_clean
     locobj = loc_clean.Location_ID(get_raw_df(['api10','Latitude','Longitude',
-                                              'Projection','UploadKey',
-                                              'StateNumber','CountyNumber',
+                                              'Projection','DisclosureId',
+                                            #   'StateNumber','CountyNumber',
                                               'StateName','CountyName']),
                                    ref_dir=orig_dir,out_dir=work_dir,ext_dir=ext_dir)
     _ = locobj.clean_location()
@@ -386,9 +389,9 @@ def location_step2(work_dir=work_dir,orig_dir=orig_dir):
 def carrier_step(work_dir=work_dir,orig_dir=orig_dir):
     import openFF.build.builder_tasks.Carrier_1_identify_in_new as car1
     
-    carobj = car1.Carrier_ID(get_raw_df(cols=['CASNumber','IngredientName','UploadKey','APINumber',
+    carobj = car1.Carrier_ID(get_raw_df(cols=['CASNumber','IngredientName','DisclosureId','APINumber',
                                               'PercentHFJob','TotalBaseWaterVolume','date',
-                                              'Purpose','IngredientKey','TradeName','MassIngredient']),
+                                              'Purpose','IngredientsId','TradeName','MassIngredient']),
                              ref_dir=orig_dir,out_dir=work_dir)
     completed(carobj.create_full_carrier_set())
     
@@ -434,7 +437,7 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
              'CAS_deprecated.parquet',
              'company_xlate.parquet',
              'location_curated.parquet',
-             'uploadKey_ref.parquet', 
+             'disclosureId_ref.parquet', 
              'upload_dates.parquet',
              'CI_sdf_summary.parquet']
     for fn in files:

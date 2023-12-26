@@ -31,9 +31,9 @@ def get_new_xlate_df(ref_dir):
     return new
 
 def make_xlate_df(raw_df):
-    gb = raw_df.groupby(['OperatorName','UploadKey'],as_index=False)['CASNumber'].count()
-    gbo = gb.groupby('OperatorName',as_index=False)['UploadKey'].count().\
-        rename({'UploadKey':'OpCount'},axis=1)
+    gb = raw_df.groupby(['OperatorName','DisclosureId'],as_index=False)['CASNumber'].count()
+    gbo = gb.groupby('OperatorName',as_index=False)['DisclosureId'].count().\
+        rename({'DisclosureId':'OpCount'},axis=1)
     gbyo = raw_df.groupby(['OperatorName'])['year'].apply(set).reset_index()
     gbyo.year = gbyo.year.map(lambda x: sort_id(x))
     gbyo.year = gbyo.year.map(lambda x: xlate_to_str(x,'; ',trunc=False))

@@ -16,7 +16,7 @@ def make_full_set_file(sources,outdir):
     casfn = os.path.join(sources,'pickles','bgCAS.parquet')
     outfn = os.path.join(outdir,'full_df.parquet')
     
-    df = pd.merge(get_df(descfn),get_df(recsfn),on='UploadKey',how='inner')
+    df = pd.merge(get_df(descfn),get_df(recsfn),on='DisclosureId',how='inner')
     df = pd.merge(df,get_df(casfn),on='bgCAS',how='left')
     
     df['in_std_filtered'] = ~(df.is_duplicate)&~(df.dup_rec)
@@ -30,8 +30,8 @@ def make_full_set_file_join(sources,outdir):
     casfn = os.path.join(sources,'pickles','bgCAS.parquet')
     outfn = os.path.join(outdir,'full_df.parquet')
     
-    df = get_df(descfn).set_index('UploadKey')
-    df = df.join(get_df(recsfn).set_index('UploadKey'),how='inner')
+    df = get_df(descfn).set_index('DisclosureId')
+    df = df.join(get_df(recsfn).set_index('DisclosureId'),how='inner')
     df = df.set_index('bgCAS')
     df = df.join(get_df(casfn).set_index('bgCAS'),how='left')
     df = df.reset_index()

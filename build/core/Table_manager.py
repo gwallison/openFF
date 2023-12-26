@@ -47,12 +47,12 @@ class Table_constructor():
         self.cas_ing_source = get_df(self.cas_ing_fn)
 
 
-        self.location_ref_fn = os.path.join(self.trans_dir,'uploadKey_ref.parquet')
+        self.location_ref_fn = os.path.join(self.trans_dir,'DisclosureId_ref.parquet')
         self.loc_ref_df = get_df(self.location_ref_fn)
         dates = get_df(os.path.join(self.trans_dir,'upload_dates.parquet'))
-
-        self.loc_ref_df = pd.merge(self.loc_ref_df,dates[['UploadKey','date_added']],
-                           on='UploadKey',how='left',validate='1:1')
+        dates = dates[dates.DisclosureId.notna()] # ignore all UploadKey-only disclosures
+        self.loc_ref_df = pd.merge(self.loc_ref_df,dates[['DisclosureId','date_added']],
+                           on='DisclosureId',how='left',validate='1:1')
 
         
     def print_step(self,txt,indent=0,newlinefirst=False):
@@ -141,11 +141,11 @@ class Table_constructor():
 
     def assemble_disclosure_table(self,raw_df):
         self.print_step('assembling disclosure table')
-        df = raw_df.groupby('UploadKey',as_index=False)\
+        df = raw_df.groupby('DisclosureId',as_index=False)\
                                 [['JobEndDate','JobStartDate','OperatorName',
                                   'APINumber', 'TotalBaseWaterVolume',
                                   'TotalBaseNonWaterVolume','FFVersion','TVD',
-                                  'StateNumber','CountyNumber',
+                                  #'StateNumber','CountyNumber',
                                   'api10',
                                   'Projection',
                                   'data_source', # needed for backwards compat
@@ -161,10 +161,10 @@ class Table_constructor():
         else: flag= ''
         self.print_step(f'Number uncurated Operators: {len(unOp)} {flag}',2)
 
-        df = pd.merge(df,self.loc_ref_df,on='UploadKey',how='left',
+        df = pd.merge(df,self.loc_ref_df,on='DisclosureId',how='left',
                       validate='1:1')
         df = self.make_date_fields(df)
-        df = self.assemble_PADUS_data(df) # adds bgFederalWell, bgNat...
+        # df = self.assemble_PADUS_data(df) # adds bgFederalWell, bgNat...
         self.tables['disclosures']= df
 
 
@@ -173,26 +173,35 @@ class Table_constructor():
     
 
     def flag_duplicated_records(self,records):
-        records['dup_rec'] = records.duplicated(subset=['UploadKey',
+        """The duplicate record problem got somewhat worse with FFv4. In the bulk data, FF started treating
+        anything below the red line as 'Ingredient Container' and labeling the old dup_rec disclosures that way,
+        but in the new dup_rec disclosures, they've just moved the "other chemicals" above the red line and
+        are labelled """
+        records['dup_rec'] = records.duplicated(subset=['DisclosureId',
                                                     'IngredientName',
                                                     'CASNumber',
                                                     'MassIngredient',
                                                     'PercentHFJob',
                                                     'PercentHighAdditive'],
                                         keep=False)
+        # records.to_csv('./sandbox/dup_rec.csv')
         c0 = records.ingKeyPresent
-        c1 = records.Supplier.str.lower().isin(['listed above'])
-        c2 = records.Purpose.str.lower().str[:9]=='see trade'
-        records['dup_rec'] = np.where(records.dup_rec&c0&c1&c2,True,False)
+        # c1 = records.Supplier.str.lower().isin(['listed above','ingredient container'])
+        c1a = (records.Supplier.str.lower()=='ingredient container')&(records.FFVersion<4)
+        c1b = (records.Supplier.str.lower()=='listed above')&(records.FFVersion==4)
+        c2b = (records.Purpose.str.lower().str[:9]=='see trade')&(records.FFVersion==4)
+        c2a = (records.Purpose.str.lower().str[:9]=='ingredien')&(records.FFVersion<4)
+
+        records['dup_rec'] = np.where(records.dup_rec&c0&(c1a|c1b)&(c2a|c2b),True,False)
         self.print_step(f'Number dups: {records.dup_rec.sum()}',2)
         return records
     
     def assemble_chem_rec_table(self,raw_df):
         self.print_step('assembling chemical records table')
-        df= raw_df[['UploadKey','CASNumber','IngredientName','PercentHFJob',
-                    'Supplier','Purpose','TradeName',
+        df= raw_df[['DisclosureId','CASNumber','IngredientName','PercentHFJob',
+                    'Supplier','Purpose','TradeName','FFVersion',
                     'PercentHighAdditive','MassIngredient',
-                    'ingKeyPresent','reckey','IngredientKey',
+                    'ingKeyPresent','reckey','IngredientsId',
                     'IngredientComment','density_from_comment']].copy()
         #ct.na_check(df,txt='assembling chem_rec 1')
         
@@ -205,7 +214,7 @@ class Table_constructor():
         # ct.na_check(df,txt='bgCAS add')
         unCAS = df[df.bgCAS.isna()]\
                     .groupby(['CASNumber','IngredientName'],as_index=False)\
-                        ['UploadKey'].count()
+                        ['DisclosureId'].count()
         unCAS.columns = ['CASNumber','IngredientName','rec_num']
         if unCAS.rec_num.sum() > 0:
             s = ' <<******'
@@ -239,6 +248,7 @@ class Table_constructor():
         self.print_step(f'Number uncurated Suppliers: {len(unSup)} {flag}',2)
         
         self.print_step('flagging duplicate records',1)
+        print(df.columns)
         self.tables['chemrecs'] = self.flag_duplicated_records(df)
 
         # ct.na_check(df,txt='assembling chem_rec end')
@@ -247,11 +257,11 @@ class Table_constructor():
 
     def flag_empty_disclosures(self):
         self.print_step('flagging disclosures without chem records')
-        gb = self.tables['chemrecs'].groupby('UploadKey',as_index=False)['ingKeyPresent'].sum()
+        gb = self.tables['chemrecs'].groupby('DisclosureId',as_index=False)['ingKeyPresent'].sum()
         gb['no_chem_recs'] = np.where(gb.ingKeyPresent==0,True,False)
         df = pd.merge(self.tables['disclosures'],
-                      gb[['UploadKey','no_chem_recs']],
-                      on='UploadKey',how='left')
+                      gb[['DisclosureId','no_chem_recs']],
+                      on='DisclosureId',how='left')
         self.print_step(f'number empty disclosures: {df.no_chem_recs.sum()} of {len(df)}',1)
         self.tables['disclosures'] = df
         
@@ -264,26 +274,26 @@ class Table_constructor():
                                               keep=False)
         df.is_duplicate = np.where(df.no_chem_recs,False,df.is_duplicate)
         
-        upk = df[df.is_duplicate].UploadKey.unique().tolist()
+        upk = df[df.is_duplicate].DisclosureId.unique().tolist()
 
-        self.tables['disclosures']['is_duplicate'] = self.tables['disclosures'].UploadKey.isin(upk)
-        #self.tables['disclosures']['skytruth_removed'] = self.tables['disclosures'].UploadKey.isin(stupk)
+        self.tables['disclosures']['is_duplicate'] = self.tables['disclosures'].DisclosureId.isin(upk)
+        #self.tables['disclosures']['skytruth_removed'] = self.tables['disclosures'].DisclosureId.isin(stupk)
         # self.print_step(f'n redundant SkyTruth disclosures: {df.redund_skytruth.sum()}',1)
         # self.print_step(f'n duplicate SkyTruth disclosures: {df.duplicate_skytruth.sum()}',1)
         # self.print_step(f'n SkyTruth disclosures deleted from pdf library: {len(stupk)}',1)        
-        # self.print_step(f'final n of SkyTruth disclosures included: {len(df[(~df.is_duplicate)&cond].UploadKey.unique())}',1)
+        # self.print_step(f'final n of SkyTruth disclosures included: {len(df[(~df.is_duplicate)&cond].DisclosureId.unique())}',1)
         self.print_step(f'n is_duplicate: {df.is_duplicate.sum()}',1)
         
 
     def apply_carrier_tables(self):
         self.print_step('applying carrier table data')
-        ukl = self.tables['disclosures'].UploadKey.unique().tolist()
-        ikl = self.tables['chemrecs'].IngredientKey.unique().tolist()        
+        ukl = self.tables['disclosures'].DisclosureId.unique().tolist()
+        ikl = self.tables['chemrecs'].IngredientsId.unique().tolist()        
 
         recs = self.tables['chemrecs']
         disc = self.tables['disclosures']
-        disc = disc.set_index('UploadKey')
-        recs = recs.set_index('IngredientKey')
+        disc = disc.set_index('DisclosureId')
+        recs = recs.set_index('IngredientsId')
         
         # set up defaults of new fields
         
@@ -303,22 +313,22 @@ class Table_constructor():
         auto_carrier_df = get_df(os.path.join(self.trans_dir,'carrier_list_auto.parquet'))
 
         # pass auto carrier type into disc table
-        gb = auto_carrier_df.groupby('UploadKey')['auto_carrier_type'].first()
-        disc = pd.merge(disc,gb,on='UploadKey',how='left')
+        gb = auto_carrier_df.groupby('DisclosureId')['auto_carrier_type'].first()
+        disc = pd.merge(disc,gb,on='DisclosureId',how='left')
 
         # to keep sub-runs from failing...
-        # if an IngredientKey is no longer
-        cond = ~(auto_carrier_df.IngredientKey.isin(ikl))
-        missing_uk = auto_carrier_df[cond].UploadKey.unique().tolist()
-        #auto_carrier_df[auto_carrier_df.UploadKey.isin(missing_uk)].to_csv('./tmp/auto-carrier_UplKey_no_longer_present.csv')
+        # if an IngredientsId is no longer
+        cond = ~(auto_carrier_df.IngredientsId.isin(ikl))
+        missing_uk = auto_carrier_df[cond].DisclosureId.unique().tolist()
+        #auto_carrier_df[auto_carrier_df.DisclosureId.isin(missing_uk)].to_csv('./tmp/auto-carrier_UplKey_no_longer_present.csv')
         self.print_step(f'Number of auto disclosures without current matches: {len(missing_uk)}',2)
-        auto_carrier_df = auto_carrier_df[~(auto_carrier_df.UploadKey.isin(missing_uk))]
+        auto_carrier_df = auto_carrier_df[~(auto_carrier_df.DisclosureId.isin(missing_uk))]
         self.print_step(f'Auto-detected carriers: {len(auto_carrier_df)}',1)
         # save list of auto carriers no longer in data set
 
         # get the auto_carrier label 
-        uk = auto_carrier_df.UploadKey.unique().tolist()
-        ik = auto_carrier_df.IngredientKey.tolist()
+        uk = auto_carrier_df.DisclosureId.unique().tolist()
+        ik = auto_carrier_df.IngredientsId.tolist()
 
         
         disc.loc[uk,'has_water_carrier'] = True
@@ -335,10 +345,10 @@ class Table_constructor():
         prob_carrier_df = get_df(os.path.join(self.trans_dir,'carrier_list_prob.parquet'))
 
         # to keep sub-runs from failing...
-        prob_carrier_df = prob_carrier_df[prob_carrier_df.UploadKey.isin(ukl)]
+        prob_carrier_df = prob_carrier_df[prob_carrier_df.DisclosureId.isin(ukl)]
         self.print_step(f'Problem disclosures excluded: {len(prob_carrier_df)}',1)
 
-        uk = prob_carrier_df.UploadKey.tolist()
+        uk = prob_carrier_df.DisclosureId.tolist()
         reas = prob_carrier_df.reasons.tolist()
         disc.loc[uk,'carrier_status'] = 'problems-detected; carrier not identified'
         disc.loc[uk,'carrier_problem_flags'] = reas
@@ -351,13 +361,13 @@ class Table_constructor():
         #                  dtype={'is_water_carrier':'str'})
         # #print(len(mg))
         # # this drops any spacer lines
-        # mg = mg[mg.IngredientKey.notna()]
+        # mg = mg[mg.IngredientsId.notna()]
         # test = ['******','FALSE']
         # mg['temp'] = ~mg.is_water_carrier.isin(test)
         # mg.is_water_carrier = mg.temp
-        # gb = mg.groupby('UploadKey',as_index=False)['is_water_carrier'].sum()
-        # upk = gb[gb.is_water_carrier>0].UploadKey.tolist()
-        # mg['cur_carrier_status'] = np.where(mg.UploadKey.isin(upk),
+        # gb = mg.groupby('DisclosureId',as_index=False)['is_water_carrier'].sum()
+        # upk = gb[gb.is_water_carrier>0].DisclosureId.tolist()
+        # mg['cur_carrier_status'] = np.where(mg.DisclosureId.isin(upk),
         #                                     'water_based_carrier',
         #                                     'carrier_not_water')
         
@@ -365,16 +375,16 @@ class Table_constructor():
         
         
         # # to keep sub-runs from failing...
-        # cur_carrier_df = cur_carrier_df[cur_carrier_df.UploadKey.isin(ukl)]
+        # cur_carrier_df = cur_carrier_df[cur_carrier_df.DisclosureId.isin(ukl)]
         # self.print_step(f'Curation detected carriers: {len(cur_carrier_df[cur_carrier_df.cur_carrier_status=="water_based_carrier"])}',1)
 
         # # first install data from water-based-carriers
         # cond = cur_carrier_df.cur_carrier_status=='water_based_carrier'
-        # uk = cur_carrier_df[cond].UploadKey.tolist()
+        # uk = cur_carrier_df[cond].DisclosureId.tolist()
         # disc.loc[uk,'has_water_carrier'] = True
         # disc.loc[uk,'carrier_status'] = 'curation-detected'
 
-        # ik = cur_carrier_df[cur_carrier_df.is_water_carrier].IngredientKey.tolist()
+        # ik = cur_carrier_df[cur_carrier_df.is_water_carrier].IngredientsId.tolist()
         # recs.loc[ik,'is_water_carrier']  = True
         
         self.tables['disclosures'] = disc.reset_index()
@@ -393,8 +403,8 @@ class Table_constructor():
         self.print_step('calculating mass',newlinefirst=True)
         rec_df, disc_df = mt.calc_mass(rec_df=self.tables['chemrecs'],
                                        disc_df=self.tables['disclosures'])
-        rec_df = pd.merge(rec_df,disc_df[['UploadKey','within_total_tolerance']],
-                          on='UploadKey',how='left')
+        rec_df = pd.merge(rec_df,disc_df[['DisclosureId','within_total_tolerance']],
+                          on='DisclosureId',how='left')
         rec_df.calcMass = np.where(rec_df.within_total_tolerance,
                                    rec_df.calcMass,np.NaN)
         self.tables['chemrecs'] = rec_df.drop(['within_total_tolerance'],axis=1)
@@ -411,11 +421,11 @@ class Table_constructor():
         rec = self.tables['chemrecs'].copy()
         rec = rec[~(rec.bgSupplier.isin(non_company))]
         rec = rec[rec.bgSupplier.notna()] # added for non curated runs
-        gb = rec.groupby('UploadKey')['bgSupplier'].agg(lambda x: x.value_counts().index[0])
+        gb = rec.groupby('DisclosureId')['bgSupplier'].agg(lambda x: x.value_counts().index[0])
         gb = gb.reset_index()
         gb.rename({'bgSupplier':'primarySupplier'},axis=1,inplace=True)
         self.tables['disclosures'] = pd.merge(self.tables['disclosures'],
-                                              gb,on='UploadKey',how='left',
+                                              gb,on='DisclosureId',how='left',
                                               validate='1:1')
         
     def pickle_tables(self):

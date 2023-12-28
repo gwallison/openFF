@@ -21,6 +21,6 @@ A simple example of this type of analysis is a pre-written notebook in which the
 In this example, the user needs only to know the target location and to follow the instructions in the notebook.  The pre-written code in the notebook takes care of the downloading, the data processing, etc.  
 We are just staring to build these notebooks but are excited about the possibilites they can give to anyone wanting to know more about fracking chemicals.
 
-These notebooks are modeled after the work of the [Environmental Enforcement Watch](https://www.environmentalenforcementwatch.org/) of EDGI.  Their notebooks allowed non-programmers do sophisticated analysis report generation from complicated EPA data sets. 
+These notebooks are modeled after the work of the [Environmental Enforcement Watch](https://www.environmentalenforcementwatch.org/) of EDGI.  Their notebooks allow non-programmers to do informative analysis and report generation from complicated EPA data sets. 
 
 |[Prev](Generating_the_Browser.md)|[Index](Top.md)|[Next](How_to_use_notebooks.md)|

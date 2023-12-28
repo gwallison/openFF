@@ -30,6 +30,9 @@ Open-FF’s development between 2019 and 2023 is documented at [CodeOcean](https
 
 
 # Installation
+
+Important Note: **Installing Open-FF code is NOT required to *use* the Open-FF data.**  The data is available in a number of ways online and is updated frequently.  The installation notes below are provided for those users who wish to modify the data set generation process.
+
 The code in this repository has been designed to run in a python environment. To create such an environment on a local machine, you can:
 - Download and install [Anaconda](https://www.anaconda.com/download)  Once completed, you should be able to open an Anaconda prompt.
 - Set up a local environment for Open-FF work.  You will use this for just about everything:

@@ -86,10 +86,11 @@ def make_disc_link(row):
 
 def show_well_info(apis):
     t = df[df.api10.isin(apis)].copy()
+    # save the full data set from these wells to allow users to download
+    t.to_csv('all_data_for_selected_wells.csv')
     t.api10 = t.apply(lambda x: make_disc_link(x),axis=1)
-    dgb = t.groupby(['UploadKey'],as_index=False)[['date','api10','OperatorName','TotalBaseWaterVolume','ingKeyPresent']].first()
-    
-    iShow(dgb[['date','OperatorName','api10','TotalBaseWaterVolume','ingKeyPresent']])
+    dgb = t.groupby(['UploadKey'],as_index=False)[['date','api10','WellName','OperatorName','TotalBaseWaterVolume','ingKeyPresent']].first()
+    iShow(dgb[['date','OperatorName','api10','WellName','TotalBaseWaterVolume','ingKeyPresent']])
     return t, dgb
 
 def show_water_used(dgb):
@@ -112,6 +113,9 @@ def show_chem_summary(t):
     # mg[['bgCAS','epa_pref_name','calcMass']]
 
     chem_df = make_compact_chem_summary(t)
+#     # save the summary data from these wells to allow users to download
+#     chem_df.to_csv('chemical_summary_for_selected_wells.csv')
+    
     # chem_df.sort_values('Total mass used (lbs)',ascending=False,inplace=True)
     iShow(chem_df.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}])
 

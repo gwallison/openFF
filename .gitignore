@@ -10,6 +10,8 @@ tmp/
 *.html
 *.pkl
 *.parquet
+*.csv
+*.xls*
 __pycache__/
 ext/
 *.pytest_cache/

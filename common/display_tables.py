@@ -326,7 +326,7 @@ def make_html_for_chem_table(df):
 #                              axis=1)    
 #     return chem_df
 
-### !!! TEMPORARY def
+### !!! TEMPORARY def  Make it more protable and usable across openFF!
 def make_compact_chem_summary(df_cas,removeCAS=['ambiguousID','sysAppMeta','conflictingID']):
 
     df_cas = df_cas[~df_cas.bgCAS.isin(removeCAS)]
@@ -391,10 +391,11 @@ def make_compact_chem_summary(df_cas,removeCAS=['ambiguousID','sysAppMeta','conf
     chem_df = pd.merge(chem_df,t,on='just_cas',how='left')
     chem_df = chem_df[['bgCAS',#'molecule',#'names',
                        #'bgIngredientName','comm_name',
-                       'numRecords','numWithMass','calcMass',
+                       'numRecords','numWithMass','calcMass','rq_lbs',
                        'extrnl','fingerprint','ref']].sort_values('numWithMass',ascending=False)
+    chem_df.rq_lbs.fillna(' ',inplace=True)
     chem_df = chem_df.rename({'bgCAS':'Material',#'bgIngredientName':'Name',# 'comm_name':'Common Name',
-                              'numRecords':'Total\nnumber of records',
+                              'numRecords':'Total\nnumber of records','rq_lbs':'Reportable quantity (lbs)',
                               'numWithMass':'Number of records with mass','calcMass':'Total mass used (lbs)',
                               'extrnl':'Lists of Chemicals of Concern',
                              'fingerprint':'ChemInformatics'},

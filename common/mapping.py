@@ -85,7 +85,7 @@ def show_simple_map(lat,lon,clickable=False):
     return m
     
 
-def showWells(fulldf,flat,flon,apilst):
+def showWells(fulldf,flat,flon,apilst,def_buffer=def_buffer):
     """This shows a map with a focal point (flat,flon) and the wells in apilist."""
     import folium
     mlst = [{'location': [flat,flon], 'color':'red', 'popup':'Focal point'}]
@@ -126,7 +126,7 @@ def showWells(fulldf,flat,flon,apilst):
     return m
 
 def showWells_in_area(fulldf,area_df,apilst):
-    """Shows the wells in apilist as well as the area(s) in area_df. This was used to show census tracts."""
+    """Shows the wells in apilist as well as the area(s) in area_df. This was first used to show census tracts."""
     import folium
     mlst = []
     for api in apilst:

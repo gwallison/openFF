@@ -532,5 +532,5 @@ def make_repository(create_zip=False,final_dir=final_dir):
         print('Making zip archive...')
         completed(shutil.make_archive(repodir, 'zip', repodir)) 
     else:
-        print('Skipping zip zrchive creation')
+        print('Skipping zip archive creation')
         completed()

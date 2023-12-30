@@ -13,6 +13,7 @@ from datetime import datetime
 
 import os
 import platform
+
 locals = ['Dell_2023_Gary','M2']
 
 curr_platform = ''
@@ -37,10 +38,14 @@ ext_data = os.path.join(root_data,'ext_data')
 ext_data_master_list = os.path.join(ext_data,'ext_data_master_list.csv')
 sandbox_dir = os.path.join(root_code,'sandbox')
 local_includes = os.path.join(root_code,'includes')
+browser_root = "https://storage.googleapis.com/open-ff-browser/"
 full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
 
 ######################  for Browser generation #######
-repo_name = 'openFF_data_2023_11_25'
+repo_name = 'openFF_data_2023_12_19'
+curr_repo_dir = os.path.join(repo_dir,repo_name)
+bulkdata_date = 'December 19, 2023'
+catalog_ver = 'beta for FFV4'
 data_source = 'bulk'  # can be 'bulk', 'FFV1_scrape' or 'SkyTruth'
                                     # or 'NM_scrape_2022_05'
 cat_creation_date = datetime.now()
@@ -67,4 +72,3 @@ blog_im_dir = os.path.join(image_dir,'blog_images')
 
 # images used in the documents section (not in the image dir)
 docs_images = os.path.join(root_code,'docs','images') 
-

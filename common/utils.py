@@ -62,4 +62,5 @@ def make_padus_pickle(source=r"C:\MyDocs\OpenFF\data\external_refs\shape_files")
     
     
 if __name__ == '__main__':
-    make_padus_pickle()
+    # make_padus_pickle()
+    make_upload_set_of_ext_data()

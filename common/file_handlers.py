@@ -68,7 +68,7 @@ def save_df(df,fn):
     
 def get_df(fn,cols=None):
     tup = os.path.splitext(fn)
-    if tup[1]=='':
+    if tup[1]=='': # files without ext are read as parquet
         return pd.read_parquet(fn+'.parquet',columns=cols)
     elif tup[1]=='.csv':
         return get_csv(fn)
@@ -112,11 +112,15 @@ def get_df_from_url(df_url,df_fn,force_freshen=False,inp_format='parquet'):
 
 #### get specific data sets
 
-def get_curr_df(curr_data=curr_data,cols=[]):
+def get_curr_df(curr_data=curr_data,cols=[],minimal=False):
     # Fetch openFF data frame from the current repository
+    if minimal: # testing mode
+        cols = ['DisclosureId','APINumber','date']
     if cols!=[]: # not empty so filter
         return pd.read_parquet(curr_data,columns=cols)
     return pd.read_parquet(curr_data)    
+
+
 
 ##### external file dictionary handler
 def get_ext_master_dic(url="https://storage.googleapis.com/open-ff-common/ext_data/ext_data_master_list.csv"):

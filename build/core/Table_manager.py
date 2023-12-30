@@ -12,7 +12,7 @@ import datetime
 import openFF.build.core.mass_tools as mt
 #import openFF.build.core.cas_tools as ct
 import openFF.build.core.external_dataset_tools as et
-from openFF.common.file_handlers import save_df, get_df
+from openFF.common.file_handlers import save_df, get_df, ext_fn
 
 class Table_constructor():
     
@@ -176,7 +176,18 @@ class Table_constructor():
         """The duplicate record problem got somewhat worse with FFv4. In the bulk data, FF started treating
         anything below the red line as 'Ingredient Container' and labeling the old dup_rec disclosures that way,
         but in the new dup_rec disclosures, they've just moved the "other chemicals" above the red line and
-        are labelled """
+        are labelled.
+        To handle this problem, hopefully temporarily, we use a data set created with a pre-FFV4 archive that
+        found the duplicates and labels them.  It also has the DisclosureId attached.   """
+        reffn = ext_fn(ext_dir=self.sources,handle='trans_dup_recs')
+        self.print_step('USING archived data to flag Version 3 duplicate records',2)
+        trans_df = get_df(reffn,cols=['DisclosureId','IngredientName','CASNumber','MassIngredient',
+                                                'PercentHFJob','PercentHighAdditive'])
+        trans_df = trans_df[~trans_df[['DisclosureId','IngredientName','CASNumber','MassIngredient',
+                                                'PercentHFJob','PercentHighAdditive']].duplicated()]
+        trans_df['old_dup_rec'] = True
+        # print(f'TRANS len: {len(trans_df)}')
+
         records['dup_rec'] = records.duplicated(subset=['DisclosureId',
                                                     'IngredientName',
                                                     'CASNumber',
@@ -184,17 +195,22 @@ class Table_constructor():
                                                     'PercentHFJob',
                                                     'PercentHighAdditive'],
                                         keep=False)
+        records = pd.merge(records,trans_df,on=['DisclosureId','IngredientName',
+                                                'CASNumber','MassIngredient',
+                                                'PercentHFJob','PercentHighAdditive'],
+                                            how='left')
+        # print(f'RECORDS merge with FFV3 trans: {records._merge.value_counts()}')
         # records.to_csv('./sandbox/dup_rec.csv')
         c0 = records.ingKeyPresent
-        # c1 = records.Supplier.str.lower().isin(['listed above','ingredient container'])
-        c1a = (records.Supplier.str.lower()=='ingredient container')&(records.FFVersion<4)
-        c1b = (records.Supplier.str.lower()=='listed above')&(records.FFVersion==4)
-        c2b = (records.Purpose.str.lower().str[:9]=='see trade')&(records.FFVersion==4)
-        c2a = (records.Purpose.str.lower().str[:9]=='ingredien')&(records.FFVersion<4)
+        cV3 = records.dup_rec & records.old_dup_rec & (records.Supplier=='Ingredient Container')
+        c2 = (records.Supplier.str.lower()=='listed above')&(records.FFVersion==4)
+        c3 = (records.Purpose.str.lower().str[:9]=='see trade')&(records.FFVersion==4)
+        cV4 = c2&c3
 
-        records['dup_rec'] = np.where(records.dup_rec&c0&(c1a|c1b)&(c2a|c2b),True,False)
+        records['dup_rec'] = np.where(records.dup_rec&c0&(cV3|cV4),True,False)
         self.print_step(f'Number dups: {records.dup_rec.sum()}',2)
-        return records
+        # print(records[records.dup_rec].FFVersion.value_counts())
+        return records.drop(['FFVersion','old_dup_rec'],axis=1)
     
     def assemble_chem_rec_table(self,raw_df):
         self.print_step('assembling chemical records table')
@@ -248,8 +264,10 @@ class Table_constructor():
         self.print_step(f'Number uncurated Suppliers: {len(unSup)} {flag}',2)
         
         self.print_step('flagging duplicate records',1)
-        print(df.columns)
+        # print(df.columns)
         self.tables['chemrecs'] = self.flag_duplicated_records(df)
+        # self.tables['chemrecs'].drop('FFVersion',axis=1,inplace=True) # FFVersion was necessary for duplicate record work
+        # print(self.tables['chemrecs'].columns)
 
         # ct.na_check(df,txt='assembling chem_rec end')
 

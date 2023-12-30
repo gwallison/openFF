@@ -24,19 +24,19 @@ def make_full_set_file(sources,outdir):
     save_df(df,outfn)
     return df
 
-def make_full_set_file_join(sources,outdir):
-    descfn = os.path.join(sources,'pickles','disclosures.parquet')
-    recsfn = os.path.join(sources,'pickles','chemrecs.parquet')
-    casfn = os.path.join(sources,'pickles','bgCAS.parquet')
-    outfn = os.path.join(outdir,'full_df.parquet')
+# def make_full_set_file_join(sources,outdir):
+#     descfn = os.path.join(sources,'pickles','disclosures.parquet')
+#     recsfn = os.path.join(sources,'pickles','chemrecs.parquet')
+#     casfn = os.path.join(sources,'pickles','bgCAS.parquet')
+#     outfn = os.path.join(outdir,'full_df.parquet')
     
-    df = get_df(descfn).set_index('DisclosureId')
-    df = df.join(get_df(recsfn).set_index('DisclosureId'),how='inner')
-    df = df.set_index('bgCAS')
-    df = df.join(get_df(casfn).set_index('bgCAS'),how='left')
-    df = df.reset_index()
+#     df = get_df(descfn).set_index('DisclosureId')
+#     df = df.join(get_df(recsfn).set_index('DisclosureId'),how='inner')
+#     df = df.set_index('bgCAS')
+#     df = df.join(get_df(casfn).set_index('bgCAS'),how='left')
+#     df = df.reset_index()
     
-    df['in_std_filtered'] = ~(df.is_duplicate)&~(df.dup_rec)
+#     df['in_std_filtered'] = ~(df.is_duplicate)&~(df.dup_rec)
 
-    save_df(df,outfn)
-    return df
+#     save_df(df,outfn)
+#     return df

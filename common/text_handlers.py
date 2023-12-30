@@ -70,11 +70,13 @@ def getDataLink(cas):
     s = f'{cas}/data.zip'
     return wrap_URL_in_html(s,'data; ')
 
-def getMapLink(lat=51.477222,lon=0,txt=''):
-    lnk = f'https://www.google.com/maps/@?api=1&map_action=map&center={lat},{lon}&basemap=satellite'
-    lnk = f'https://maps.google.com/maps?q={lat},{lon}&t=k'
+def getMapLink(row, txt='',latname='bgLatitude',lonname='bgLongitude'):
+    lnk = f'https://maps.google.com/maps?q={row[latname]},{row[lonname]}&t=k'
     return wrap_URL_in_html(lnk,txt)
 
+def getAPILink(row, txt='',latname='bgLatitude',lonname='bgLongitude'):
+    lnk = f'https://maps.google.com/maps?q={row[latname]},{row[lonname]}&t=k'
+    return wrap_URL_in_html(lnk,row.APINumber)
 
 def getDisclosureLink(APINumber,uploadkey,text_to_show='disclosure',
                       use_remote=False,up_level=True):

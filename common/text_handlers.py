@@ -106,6 +106,22 @@ def getPubChemLink(cas):
         pass
     return ''
 
+def getMoleculeImg(cas,size=120,chemical_report=False):
+    prefix = ''
+    if chemical_report: prefix='../'
+    ct_path = os.path.join(pic_dir,cas,'comptoxid.png')
+    # take comptox version if it exists
+    if os.path.exists(ct_path):
+        # and is not empty:  # this is the normal return
+        if os.path.getsize(ct_path) > 0:
+            return f"""<center><img src="{prefix}images/{cas}/comptoxid.png" onerror="this.onerror=null; this.remove();" width="{size}"></center>"""
+    else: # but if all else fails, try linking ot chemid
+        ci_path = os.path.join(pic_dir,cas,'chemid.png')
+        if os.path.exists(ci_path):
+            if os.path.getsize(ci_path) > 0:
+                return f"""<center><img src="{prefix}images/{cas}/chemid.png" onerror="this.onerror=null; this.remove();" width="{size}"></center>"""
+    return "<center>Image not available</center>"
+
 def getFingerprintImg(cas):
     fp_path = os.path.join(pic_dir,cas,'haz_fingerprint.png')
     # take comptox version if it exists

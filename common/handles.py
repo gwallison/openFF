@@ -42,7 +42,7 @@ browser_root = "https://storage.googleapis.com/open-ff-browser/"
 full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
 
 ######################  for Browser generation #######
-repo_name = 'openFF_data_2023_12_19'
+repo_name = 'openFF_data_2023_12_19_with_mass'
 curr_repo_dir = os.path.join(repo_dir,repo_name)
 bulkdata_date = 'December 19, 2023'
 catalog_ver = 'beta for FFV4'

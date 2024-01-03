@@ -5,10 +5,11 @@ Created on Sun Nov  6 17:01:07 2022
 @author: Gary
 """
 
-#import pandas as pd
+import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 
+# some defaults
 final_crs = 4326 # WGS84
 proj_crs = 3857 # convert to this when calculating distances
 def_buffer = 1609.34 # one mile
@@ -169,3 +170,158 @@ def showWells_in_area(fulldf,area_df,apilst):
     folium.LayerControl().add_to(m)
 
     return m
+
+def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shape=False,area_df=None,
+                     fields=['APINumber','TotalBaseWaterVolume','year','OperatorName','ingKeyPresent'],
+                     aliases=['API Number','Water Volume','year','Operator','has chem recs'],
+                     width=600,height=400):
+    # only the first item of the area df is used.  Meant to be a simple outline, like a county line
+    import folium
+    from folium import plugins
+    f = folium.Figure(width=width, height=height)
+    if include_shape:
+        #print('including shape!')
+        area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
+        m = folium.Map(tiles="openstreetmap",location=area, zoom_start=10).add_to(f)
+        
+        # show area
+        style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
+        folium.GeoJson(area_df,
+                       style_function=lambda x: style,
+                       smooth_factor=.2,
+                       name= 'target area'
+                       ).add_to(m)
+
+
+    else:
+        m = folium.Map(tiles="openstreetmap").add_to(f)
+    locations = list(zip(data.bgLatitude, data.bgLongitude))
+    cluster = plugins.MarkerCluster(locations=locations,
+                                   name='cluster markers')#,                     
+    m.add_child(cluster)
+    
+    sw = data[['bgLatitude', 'bgLongitude']].min().values.tolist()
+    ne = data[['bgLatitude', 'bgLongitude']].max().values.tolist()
+    m.fit_bounds([sw, ne]) 
+
+    gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.bgLongitude,
+                                                            data.bgLatitude),
+                           crs=final_crs)
+    folium.features.GeoJson(
+            data=gdf,
+            name='information marker',
+            show=False,
+            smooth_factor=2,
+            style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
+            popup=folium.features.GeoJsonPopup(
+                fields=fields,
+                aliases=aliases, 
+                localize=True,
+                sticky=False,
+                labels=True,
+                style="""
+                    background-color: #F0EFEF;
+                    border: 2px solid black;
+                    border-radius: 3px;
+                    box-shadow: 3px;
+                """,
+                max_width=800,),
+                    highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
+                ).add_to(m)   
+    
+    # Add a tile layer with satellite imagery
+    folium.TileLayer(
+        tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+        attr='Google',
+        name='Google Satellite',
+        overlay=False,
+        control=True,
+        subdomains=['mt0', 'mt1', 'mt2', 'mt3']
+    ).add_to(m)
+
+    # Add layer control to switch between base maps
+    folium.LayerControl().add_to(m)
+
+    if include_mini_map:
+        minimap = plugins.MiniMap()
+        m.add_child(minimap)
+        
+
+    # display(f)
+    return f
+
+def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,include_shape=False,area_df=None,
+                     fields=['APINumber','TotalBaseWaterVolume','year','OperatorName','ingKeyPresent'],
+                     aliases=['API Number','Water Volume','year','Operator','has chem recs'],
+                     width=600,height=400):
+    """ClusterMarker and GeoJsonPopup dont work together, so we do it by hand"""
+    # only the first item of the area df is used.  Meant to be a simple outline, like a county line
+    import folium
+    from folium import plugins
+    from IPython.display import Markdown as md
+    from IPython.display import display, HTML
+
+    f = folium.Figure(width=width, height=height)
+    if include_shape:
+        #print('including shape!')
+        area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
+        m = folium.Map(tiles="openstreetmap",location=area, zoom_start=10).add_to(f)
+        
+        # show area
+        style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
+        folium.GeoJson(area_df,
+                       style_function=lambda x: style,
+                       smooth_factor=.2,
+                       name= 'target area'
+                       ).add_to(m)
+
+
+    else:
+        m = folium.Map(tiles="openstreetmap").add_to(f)
+
+    sw = data[['bgLatitude', 'bgLongitude']].min().values.tolist()
+    ne = data[['bgLatitude', 'bgLongitude']].max().values.tolist()
+    m.fit_bounds([sw, ne]) 
+
+    
+    cluster = plugins.MarkerCluster(name='cluster markers')
+    m.add_child(cluster)
+    
+    # import ipywidgets as widgets
+    # import markdown
+    gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.bgLongitude,
+                                                            data.bgLatitude),
+                           crs=final_crs)
+    for i,row in gdf.iterrows():
+        
+        # s = '| | value |\n |---|---|\n'
+        name = []
+        val = []
+        for j,field in enumerate(fields):
+            name.append(f"{aliases[j]}:")
+            val.append(f'{row[field]}')
+            # s+=f'| **{aliases[j]}:** | {row[field]} |\n'
+            # s+= f"<b>{aliases[j]}:</b> {row[field]}<br>"
+        tmpdf = pd.DataFrame({'value':val},index=name)
+        html = tmpdf.to_html(header=False,
+                             classes="table table-striped table-hover table-condensed table-responsive")
+        popup = folium.Popup(html)
+        folium.Marker(
+            location=[row.bgLatitude,row.bgLongitude],
+            popup = popup,                
+        ).add_to(cluster)
+    
+    # Add a tile layer with satellite imagery
+    folium.TileLayer(
+        tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+        attr='Google',
+        name='Google Satellite',
+        overlay=False,
+        control=True,
+        subdomains=['mt0', 'mt1', 'mt2', 'mt3']
+    ).add_to(m)
+
+    # Add layer control to switch between base maps
+    folium.LayerControl().add_to(m)
+
+    return f

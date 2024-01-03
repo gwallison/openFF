@@ -16,6 +16,17 @@ def make_sandbox(name='sandbox'):
     except:
         print(f'{name} already exists')
 
+def add_favicon(fn):
+    # also adds favicon to browser tab
+    with open(fn,'r',encoding='utf-8') as f:
+        alltext = f.read()
+    alltext  = alltext.replace('</title>',
+                               '</title>\n<link rel="icon" href="https://storage.googleapis.com/open-ff-common/favicon.ico">',1)
+    with open(fn,'w',encoding='utf-8') as f:
+        f.write(alltext)
+
+
+
 def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
               incl_links=True,link_up_level=0,repo_name='',cat_creation_date='',
               show_source=True,use_remote=False):
@@ -27,8 +38,8 @@ def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
     if use_remote:
         local_prefix = browser_root
         
-    logo = """<a href="https://frackingchemicaldisclosure.wordpress.com/" title="Open-FF home page, tour and blog"><img src="https://storage.googleapis.com/open-ff-common/openFF_logo.png" alt="openFF logo" width="100" height="100"></a>"""
-    logoFT = """<center><a href="https://www.fractracker.org/" title="FracTracker Alliance"><img src="https://storage.googleapis.com/open-ff-common/2021_FT_logo_icon.png" alt="FracTracker logo" width="100" height="100"><br>Sponsored by FracTracker Alliance</a></center>"""
+    logo = """<center><a href="https://frackingchemicaldisclosure.wordpress.com/" title="Open-FF home page, tour and blog"><img src="https://storage.googleapis.com/open-ff-common/openFF_logo.png" alt="openFF logo" width="100" height="100"><h2>Open-FF</h2></a></center>"""
+    logoFT = """<center><a href="https://www.fractracker.org/" title="FracTracker Alliance"><img src="https://storage.googleapis.com/open-ff-common/2021_FT_logo_icon.png" alt="FracTracker logo" width="100" height="100"><br><h4>Sponsored by FracTracker Alliance</h4></a></center>"""
 
     if show_source:
         source = f"""This file was generated on {cat_creation_date:%B %d, %Y} <br>from data repository: {repo_name}."""

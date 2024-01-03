@@ -164,13 +164,30 @@ def calc_massComp(rec_df,disc_df):
     sp = ' '*10
     rec_df['massComp'] = ((rec_df[c1&c2].calcMass - rec_df[c1&c2].cleanMI).abs())/rec_df[c1&c2].calcMass
     print(f'{sp}Number of disclosures with inconsistent MI:        {len(disc_df[disc_df.MI_inconsistent]):,}')
-    print(f'{sp}Number of records with both calcMass and cleanMI: {len(rec_df[rec_df.massComp.notna()]):,}')
-    print(f'{sp}   Number of disclosures with both: {len(rec_df[rec_df.massComp.notna()].DisclosureId.unique()):,}')
-    print(f'{sp}Number where only calcMass is non-zero:             {len(rec_df[c1&~(c2)]):,}')
-    print(f'{sp}Number where only cleanMI is non-zero:              {len(rec_df[~(c1)&(c2)]):,}')
+    print(f'{sp}Number of records with both calcMass and cleanMI:  {len(rec_df[rec_df.massComp.notna()]):,}')
+    print(f'{sp}   Number of disclosures with both:                {len(rec_df[rec_df.massComp.notna()].DisclosureId.unique()):,}')
+    print(f'{sp}Number where only calcMass is non-zero:            {len(rec_df[c1&~(c2)]):,}')
+    print(f'{sp}Number where only cleanMI is non-zero:             {len(rec_df[~(c1)&(c2)]):,}')
 
     rec_df['massCompFlag'] = rec_df.massComp>massComp_upper_limit
     print(f'{sp}Number calcMass values rejected by massComp: {rec_df.massCompFlag.sum():,}')
+    rec_df['calcMass_unfiltered'] = rec_df.calcMass
     rec_df.calcMass = np.where(rec_df.massCompFlag,np.NaN,rec_df.calcMass)
-    #rec_df = rec_df.drop('MI_inconsistent',axis=1)
+
+    # construct 'mass' and 'massSource'
+    rec_df['massSource'] = 'neither'
+
+    # just MI
+    rec_df.massSource = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),'MI_only',rec_df.massSource)
+    rec_df['mass'] = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),rec_df.cleanMI,np.NaN)
+
+    # just calcMass
+    rec_df.massSource = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),'calcMass_only',rec_df.massSource)
+    rec_df.mass = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),rec_df.calcMass,rec_df.mass)
+
+    # both, use the MI value over the calcMass value
+    rec_df.massSource = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.notna()),'MI_and_calcMass',rec_df.massSource)
+    rec_df.mass = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.notna()),rec_df.cleanMI,rec_df.mass)
+    print(f'Number records where "mass" is available: {len(rec_df[rec_df.mass.notna()]):,}')
+
     return rec_df

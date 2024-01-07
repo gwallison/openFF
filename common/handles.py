@@ -6,6 +6,7 @@ Created on Thu Oct 12 12:40:16 2023
 
 Handles for file and url locations used throughout Open-FF
 
+
 """
 
 # in this version, repo data is fetched from the directory "current_repo"
@@ -16,6 +17,9 @@ import platform
 
 locals = ['Dell_2023_Gary','M2']
 
+repo_name = 'openFF_data_2023_12_19_with_mass'
+bulkdata_date = 'December 19, 2023'
+
 curr_platform = ''
 if not platform.node() in locals:
     curr_platform = 'remote'
@@ -23,17 +27,18 @@ else:
     curr_platform = platform.node()
 
 if curr_platform=='remote':
+    # simple structure, very local within env.
     root_code = "openFF"
     root_data = ""
-    # curr_data = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
     curr_data = "full_df.parquet"
 
 else:     
     root_code = r"C:\MyDocs\integrated\openFF"
     root_data = r"C:\MyDocs\integrated"
-    curr_data = r"C:\MyDocs\integrated\repos\current_repo\full_df.parquet"
+    curr_data = os.path.join(root_data,'repos',repo_name,"full_df.parquet")
     
 repo_dir = os.path.join(root_data,'repos')
+curr_repo_dir = os.path.join(repo_dir,repo_name)
 ext_data = os.path.join(root_data,'ext_data')
 ext_data_master_list = os.path.join(ext_data,'ext_data_master_list.csv')
 sandbox_dir = os.path.join(root_code,'sandbox')
@@ -42,10 +47,7 @@ browser_root = "https://storage.googleapis.com/open-ff-browser/"
 full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
 
 ######################  for Browser generation #######
-repo_name = 'openFF_data_2023_12_19_with_mass'
-curr_repo_dir = os.path.join(repo_dir,repo_name)
-bulkdata_date = 'December 19, 2023'
-catalog_ver = 'beta for FFV4'
+# catalog_ver = 'beta for FFV4'
 data_source = 'bulk'  # can be 'bulk', 'FFV1_scrape' or 'SkyTruth'
                                     # or 'NM_scrape_2022_05'
 cat_creation_date = datetime.now()
@@ -54,6 +56,10 @@ browser_nb_dir = os.path.join(root_code,'browser','notebooks')
  # output folder is outside of main code repo
 browser_out_dir = os.path.join(root_data,"browser_out")
 browser_inc_dir = os.path.join(browser_out_dir,"includes")
+browser_states_dir = os.path.join(browser_out_dir,"states")
+browser_operators_dir = os.path.join(browser_out_dir,"operators")
+browser_disclosures_dir = os.path.join(browser_out_dir,"disclosures")
+ref_fn = os.path.join(sandbox_dir,'ref.csv')
 
 # wells_in_dist_fn = './work/FFwells_in_school_districts.csv'
 

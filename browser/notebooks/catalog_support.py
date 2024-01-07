@@ -24,13 +24,11 @@ opt.classes="display compact cell-border"
 opt.maxBytes = 0
 
 
-from openFF.common.nb_helper import get_common_header
-from openFF.common.handles import cat_creation_date, repo_name, data_source, catalog_ver, bulkdata_date
-from openFF.common.handles import curr_repo_dir, browser_root, pic_dir
-from openFF.common.file_handlers import get_curr_df, get_df
-from openFF.common.text_handlers import getMapLink, getAPILink, getCatLink, getPubChemLink, getCompToxRef
-from openFF.common.text_handlers import getMoleculeImg, getFingerprintImg, round_sig, xlate_to_str
-from openFF.common.mapping import create_integrated_point_map
+import openFF.common.nb_helper as nbh
+import openFF.common.handles as hndl
+import openFF.common.file_handlers as fh
+import openFF.common.text_handlers as th
+import openFF.common.mapping as mapping
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -46,7 +44,7 @@ warnings.filterwarnings('ignore')
 # transformed_loc = 'c:/MyDocs/OpenFF/data/transformed/'
 # pic_dir = r"C:\MyDocs\OpenFF\src\openFF-catalog\pic_dir"
 
-def showHeader(name,subt='',use_remote=False):
-    display(HTML(get_common_header(name,subtitle=subt,
-                                   repo_name=repo_name,cat_creation_date=cat_creation_date,
+def showHeader(name,line2='',subt='',imglnk='',use_remote=False):
+    display(HTML(nbh.get_common_header(name,line2=line2,subtitle=subt,imagelink=imglnk,
+                                   repo_name=hndl.repo_name,cat_creation_date=hndl.cat_creation_date,
                                            link_up_level=2,use_remote=use_remote)))

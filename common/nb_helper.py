@@ -1,5 +1,7 @@
 import pandas as pd
 import os
+import subprocess
+
 from openFF.common.handles import browser_root
 #################### utils used to compile or run notebooks  ############
 
@@ -25,6 +27,32 @@ def add_favicon(fn):
     with open(fn,'w',encoding='utf-8') as f:
         f.write(alltext)
 
+def hide_map_warning(fn):
+    # also adds favicon to browser tab
+    with open(fn,'r',encoding='utf-8') as f:
+        alltext = f.read()
+    text = """<div class="jp-OutputArea-child">
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>WARNING:fiona.ogrext:Skipping field geo_point_2d: invalid type 3
+</pre>
+</div>
+</div>"""
+    alltext  = alltext.replace(text,'')
+    with open(fn,'w',encoding='utf-8') as f:
+        f.write(alltext)
+
+def make_notebook_output(nb_fn,output_fn, basic_output=False):
+    res = os.path.split(output_fn)
+    out_dir = res[0]
+    out_fn = res[1] 
+    assert out_fn[-5:]=='.html', f'Expecting .html ext on {output_fn}'
+    b_text = ''
+    if basic_output:
+        b_text = ' --template=basic '
+    s= f'jupyter nbconvert --no-input {b_text}--ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {nb_fn} --to=html --output={out_fn[:-5]} --output-dir={out_dir}'
+    subprocess.run(s)
+    hide_map_warning(output_fn)
 
 
 def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',

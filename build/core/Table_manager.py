@@ -157,7 +157,9 @@ class Table_constructor():
         df = pd.merge(df,cmp,on='OperatorName', how='left')
 
         unOp = df[df.bgOperatorName.isna()]
-        if len(unOp)>0: flag = '<******'
+        if len(unOp)>0: 
+            flag = '<******'
+            print(unOp.OperatorName.tolist())
         else: flag= ''
         self.print_step(f'Number uncurated Operators: {len(unOp)} {flag}',2)
 

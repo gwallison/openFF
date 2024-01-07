@@ -19,8 +19,7 @@ today = datetime.today()
 
 class Disc_gen():
     
-    def __init__(self,#repo_name = repo_name, # use common.handles version if not supplied
-                  ):
+    def __init__(self):
         self.repo_name = repo_name # pulls from handles
         self.repo_dir = repo_dir
         self.data_source = data_source # just from common.handles

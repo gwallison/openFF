@@ -112,13 +112,13 @@ def get_df_from_url(df_url,df_fn,force_freshen=False,inp_format='parquet'):
 
 #### get specific data sets
 
-def get_curr_df(curr_data=curr_data,cols=[],minimal=False):
-    # Fetch openFF data frame from the current repository
-    if minimal: # testing mode
-        cols = ['DisclosureId','APINumber','date']
-    if cols!=[]: # not empty so filter
-        return pd.read_parquet(curr_data,columns=cols)
-    return pd.read_parquet(curr_data)    
+# def get_curr_df(curr_data=curr_data,cols=[],minimal=False):
+#     # Fetch openFF data frame from the current repository
+#     if minimal: # testing mode
+#         cols = ['DisclosureId','APINumber','date']
+#     if cols!=[]: # not empty so filter
+#         return pd.read_parquet(curr_data,columns=cols)
+#     return pd.read_parquet(curr_data)    
 
 
 

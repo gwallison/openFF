@@ -3,7 +3,7 @@ import numpy as np
 import os
 from IPython.display import HTML, display
 
-use_itables = False
+use_itables = True
 if use_itables:
     from itables import init_notebook_mode
     init_notebook_mode(all_interactive=True)
@@ -15,7 +15,7 @@ if use_itables:
 else:
     def iShow(df,maxBytes=0,classes=None): # dummy iShow
         display(df)
-        
+
 from openFF.common.handles import sandbox_dir, full_url
 from openFF.common.nb_helper import make_sandbox, completed
 from openFF.common.file_handlers import get_df_from_url

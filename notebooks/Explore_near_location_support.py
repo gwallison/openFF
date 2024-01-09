@@ -119,7 +119,7 @@ def show_chem_summary(t):
     # mg[['bgCAS','epa_pref_name','calcMass']]
 
     chem_df = make_compact_chem_summary(t)
-    chem_df.to_excel('chemical_summary.xlsx')
+    # chem_df.to_excel('chemical_summary.xlsx')
 #     # save the summary data from these wells to allow users to download
 #     chem_df.to_csv('chemical_summary_for_selected_wells.csv')
     

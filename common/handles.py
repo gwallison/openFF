@@ -9,7 +9,7 @@ Handles for file and url locations used throughout Open-FF
 
 """
 
-# in this version, repo data is fetched from the directory "current_repo"
+
 from datetime import datetime
 
 import os
@@ -39,6 +39,7 @@ else:
     
 repo_dir = os.path.join(root_data,'repos')
 curr_repo_dir = os.path.join(repo_dir,repo_name)
+curr_repo_pkl_dir = os.path.join(curr_repo_dir,'pickles')
 ext_data = os.path.join(root_data,'ext_data')
 ext_data_master_list = os.path.join(ext_data,'ext_data_master_list.csv')
 sandbox_dir = os.path.join(root_code,'sandbox')

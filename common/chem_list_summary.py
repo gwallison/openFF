@@ -18,35 +18,21 @@ class ChemListSummary():
                  ):
         self.df = df
         self.summarize_by_chem = summarize_by_chem
-        self.colsets = {'chem_index': ['composite_id','ref','img','num_rec','num_mass','perc_mass',
-                                       'rq','fingerprint','cc_lsts','earliest']}
-        casdf = fh.get_df(os.path.join(hndl.curr_repo_pkl_dir,'bgCAS.parquet'))
-        # print(self.casdf.columns)                              
-        c1 = True
-        if ignore_duplicates: c1 = df.in_std_filtered
-
-        caslst = df[c1].bgCAS.unique().tolist()
-        cdf = casdf[casdf.bgCAS.isin(caslst)].copy()
-        cdf['fingerprint'] = cdf.bgCAS.map(lambda x: th.getFingerprintImg(x))
-        cdf['img'] = cdf.bgCAS.map(lambda x: th.getMoleculeImg(x))
-        cdf['History'] = cdf.bgCAS.map(lambda x: th.getCatLink(x,x))
-        cdf['PubChem'] = cdf.bgCAS.map(lambda x: th.getPubChemLink(x)) 
-        cdf['EPA_ref'] = cdf.DTXSID.map(lambda x: th.getCompToxRef(x))
-        cdf = self.make_extrnl_column(cdf)
-
-        if self.summarize_by_chem:
-            tmp = self.df[c1].groupby('bgCAS',as_index=False).size()
-            tmp = tmp.rename({'size':'tot_records'},axis=1)
-            cdf = cdf.merge(tmp,on='bgCAS',how='left')
-            
-            tmp = df[c1&(df.mass>0)].groupby('bgCAS',as_index=False).size().rename({'size':'num_w_mass'},axis=1)
-            tmp.num_w_mass.fillna(0)
-            cdf = cdf.merge(tmp,on='bgCAS',how='left')
-        else:
-            cdf = pd.merge(df[c1],cdf, on='bgCAS',how='left',validate='m:1')
-
-        self.chem_df = cdf
-
+        self.ignore_duplicates = ignore_duplicates
+        # sets of fields to include under different circumstances
+        self.colsets = {'chem_index': ['composite_id','refs','img','tot_records','num_w_mass',
+                                       'mass_median','mass_90_perc',
+                                       'rq_lbs','fingerprint','extrnl','earliest_date'],
+                        'colab_v1':   ['composite_id','refs','img','tot_records','num_w_mass',
+                                       'tot_mass',
+                                       'rq_lbs','fingerprint','extrnl'],
+                        'summary_file':['bgCAS','epa_pref_name','ingredCommonName',
+                                        'tot_records','num_w_mass',
+                                        'tot_mass','mass_median','rq_lbs']
+                        }
+        
+        self.assemble_cas_df()
+        
     def make_extrnl_column(self,chem_df):
         chem_df['extrnl'] = np.where(chem_df.is_on_CWA,'CWA<br>','    ')
         chem_df.extrnl = np.where(chem_df.is_on_AQ_CWA,chem_df.extrnl+'AQ_CWA<br>',chem_df.extrnl)
@@ -63,9 +49,70 @@ class ChemListSummary():
         return chem_df
 
 
+    def assemble_cas_df(self): 
+        casdf = fh.get_df(os.path.join(hndl.curr_repo_pkl_dir,'bgCAS.parquet'))
+        casingdf = fh.get_df(os.path.join(hndl.curr_repo_pkl_dir,'cas_ing.parquet'))
+        gb = casingdf.groupby('bgCAS',as_index=False)['ingredCommonName'].first()
+        casdf = casdf.merge(gb,on='bgCAS',how='left',validate='1:1')
+
+        c1 = True
+        if self.ignore_duplicates: c1 = self.df.in_std_filtered
+
+        caslst = self.df[c1].bgCAS.unique().tolist()
+        cdf = casdf[casdf.bgCAS.isin(caslst)].copy()
+        cdf['fingerprint'] = cdf.bgCAS.map(lambda x: th.getFingerprintImg(x))
+        cdf['img'] = cdf.bgCAS.map(lambda x: th.getMoleculeImg(x,size=300))
+        cdf['chem_detail'] = cdf.bgCAS.map(lambda x: th.getCatLink(x,x))
+        cdf['PubChem'] = cdf.bgCAS.map(lambda x: th.getPubChemLink(x)) 
+        cdf['EPA_ref'] = cdf.DTXSID.map(lambda x: th.getCompToxRef(x))
+        cdf['refs'] = cdf.PubChem+'<br>'+cdf.EPA_ref
+        cdf.epa_pref_name = np.where(cdf.epa_pref_name.isna(),' -- ',cdf.epa_pref_name)
+        cdf['names'] = cdf.epa_pref_name +'<br>----------<br>' + cdf.ingredCommonName
+        cdf['composite_id'] = '<center><h3>'+cdf.chem_detail+'</h3>'+cdf.names+'</center>'
+        cdf = self.make_extrnl_column(cdf)
+
+        if self.summarize_by_chem:
+            tmp = self.df[c1].groupby('bgCAS',as_index=False).size()
+            tmp = tmp.rename({'size':'tot_records'},axis=1)
+            cdf = cdf.merge(tmp,on='bgCAS',how='left')
+            
+            tmp = self.df[c1&(self.df.mass>0)].groupby('bgCAS',as_index=False).size().rename({'size':'num_w_mass'},axis=1)
+            tmp.num_w_mass.fillna(0)
+            cdf = cdf.merge(tmp,on='bgCAS',how='left')
+
+            tmp = self.df[c1].groupby('bgCAS',as_index=False)['date'].min().rename({'date':'earliest_date'},axis=1)
+            cdf = cdf.merge(tmp,on='bgCAS',how='left')
+
+            tmp = self.df[c1].groupby('bgCAS',as_index=False)['mass'].sum().rename({'mass':'tot_mass'},axis=1)
+            tmp.tot_mass = tmp.tot_mass.map(lambda x: th.round_sig(x,3))
+            cdf = cdf.merge(tmp,on='bgCAS',how='left')
+
+            tmp = self.df[c1&(self.df.mass>0)].groupby('bgCAS',as_index=False)['mass'].apply(np.percentile,90).rename({'mass':'mass_90_perc'},axis=1)
+            tmp.mass_90_perc = tmp.mass_90_perc.map(lambda x: th.round_sig(x,3))
+            cdf = cdf.merge(tmp,on='bgCAS',how='left')
+
+            tmp = self.df[c1&(self.df.mass>0)].groupby('bgCAS',as_index=False)['mass'].median().rename({'mass':'mass_median'},axis=1)
+            tmp.mass_median = tmp.mass_median.map(lambda x: th.round_sig(x,3))
+            cdf = cdf.merge(tmp,on='bgCAS',how='left')
+
+            # cdf.fillna('',inplace=True)
+        else:
+            cdf = pd.merge(self.df[c1],cdf, on='bgCAS',how='left',validate='m:1')
+
+        self.chem_df = cdf
+
+    def get_storable_table(self,colset='summary_file',sortby='bgCAS'):
+        assert colset in self.colsets, 'Column set not recognized'
+        if sortby in self.colsets[colset]:
+            self.chem_df = self.chem_df.sort_values(sortby)
+        return self.chem_df[self.colsets[colset]]
+
     
-    def display_table(self,colset='chem_index'):
-        pass
+    def get_display_table(self,colset='chem_index',sortby='composite_id'):
+        assert colset in self.colsets, 'Column set not recognized'
+        if sortby in self.colsets[colset]:
+            self.chem_df = self.chem_df.sort_values(sortby)
+        return self.chem_df[self.colsets[colset]]
 
     def get_html_table(self,colset='chem_index'):
         pass

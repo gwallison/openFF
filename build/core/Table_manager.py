@@ -68,15 +68,26 @@ class Table_constructor():
         self.print_step(f'{name:15}: rows: {rows:7}, cols: {cols:3}',1)
 
 
-    def assemble_cas_ing_table(self):
+    def assemble_cas_ing_table(self,raw_df):
         self.print_step('assembling CAS/IngredientName table')
+
         df = self.cas_ing_source[['CASNumber','IngredientName','bgCAS',
                                   'source','synCAS',
                                   #'categoryCAS','syn_code',
                                   #'bgSource','alt_CAS'
                                   ]]
+
+        self.print_step('generating ingredCommonName',1)
+        raw_df = raw_df.merge(df[['CASNumber','IngredientName','bgCAS']],
+                              on=['CASNumber','IngredientName'],how='left',
+                              validate='m:1')
+        
+        gb = raw_df.groupby('bgCAS')['IngredientName'].agg(lambda x: x.value_counts().index[0])
+        gb = gb.reset_index()
+        gb.columns = ['bgCAS','ingredCommonName']
+
+        df = df.merge(gb,on='bgCAS',how='left')
         self.tables['cas_ing'] = df
-        #ct.na_check(df,txt='assembling cas_ing table')
 
         
     def assemble_companies_table(self):
@@ -88,14 +99,12 @@ class Table_constructor():
         
     def assemble_bgCAS_table(self,cas_ing):
         self.print_step('assembling bgCAS table')
-        # ref = get_df(os.path.join(self.trans_dir,
-        #                           'CAS_ref_and_names.parquet'))
-        # ref.columns=['bgCAS','bgIngredientName']
+
         ref = get_df(os.path.join(self.trans_dir,'master_cas_number_list.parquet'))
         ref = ref[['cas_number','ing_name']]
         ref.columns = ['bgCAS','bgIngredientName']
         df = pd.DataFrame({'bgCAS':cas_ing.bgCAS.unique().tolist()})
-        df = pd.merge(df,ref,on='bgCAS',how='left')
+        df = df.merge(ref,on='bgCAS',how='left')
         
         self.print_step('add external references such as TEDX and PFAS',1)
         df = et.add_all_bgCAS_tables(df,sources=self.extdir,
@@ -465,7 +474,7 @@ class Table_constructor():
      
     def assemble_all_tables(self,df):
         # ct.na_check(df,txt='top of assemble all tables')
-        self.assemble_cas_ing_table()
+        self.assemble_cas_ing_table(df)
         self.assemble_companies_table()
         self.assemble_bgCAS_table(self.tables['cas_ing'])
         self.assemble_disclosure_table(df)

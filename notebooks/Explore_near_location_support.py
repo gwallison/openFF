@@ -32,8 +32,9 @@ df_fn = os.path.join(out_dir,'full_df.parquet')
 
 ##### execute the following on run 
 make_sandbox(out_dir)
-df = get_df_from_url(df_url,df_fn)
-df = df[df.in_std_filtered]
+# df = get_df_from_url(df_url,df_fn)
+# df = df[df.in_std_filtered]
+df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
 completed()
 
 def show_lat_lon_input(latlon_str):

@@ -28,7 +28,13 @@ class ChemListSummary():
                                        'rq_lbs','fingerprint','extrnl'],
                         'summary_file':['bgCAS','epa_pref_name','ingredCommonName',
                                         'tot_records','num_w_mass',
-                                        'tot_mass','mass_median','rq_lbs']
+                                        'tot_mass','mass_median','rq_lbs'],
+                        'single_disc': ['TradeName','Supplier','Purpose','CASNumber',
+                                        'bgCAS','IngredientName','bgIngredientName',
+                                        'epa_pref_name','PercentHighAdditive','PercentHFJob',
+                                        'mass','massSource',
+                                        'cleanMI','calcMass','extrnl','fingerprint',
+                                        'refs','is_water_carrier','dup_rec']
                         }
         
         self.assemble_cas_df()
@@ -97,7 +103,11 @@ class ChemListSummary():
 
             # cdf.fillna('',inplace=True)
         else:
-            cdf = pd.merge(self.df[c1],cdf, on='bgCAS',how='left',validate='m:1')
+            cols_to_add = self.df.columns.difference(cdf.columns).tolist()
+            cols_to_add.append('bgCAS')
+            # print(cols_to_add)
+            cdf = pd.merge(self.df[c1][cols_to_add],cdf, on='bgCAS',how='left',validate='m:1')
+            # print(cdf.columns.tolist())
 
         self.chem_df = cdf
 

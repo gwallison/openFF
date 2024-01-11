@@ -18,7 +18,7 @@ import pandas as pd
 import os
 import requests
 import urllib
-from openFF.common.handles import curr_data
+import openFF.common.handles as hndl
 
 # this is the list of FF fields that should be treated as text columns in CSV file
 lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
@@ -78,7 +78,7 @@ def get_df(fn,cols=None):
         print(f'{fn}: Extention <{tup[1]}> not valid for "get_df"')
         assert 1==0
 
-def get_table(repo_dir='', repo_name='current_repo',tname='disclosures',cols=None):
+def get_table(repo_dir=hndl.repo_dir, repo_name=hndl.repo_name,tname='disclosures',cols=None):
     """ Used to pull in repo's pickled tables"""
     return pd.read_parquet(os.path.join(repo_dir,repo_name,'pickles',tname+'.parquet'),
                            columns=cols)

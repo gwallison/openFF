@@ -42,6 +42,6 @@ if __name__ == '__main__':
     # if c == 'erase':
     #     print(f'Initializing {hndl.browser_out_dir}')
     #     init_output_space()
-    _ = gen_chem.Chem_gen()
-    # _ = gen_disc.Disc_gen()
+    #_ = gen_chem.Chem_gen()
+    _ = gen_disc.Disc_gen()
     print('DONE')

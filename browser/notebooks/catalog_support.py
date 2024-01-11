@@ -33,16 +33,7 @@ import openFF.common.mapping as mapping
 import warnings
 warnings.filterwarnings('ignore')
 
-# bulkdata_date = 'December 19, 2023'
-# repo_name = 'openFF_data_2023_12_19'
 
-# data_source = 'bulk'  # can be 'bulk', 'FFV1_scrape' or 'SkyTruth'
-#                                     # or 'NM_scrape_2022_05'
-
-# cat_creation_date = datetime.datetime.now()
-# extData_loc = 'c:/MyDocs/OpenFF/data/external_refs/'
-# transformed_loc = 'c:/MyDocs/OpenFF/data/transformed/'
-# pic_dir = r"C:\MyDocs\OpenFF\src\openFF-catalog\pic_dir"
 
 def showHeader(name,line2='',subt='',imglnk='',use_remote=False):
     display(HTML(nbh.get_common_header(name,line2=line2,subtitle=subt,imagelink=imglnk,

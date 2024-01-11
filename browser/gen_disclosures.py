@@ -142,9 +142,9 @@ class Disc_gen():
                 meta_html = disp_tab.make_html_of_disclosure_meta(meta)
                 chem = self.allrec[self.allrec.DisclosureId==upk]
                 disp_obj = chem_sum.ChemListSummary(chem,summarize_by_chem=False)
-                chem_disp = disp_obj.get_display_table(colset='single_disc')
+                self.chem_disc = disp_obj.get_display_table(colset='single_disc')
                 # self.chem_disc = disp_tab.make_chem_single_disclosure(chem,self.allCAS) # save df in self for later use
-                chemout = disp_tab.make_html_for_chem_table(chem_disp)
+                chemout = disp_tab.make_html_for_chem_table(self.chem_disc)
                 disc_title = api+'-disclosure_'+str(i+1)
                 header = nbh.get_common_header(title=f'{api[:2]}-{api[2:5]}-{api[5:]}',
                                            #subtitle=f'FracFocus ID: {upk}',
@@ -160,7 +160,7 @@ class Disc_gen():
  
     def make_disc_include_page(self):
         # make the disclosure 'include' file for the end of each disclosure:
-        # self.chem_disc.to_parquet(os.path.join(self.tmp,'chem_disc.parquet'))
+        self.chem_disc.to_parquet(os.path.join(self.tmp,'chem_disc.parquet'))
         name = self.disc_dictionary_fn[:-6] + '.html'
         outfn = os.path.join(hndl.browser_out_dir,os.path.basename(name))
         s= f'jupyter nbconvert --no-input --template=basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_dictionary_fn} --to=html --output-dir={self.out_dir}'

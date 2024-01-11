@@ -200,7 +200,7 @@ def make_html_for_chem_table(df):
         dom: 'Bfrtip',
         buttons: [{extend: 'colvis',text: 'Columns'}],
         columnDefs: [{"width": "100px", "targets": 2},
-                     {"targets": [0,1,2,3,5,6,8,10,15,16], "visible": false},
+                     {"targets": [0,1,2,3,5,6,8,11,12,13,17,18], "visible": false},
                      {"render": $.fn.dataTable.render.number(',', '.', 0), "targets": [10,11]}]
       });
     });

@@ -141,7 +141,8 @@ class Disc_gen():
                 meta = metas[metas.DisclosureId==upk]
                 meta_html = disp_tab.make_html_of_disclosure_meta(meta)
                 chem = self.allrec[self.allrec.DisclosureId==upk]
-                disp_obj = chem_sum.ChemListSummary(chem,summarize_by_chem=False)
+                disp_obj = chem_sum.ChemListSummary(chem,ignore_duplicates=False,
+                                                    summarize_by_chem=False)
                 self.chem_disc = disp_obj.get_display_table(colset='single_disc')
                 # self.chem_disc = disp_tab.make_chem_single_disclosure(chem,self.allCAS) # save df in self for later use
                 chemout = disp_tab.make_html_for_chem_table(self.chem_disc)
@@ -163,14 +164,14 @@ class Disc_gen():
         self.chem_disc.to_parquet(os.path.join(self.tmp,'chem_disc.parquet'))
         name = self.disc_dictionary_fn[:-6] + '.html'
         outfn = os.path.join(hndl.browser_out_dir,os.path.basename(name))
-        s= f'jupyter nbconvert --no-input --template=basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_dictionary_fn} --to=html --output-dir={self.out_dir}'
-        subprocess.run(s)
+        nbh.make_notebook_output(nb_fn=name,output_fn=outfn, basic_output=False)
  
     def make_disc_index_page(self):
         name = self.disc_index_fn[:-6] + '.html'
         outfn = os.path.join(hndl.browser_out_dir,os.path.basename(name))
-        s= f'jupyter nbconvert --no-input --template=basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_index_fn} --to=html --output-dir={hndl.browser_out_dir}'
-        subprocess.run(s)
+        nbh.make_notebook_output(nb_fn=name,output_fn=outfn, basic_output=False)
+        # s= f'jupyter nbconvert --no-input --template=basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_index_fn} --to=html --output-dir={hndl.browser_out_dir}'
+        # subprocess.run(s)
         nbh.compile_nb_page(fn=outfn,
                         header = nbh.get_common_header(title='Open-FF Disclosure Index',repo_name=hndl.repo_name,
                                                    cat_creation_date=hndl.cat_creation_date),

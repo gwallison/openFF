@@ -34,7 +34,7 @@ class ChemListSummary():
                                         'epa_pref_name','PercentHighAdditive','PercentHFJob',
                                         'mass','massSource',
                                         'MassIngredient','calcMass','extrnl','fingerprint',
-                                        'refs','is_water_carrier','dup_rec']
+                                        'refs','is_water_carrier','dup_rec','ingKeyPresent']
                         }
         
         self.assemble_cas_df()

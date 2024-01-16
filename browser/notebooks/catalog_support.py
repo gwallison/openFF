@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pylab import gca, mpl
+import matplotlib.ticker
 import datetime
 import time
 import sys

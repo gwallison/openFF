@@ -13,6 +13,7 @@ import openFF.common.handles as hndl
 import openFF.browser.gen_disclosures as gen_disc
 import openFF.browser.gen_chemicals as gen_chem
 import openFF.browser.gen_misc_nb as gen_misc_nb
+import openFF.browser.gen_scope as gen_scope
 
 def erase_output_space(dir = hndl.browser_out_dir):
     # CAREFUL: This removes everything the the browser_out_dir!
@@ -46,5 +47,6 @@ if __name__ == '__main__':
 
     #_ = gen_chem.Chem_gen()
     # _ = gen_disc.Disc_gen()
-    _ = gen_misc_nb.Misc_notebook_gen()
+    _ = gen_scope.ScopeGen()
+    # _ = gen_misc_nb.Misc_notebook_gen()
     print('DONE')

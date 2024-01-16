@@ -78,6 +78,13 @@ def getAPILink(row, txt='',latname='bgLatitude',lonname='bgLongitude'):
     lnk = f'https://maps.google.com/maps?q={row[latname]},{row[lonname]}&t=k'
     return wrap_URL_in_html(lnk,row.APINumber)
 
+def getFFLink(row, txt=''):
+    # link to the FF disclosure with the (default) text as the APINumber
+    lnk = f'https://fracfocus.org/wells/{row.APINumber}'
+    if txt=='':
+        txt = row.APINumber
+    return wrap_URL_in_html(lnk,txt)
+
 def getDisclosureLink(APINumber,uploadkey,text_to_show='disclosure'): #
                     #   use_remote=False,up_level=True):
     preamble = hndl.browser_root

@@ -444,7 +444,7 @@ class Table_constructor():
             
     def gen_primarySupplier(self): 
         self.print_step('generating primarySupplier')
-        non_company = ['third party','operator','ambiguous',
+        non_company = ['third party','operator','ambiguous','sys_approach_ingred_cont',
                        'company supplied','customer','multiple suppliers',
                        'not a company','missing']
         rec = self.tables['chemrecs'].copy()

@@ -6,6 +6,7 @@ Created on Sun Nov  6 17:01:07 2022
 """
 
 import pandas as pd
+import numpy as np
 import geopandas as gpd
 from shapely.geometry import Point
 
@@ -14,6 +15,16 @@ final_crs = 4326 # WGS84
 proj_crs = 3857 # convert to this when calculating distances
 def_buffer = 1609.34 # one mile
 
+def fix_county_names(df):
+    trans = {'mckenzie':'mc kenzie',
+             'dewitt':'de witt',
+             'mcclain':'mc clain',
+             'mcintosh':'mc intosh',
+             'mckean':'mc kean',
+             'mcmullen':'mc mullen'}
+    for wrong in trans.keys():
+        df.CountyName = np.where(df.CountyName==wrong,trans[wrong],df.CountyName)
+    return df
 
 def make_as_well_gdf(in_df,latName='bgLatitude',lonName='bgLongitude',
                 in_crs=final_crs):
@@ -325,3 +336,165 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,i
     folium.LayerControl().add_to(m)
 
     return f
+
+
+# single layer, with popups
+def create_state_choropleth(data,
+                            start_loc=[40, -96],start_zoom = 4,
+                            custom_scale = [], plotlog = True,
+                            legend_name = 'Test legend',
+                            fields = ['StateName','orig_value'],
+                            aliases = ['State: ','data: '],
+                            width=600,height=400):
+    import folium
+    fn = r"C:\MyDocs\OpenFF\data\non-FF\georef-united-states-of-america-state.geojson"
+    geojson = gpd.read_file(fn)
+    data['orig_value'] = data.value
+
+    geojson['StateName'] = geojson.ste_name.str.lower()
+    geojson = geojson[['StateName','ste_code','geometry']]
+    #     geojson.drop(['ste_name'],axis=1,inplace=True)
+    f = folium.Figure(width=width, height=height)
+    m = folium.Map(location= start_loc, tiles="openstreetmap",
+                    zoom_start=start_zoom).add_to(f)
+#     fg1 = folium.FeatureGroup(name=legend_name,overlay=False).add_to(m)
+    
+    geojson = pd.merge(geojson,data,on=['StateName'],how='left')
+    #geojson.value.fillna(0,inplace=True)
+    if plotlog:
+        geojson.value = np.log10(geojson.value+1)
+        legend_name = legend_name + ' (log transformed)'
+    geojson.orig_value.fillna('no data',inplace=True)
+    #print(geojson[['StateName','value']])
+    
+    if custom_scale==[]:
+        custom_scale = (geojson['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
+    folium.Choropleth(
+                geo_data=fn,
+                data=geojson,
+                columns=['ste_code', 'value'],  #Here we tell folium to get the fips and plot values for each state
+                key_on='feature.properties.ste_code',
+                threshold_scale=custom_scale, #use the custom scale we created for legend
+                fill_color='YlOrRd',
+                nan_fill_color="gainsboro", #Use white color if there is no data available for the area
+                fill_opacity=0.7,
+                line_opacity=0.4,
+                line_weight=0.3,
+                legend_name= legend_name, #title of the legend
+                highlight=True,
+                line_color='black').add_to(m) 
+    
+    folium.features.GeoJson(
+                data=geojson,
+                name='',
+                smooth_factor=2,
+                style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
+                tooltip=folium.features.GeoJsonTooltip(
+                    fields=fields,
+                    aliases=aliases, 
+                    localize=True,
+                    sticky=False,
+                    labels=True,
+                    style="""
+                        background-color: #F0EFEF;
+                        border: 2px solid black;
+                        border-radius: 3px;
+                        box-shadow: 3px;
+                    """,
+                    max_width=800,),
+                        highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
+                    ).add_to(m)   
+
+    display(f)
+
+def create_county_choropleth(data,
+                             start_loc=[40, -96],start_zoom = 6,
+                             custom_scale = [], plotlog = True,
+                             legend_name = 'Test legend',
+                             show_only_data_states=True,
+                             #popup_enabled=True, tooltip_enabled=False,
+                             fields = ['CountyName','orig_value'],
+                             aliases = ['County: ','data: ']):
+    import folium
+    fn = r"C:\MyDocs\OpenFF\data\non-FF\georef-united-states-of-america-county.geojson"
+    if len(data)<1:
+        print('No mappable data')
+        return
+    geojson = gpd.read_file(fn)
+    data['orig_value'] = data.value
+
+    geojson['StateName'] = geojson.ste_name.str.lower()
+    geojson['CountyName'] = geojson.coty_name.str.lower()
+    geojson = fix_county_names(geojson)
+    working = geojson[['StateName','CountyName','coty_code','geometry']]
+    #geojson = geojson.to_crs(5070)
+    working = pd.merge(working,data,on=['StateName','CountyName'],how='left')
+    #print(geojson.info())
+    if start_loc==[]:
+        start_loc = [geojson.geometry.centroid.x.mean(),geojson.geometry.centroid.y.mean()]
+    f = folium.Figure(width=600, height=400)
+    m = folium.Map(location= start_loc, tiles="openstreetmap",
+                   zoom_start=start_zoom).add_to(f)
+    if plotlog:
+        working.value = np.log10(working.value+1)
+        legend_name = legend_name + ' (log transformed)'
+    working.orig_value.fillna('no data',inplace=True)
+    
+    if custom_scale==[]:
+        custom_scale = (working['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
+    if show_only_data_states:
+        gb = data.groupby(['StateName','CountyName'],as_index=False)['value'].first()
+        datalst = []
+        for i,row in gb.iterrows():
+            datalst.append((row.StateName,row.CountyName))
+        wlst = []
+        working['tup'] = list(zip(working.StateName.tolist(),working.CountyName.tolist()))
+        geojson['tup'] = list(zip(geojson.StateName.tolist(),geojson.CountyName.tolist()))
+        
+#         working = working[working.StateName.isin(data.StateName.unique().tolist())]
+#         geojson = geojson[geojson.StateName.isin(data.StateName.unique().tolist())]
+#         c1 = working.CountyName.isin(data.CountyName.unique().tolist())
+#         c2 = working.StateName.isin(data.StateName.unique().tolist())
+#         c3 = geojson.CountyName.isin(data.CountyName.unique().tolist())
+#         c4 = geojson.StateName.isin(data.StateName.unique().tolist())
+        working = working[working.tup.isin(datalst)]
+        geojson = geojson[geojson.tup.isin(datalst)]
+    working.StateName = working.StateName.str.title()
+    working.CountyName = working.CountyName.str.title()
+    #print(f'States in geojson: {working.StateName.unique().tolist()}')
+    folium.Choropleth(
+                geo_data=geojson,
+                data=working,
+                columns=['coty_code', 'value'],  #Here we tell folium to get the fips and plot values for each state
+                key_on='feature.properties.coty_code',
+                threshold_scale=custom_scale, #use the custom scale we created for legend
+                fill_color='YlOrRd',
+                nan_fill_color="gainsboro", #Use white color if there is no data available for the area
+                fill_opacity=0.7,
+                line_opacity=0.4,
+                line_weight=0.4,
+                legend_name= legend_name, #title of the legend
+                highlight=True,
+                line_color='black').add_to(m) 
+    
+    folium.features.GeoJson(
+                data=working,
+                name='',
+                smooth_factor=2,
+                style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
+                popup=folium.features.GeoJsonPopup(
+                    fields=fields,
+                    aliases=aliases, 
+                    localize=True,
+                    sticky=False,
+                    labels=True,
+                    style="""
+                        background-color: #F0EFEF;
+                        border: 2px solid black;
+                        border-radius: 3px;
+                        box-shadow: 3px;
+                    """,
+                    max_width=800,),
+                        highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
+                    ).add_to(m)   
+    display(f)

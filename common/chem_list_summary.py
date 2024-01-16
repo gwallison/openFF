@@ -61,8 +61,7 @@ class ChemListSummary():
         gb = casingdf.groupby('bgCAS',as_index=False)['ingredCommonName'].first()
         casdf = casdf.merge(gb,on='bgCAS',how='left',validate='1:1')
 
-        c1 = True
-        if self.ignore_duplicates: c1 = self.df.in_std_filtered
+        c1 = np.where(self.ignore_duplicates,self.df.in_std_filtered,True)
 
         caslst = self.df[c1].bgCAS.unique().tolist()
         cdf = casdf[casdf.bgCAS.isin(caslst)].copy()

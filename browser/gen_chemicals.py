@@ -15,6 +15,7 @@ import openFF.common.defaults as dflt
 import openFF.common.file_handlers as fh
 import openFF.common.text_handlers as th
 import openFF.common.nb_helper as nbh
+# import openFF.common.chem_info_tools as cit
 
 
 today = datetime.today()
@@ -82,7 +83,8 @@ class Chem_gen():
     #     subprocess.run(s)
     #     nbh.hide_map_warning(self.no_data_html_fn)
 
-
+    # def compile_chem_informatics(self):
+    #     cit.sdf_extract()
     def make_chem_list(self):
         import math
         t = self.allrec # just a handle

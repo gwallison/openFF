@@ -17,8 +17,8 @@ import platform
 
 locals = ['Dell_2023_Gary','M2']
 
-repo_name = 'final_repo_new'
-bulkdata_date = 'January 6, 2024?'
+repo_name = 'openFF_data_2024_01_06'
+bulkdata_date = 'January 6, 2024'
 
 curr_platform = ''
 if not platform.node() in locals:
@@ -60,6 +60,8 @@ browser_inc_dir = os.path.join(browser_out_dir,"includes")
 browser_states_dir = os.path.join(browser_out_dir,"states")
 browser_operators_dir = os.path.join(browser_out_dir,"operators")
 browser_disclosures_dir = os.path.join(browser_out_dir,"disclosures")
+browser_scope_dir = os.path.join(browser_out_dir,"scope")
+
 ref_fn = os.path.join(sandbox_dir,'ref.csv')
 
 # wells_in_dist_fn = './work/FFwells_in_school_districts.csv'
@@ -79,3 +81,7 @@ blog_im_dir = os.path.join(image_dir,'blog_images')
 
 # images used in the documents section (not in the image dir)
 docs_images = os.path.join(root_code,'docs','images') 
+
+################### ChemInformatics handles
+ci_source = os.path.join(curr_repo_dir,"ChemInfo_ref_files")
+ci_summ_fn = 'CI_sdf_summary.parquet'

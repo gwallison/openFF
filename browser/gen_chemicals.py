@@ -25,14 +25,19 @@ class Chem_gen():
 
     def __init__(self, 
                  caslist=[], # for testing; if not [], will only work on cas in list)
+                 testing_mode=False
     ):
         print(f'Starting Chem Browser: using repository: {hndl.curr_data}')
         self.caslist = caslist
         self.html_fn = os.path.join(hndl.browser_nb_dir,'chemical_report.html')
         self.no_data_html_fn = os.path.join(hndl.browser_nb_dir,'chemical_report_no_data.html')
         self.allrec = fh.get_df(hndl.curr_data,cols=dflt.filt_cols)
-        # self.allrec[self.allrec.bgCAS.isin(['50-00-0'])].to_parquet('tmpdf.parquet')
-        # self.allrec = pd.read_parquet('tmpdf.parquet')
+
+        # Next few lines are for testing mode; runs much faster!
+        if testing_mode:
+            self.allrec[self.allrec.bgCAS.isin(['50-00-0'])].to_parquet('tmpdf.parquet')
+            self.allrec = pd.read_parquet('tmpdf.parquet')
+
         self.allrec['TradeName_trunc'] = np.where(self.allrec.TradeName.str.len()>30,
                                                   self.allrec.TradeName.str[:30]+'...',
                                                   self.allrec.TradeName)

@@ -45,8 +45,8 @@ if __name__ == '__main__':
     #     print(f'Initializing {hndl.browser_out_dir}')
     #     init_output_space()
 
-    #_ = gen_chem.Chem_gen()
+    _ = gen_chem.Chem_gen(testing_mode=False)
     # _ = gen_disc.Disc_gen()
-    _ = gen_scope.ScopeGen()
+    #_ = gen_scope.ScopeGen()
     # _ = gen_misc_nb.Misc_notebook_gen()
     print('DONE')

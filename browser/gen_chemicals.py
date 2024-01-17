@@ -23,20 +23,20 @@ today = datetime.today()
 
 class Chem_gen():
 
-    def __init__(self, 
+    def __init__(self, workingdf,
                  caslist=[], # for testing; if not [], will only work on cas in list)
-                 testing_mode=False
+                 #testing_mode=False
     ):
         print(f'Starting Chem Browser: using repository: {hndl.curr_data}')
         self.caslist = caslist
         self.html_fn = os.path.join(hndl.browser_nb_dir,'chemical_report.html')
         self.no_data_html_fn = os.path.join(hndl.browser_nb_dir,'chemical_report_no_data.html')
-        self.allrec = fh.get_df(hndl.curr_data,cols=dflt.filt_cols)
+        self.allrec = workingdf
 
-        # Next few lines are for testing mode; runs much faster!
-        if testing_mode:
-            self.allrec[self.allrec.bgCAS.isin(['50-00-0'])].to_parquet('tmpdf.parquet')
-            self.allrec = pd.read_parquet('tmpdf.parquet')
+        # # Next few lines are for testing mode; runs much faster!
+        # if testing_mode:
+        #     self.allrec[self.allrec.bgCAS.isin(['50-00-0'])].to_parquet('tmpdf.parquet')
+        #     self.allrec = pd.read_parquet('tmpdf.parquet')
 
         self.allrec['TradeName_trunc'] = np.where(self.allrec.TradeName.str.len()>30,
                                                   self.allrec.TradeName.str[:30]+'...',
@@ -95,18 +95,20 @@ class Chem_gen():
         t = self.allrec # just a handle
         if self.caslist != []: # then do all
             t = t[t.bgCAS.isin(self.caslist)]
+        print(len(t),self.caslist)
         gb = t.groupby('bgCAS',as_index=False)[['bgIngredientName','epa_pref_name',
                                                 'IngredientName','iupac_name']].first()
         # self.make_bgCAS_name_df(gb)
-        gb = gb[:4]  #limit length for development
+        # gb = gb[:4]  #limit length for development
         lst = gb.bgCAS.unique().tolist()
         lst.sort()
         # self.make_dir_structure(lst)
         
-        for (i, row) in gb.iterrows():
+        for i, row in gb.iterrows():
             #if i>15:  # control the overall list
             #    continue # skip the rest
             chem = row.bgCAS
+            print(chem)
             ing = row.epa_pref_name
             if ing == '':
                 ing= row.bgIngredientName
@@ -159,6 +161,11 @@ class Chem_gen():
             # an_fn = f'analysis_{chem}.html'
             # shutil.copyfile(self.jupyter_fn,
                             # os.path.join(self.outdir,chem,an_fn))
+                # make the State Index
+        fulloutfn = os.path.join(hndl.browser_out_dir,'Open-FF_Chemicals.html')
+        nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'Open-FF_Chemicals.ipynb'),
+                                output_fn=fulloutfn)
+        nbh.fix_nb_title(fulloutfn,'Chemical Index')
 
     def fix_chem_html(self,cas,ing,num_recs,mxmass,fn):
         # also adds favicon to browser tab
@@ -206,67 +213,4 @@ calculable, locations, and companies and trade-named products involved when prov
         with open(self.jupyter_fn,'w',encoding='utf-8') as f:
             f.write(alltext)
 
-    # def __init__(self,repo_name = 'unknown',data_date='UNKNOWN',caslist = [],
-    #              outdir='./out/website/',data_source='bulk'):
-    #     self.repo_name = repo_name
-    #     self.data_date = data_date
-    #     self.outdir = outdir
-    #     self.data_source = data_source
-    #     self.scopedir = os.path.join(self.outdir,'scope/')
-    #     self.colabdir = os.path.join(self.outdir,'colab/')
-    #     self.statesdir = os.path.join(self.outdir,'states/')
-    #     self.operatordir = os.path.join(self.outdir,'operators/')
-    #     self.images = os.path.join(self.outdir,'images/')
-    #     self.sitemap_txt = """<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n"""
-    #     print('Output directories:')
-    #     print(f'  {self.outdir}')
-    #     print(f'  {self.scopedir}')
-    #     print(f'  {self.statesdir}')
-    #     print(f'  {self.operatordir}')
-    #     print(f'  {self.colabdir}')
-    #     print(f'  {self.images}')
-    #     self.css_fn = './work/style.css'
-    #     #self.default_empty_fn = './website_gen/default_empty.html'
-    #     self.jupyter_fn = './work/chemical_report.html'
-    #     self.no_data_fn = './work/chemical_report_no_data.html'
-    #     self.state_fn = './work/state_report.html'
-    #     self.county_fn = './work/county_report.html'
-    #     self.operator_fn = './work/operator_report.html'
-    #     self.ref_fn = './work/ref.csv'
-    #     self.filtered_fields = ['PercentHFJob', 
-    #                             'calcMass', 'DisclosureId', 'OperatorName',
-    #                             'bgOperatorName',
-    #                             'APINumber', 'TotalBaseWaterVolume',
-    #                             'TotalBaseNonWaterVolume', 'FFVersion', 
-    #                             'TVD', 'StateName', 'StateNumber', 'CountyName', 
-    #                             'CountyNumber', 'TradeName',
-    #                             'Latitude', 'Longitude', 'Projection',
-    #                             'data_source', 'bgStateName', 'bgCountyName', 
-    #                             'bgLatitude', 'bgLongitude', 'date',
-    #                             'IngredientName', 'Supplier', 'bgSupplier', 
-    #                             'Purpose', 'CASNumber', 'bgCAS','primarySupplier',
-    #                             'epa_pref_name','iupac_name',
-    #                             'bgIngredientName','in_std_filtered',
-    #                             'TradeName_trunc','Purp_trunc','has_TBWV',
-    #                             'within_total_tolerance','has_water_carrier',
-    #                             'carrier_status','massComp','massCompFlag',
-    #                             'cleanMI','loc_within_state',
-    #                             'loc_within_county','rq_lbs','bgLocationSource'] 
-    #     self.caslist = caslist
-    #     self.allrec = ana_set.Full_set(repo = hndl.repo_name,
-    #                                       force_new_creation=True,
-    #                                       outdir=work_pickles).get_set()
-    #     #!!! FILTER FOR TESTING
-    #     # print('WARNING: FILTER FOR TESTING IS ENABLED!')
-    #     # self.allrec = self.allrec[self.allrec.bgStateName=='nevada']
-    #     # ##
-        
-    #     #print(f'allrec len {len(self.allrec)}')
-    #     w_chem = ~(self.allrec.no_chem_recs)
-    #     filtered = self.allrec.in_std_filtered
-    #     self.num_events = len(self.allrec.DisclosureId.unique())
-    #     self.num_events_wo_FFV1 = len(self.allrec[w_chem].DisclosureId.unique())
-    #     self.num_events_fil = len(self.allrec[filtered].DisclosureId.unique())
-    #     self.num_events_fil_wo_FFV1 = len(self.allrec[filtered & w_chem].DisclosureId.unique())
-        
-    #     self.get_chem_infom_dataset()
+ 

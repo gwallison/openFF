@@ -41,30 +41,21 @@ def getCatLink(cas,text_to_show='Analysis'): #,use_remote=False):
     s = f'{preamble}{cas}/analysis_{cas}.html'
     return wrap_URL_in_html(s,text_to_show)
 
-# def getOpLink(opname,text_to_show='Operator details',use_remote=False,up_level=False):
-#     preamble = ''
-#     if use_remote:
-#         preamble = 'https://storage.googleapis.com/open-ff-browser/'
-#     if up_level:
-#         preamble = '../'
-#     s = f'{preamble}operators/{opname}.html'
-#     return ggmap.wrap_URL_in_html(s,text_to_show)
+def getOpLink(opname,text_to_show='Operator details'):
+    preamble = hndl.browser_root
+    s = f'{preamble}operators/{opname}.html'
+    return wrap_URL_in_html(s,text_to_show)
 
-# def getStateLink(state,text_to_show='State details',use_remote=False):
-#     preamble = 'states'
-#     if use_remote:
-#         preamble = 'https://storage.googleapis.com/open-ff-browser/states/'
-#     s = f'{preamble}/{state.lower()}.html'
-#     return ggmap.wrap_URL_in_html(s,text_to_show)
+def getStateLink(state,text_to_show='State details'):
+    preamble = 'https://storage.googleapis.com/open-ff-browser/states/'
+    s = f'{preamble}{state.lower()}.html'
+    return wrap_URL_in_html(s,text_to_show)
 
-# def getCountyLink(county,state,text_to_show='County details',use_remote=False):
-#     preamble = '.' # when coming from a state link, don't need preamble
-#     if use_remote:
-#         preamble = 'https://storage.googleapis.com/open-ff-browser/states/'
-#     name = county.lower().replace(' ','_') + '-' + state.lower().replace(' ','_')
-#     # s = f'{preamble}/{name}.csv'
-#     s = f'{preamble}/{name}.html'
-#     return ggmap.wrap_URL_in_html(s,text_to_show)
+def getCountyLink(county,state,text_to_show='County details'):
+    preamble = 'https://storage.googleapis.com/open-ff-browser/states/'
+    name = county.lower().replace(' ','_') + '-' + state.lower().replace(' ','_')
+    s = f'{preamble}/{name}.html'
+    return wrap_URL_in_html(s,text_to_show)
 
 def getDataLink(cas):
     s = f'{cas}/data.zip'

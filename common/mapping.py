@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import Point
-
+import openFF.common.text_handlers as th
 # some defaults
 final_crs = 4326 # WGS84
 proj_crs = 3857 # convert to this when calculating distances
@@ -264,6 +264,7 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
 def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,include_shape=False,area_df=None,
                      fields=['APINumber','TotalBaseWaterVolume','year','OperatorName','ingKeyPresent'],
                      aliases=['API Number','Water Volume','year','Operator','has chem recs'],
+                     include_disc_link=True,
                      width=600,height=400):
     """ClusterMarker and GeoJsonPopup dont work together, so we do it by hand"""
     # only the first item of the area df is used.  Meant to be a simple outline, like a county line
@@ -276,7 +277,7 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,i
     if include_shape:
         #print('including shape!')
         area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
-        m = folium.Map(tiles="openstreetmap",location=area, zoom_start=10).add_to(f)
+        m = folium.Map(tiles="openstreetmap",location=area, zoom_start=7).add_to(f)
         
         # show area
         style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
@@ -304,18 +305,16 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,i
                                                             data.bgLatitude),
                            crs=final_crs)
     for i,row in gdf.iterrows():
-        
-        # s = '| | value |\n |---|---|\n'
         name = []
         val = []
         for j,field in enumerate(fields):
             name.append(f"{aliases[j]}:")
             val.append(f'{row[field]}')
-            # s+=f'| **{aliases[j]}:** | {row[field]} |\n'
-            # s+= f"<b>{aliases[j]}:</b> {row[field]}<br>"
         tmpdf = pd.DataFrame({'value':val},index=name)
         html = tmpdf.to_html(header=False,
                              classes="table table-striped table-hover table-condensed table-responsive")
+        if inc_disc_link:
+            html += '<br>'+ th.getDisclosureLink(row.APINumber,row.DisclosureId,'Disclosure link') 
         popup = folium.Popup(html)
         folium.Marker(
             location=[row.bgLatitude,row.bgLongitude],

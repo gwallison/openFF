@@ -9,11 +9,19 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import openFF.common.handles as hndl 
+import openFF.common.file_handlers as fh 
 
 import openFF.browser.gen_disclosures as gen_disc
 import openFF.browser.gen_chemicals as gen_chem
+import openFF.browser.gen_states as gen_states
+import openFF.browser.gen_operators as gen_operators
 import openFF.browser.gen_misc_nb as gen_misc_nb
 import openFF.browser.gen_scope as gen_scope
+
+####
+testing_mode = True
+remake_workingdf = False
+####
 
 def erase_output_space(dir = hndl.browser_out_dir):
     # CAREFUL: This removes everything the the browser_out_dir!
@@ -34,9 +42,34 @@ def init_output_space(dir = hndl.browser_out_dir):
             #                 os.path.join(self.outdir,'style.css'))
 
     
-
-
- 
+def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf):
+    if remake_workingdf:        
+        if testing_mode:
+            if remake_workingdf:
+                print('-- creating new test workingdf')
+                df = fh.get_df(os.path.join(hndl.curr_repo_dir,'full_df.parquet'))
+                c1 = df.bgCAS == '50-00-0'
+                c2 = df.bgStateName == 'pennsylvania'
+                c3 = df.bgOperatorName == 'cnx'
+                df = df[c2&c3]
+                df.to_parquet(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
+            workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
+        else:
+            workdf = fh.get_df(os.path.join(hndl.curr_repo_dir,'full_df.parquet'))
+        ########## Lots of add-ins...
+        # percent of valid cas that are proprietary (disclosure level)
+        workdf['is_proprietary'] = workdf.bgCAS=='proprietary'
+        gb1 = workdf.groupby('DisclosureId',as_index=False)[['is_proprietary','is_valid_cas']].sum()
+        gb1.fillna(0,inplace=True)
+        gb1['perc_proprietary'] = gb1.is_proprietary/gb1.is_valid_cas *100
+        workdf = workdf.merge(gb1[['DisclosureId','perc_proprietary']],
+                            on='DisclosureId',how='left',validate='m:1')
+        # add easy to use links
+      
+        fh.save_df(workdf,(os.path.join(hndl.sandbox_dir,'workdf.parquet'))) # for the indexes
+    else:
+        workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'workdf.parquet'))
+    return workdf
 
 
 if __name__ == '__main__':
@@ -44,9 +77,11 @@ if __name__ == '__main__':
     # if c == 'erase':
     #     print(f'Initializing {hndl.browser_out_dir}')
     #     init_output_space()
-
-    _ = gen_chem.Chem_gen(testing_mode=False)
-    # _ = gen_disc.Disc_gen()
-    #_ = gen_scope.ScopeGen()
-    # _ = gen_misc_nb.Misc_notebook_gen()
+    workingdf = prep_working_df()
+    _ = gen_chem.Chem_gen(workingdf)
+    # _ = gen_states.State_gen(workingdf)
+    # _ = gen_operators.Operator_gen(workingdf)
+    # _ = gen_disc.Disc_gen(workingdf)
+    # _ = gen_scope.ScopeGen(workingdf)
+    # _ = gen_misc_nb.Misc_notebook_gen(workingdf)
     print('DONE')

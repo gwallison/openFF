@@ -18,9 +18,9 @@ today = datetime.today()
 
 class ScopeGen():
 
-    def __init__(self):
+    def __init__(self,workingdf):
         print(f'Compiling Scope data using repository: {hndl.curr_data}')
-        self.allrec = fh.get_df(hndl.curr_data)
+        self.allrec = workingdf
         # make dir within browser_out if not already there
         try:
             os.mkdir(hndl.browser_scope_dir)

@@ -314,7 +314,7 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,i
         html = tmpdf.to_html(header=False,
                              classes="table table-striped table-hover table-condensed table-responsive")
         if inc_disc_link:
-            html += '<br>'+ th.getDisclosureLink(row.APINumber,row.DisclosureId,'Disclosure link') 
+            html += '<br><h4>'+ th.getDisclosureLink(row.APINumber,row.DisclosureId,'Disclosure link') + '</h4>'
         popup = folium.Popup(html)
         folium.Marker(
             location=[row.bgLatitude,row.bgLongitude],

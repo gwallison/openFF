@@ -43,12 +43,14 @@ def getCatLink(cas,text_to_show='Analysis'): #,use_remote=False):
 
 def getOpLink(opname,text_to_show='Operator details'):
     preamble = hndl.browser_root
-    s = f'{preamble}operators/{opname}.html'
+    oneword = opname.replace(' ','_')
+    s = f'{preamble}operators/{oneword}.html'
     return wrap_URL_in_html(s,text_to_show)
 
 def getStateLink(state,text_to_show='State details'):
     preamble = 'https://storage.googleapis.com/open-ff-browser/states/'
-    s = f'{preamble}{state.lower()}.html'
+    oneword = state.lower().replace(' ','_')
+    s = f'{preamble}{oneword}.html'
     return wrap_URL_in_html(s,text_to_show)
 
 def getCountyLink(county,state,text_to_show='County details'):

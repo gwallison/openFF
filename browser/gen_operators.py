@@ -47,7 +47,7 @@ class Operator_gen():
 
         print(f'Number of operators to be processed: {len(oplst)}')
         for op in oplst:
-            workdf = t[t.bgOperatorName==op]
+            workdf = t[t.bgOperatorName==op].copy()
             workdf['location_error'] = workdf.loc_name_mismatch|\
                                        (workdf.loc_within_county=='NO')|\
                                        (workdf.loc_within_state=='NO')|\
@@ -67,7 +67,8 @@ class Operator_gen():
             gb.to_parquet(os.path.join(hndl.sandbox_dir,'operator.parquet'),index=False)
             #workdf.to_parquet(os.path.join(hndl.sandbox_dir,'operator.parquet'),index=False)
             print(f'** {op:<40} **  n recs: {len(workdf):>10,}')
-            fulloutfn = os.path.join(hndl.browser_out_dir,'operators',f'{op}.html')
+            oneword = op.replace(' ','_')
+            fulloutfn = os.path.join(hndl.browser_out_dir,'operators',f'{oneword}.html')
             nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'operator_report.ipynb'),
                                     output_fn=fulloutfn)
             self.fix_operator_title(fulloutfn,op)

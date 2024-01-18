@@ -83,6 +83,16 @@ def get_table(repo_dir=hndl.repo_dir, repo_name=hndl.repo_name,tname='disclosure
     return pd.read_parquet(os.path.join(repo_dir,repo_name,'pickles',tname+'.parquet'),
                            columns=cols)
 
+def get_repo_tables(pkl_dir=hndl.curr_repo_pkl_dir):
+    tables = {}
+    print(f'Pulling repo tables from: {pkl_dir}')
+    flst = os.listdir(pkl_dir)
+    for fn in flst:
+        if fn[-8:] == '.parquet':
+            name = fn[:-8]
+            tables[name] = pd.read_parquet(os.path.join(pkl_dir,fn))
+    return tables
+    
 #####################  Interacting with remote files ##############
 
 def get_size_of_url_file(url):

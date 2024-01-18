@@ -19,7 +19,7 @@ import openFF.browser.gen_misc_nb as gen_misc_nb
 import openFF.browser.gen_scope as gen_scope
 
 ####
-testing_mode = True
+testing_mode = False
 remake_workingdf = False
 ####
 
@@ -48,10 +48,11 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
             if remake_workingdf:
                 print('-- creating new test workingdf')
                 df = fh.get_df(os.path.join(hndl.curr_repo_dir,'full_df.parquet'))
-                c1 = df.bgCAS == '50-00-0'
-                c2 = df.bgStateName == 'pennsylvania'
-                c3 = df.bgOperatorName == 'cnx'
-                df = df[c2&c3]
+                # c1 = df.bgCAS.isin(['50-00-0','proprietary','7732-18-5','71-43-2'])
+                c2 = df.bgCountyName == 'monroe'
+                c1a = df.bgStateName == 'ohio'
+                c3 = df.bgOperatorName == 'antero'
+                df = df[c1a & c2 & c3]
                 df.to_parquet(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
             workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
         else:
@@ -78,10 +79,10 @@ if __name__ == '__main__':
     #     print(f'Initializing {hndl.browser_out_dir}')
     #     init_output_space()
     workingdf = prep_working_df()
-    _ = gen_chem.Chem_gen(workingdf)
+    # _ = gen_chem.Chem_gen(workingdf)
     # _ = gen_states.State_gen(workingdf)
     # _ = gen_operators.Operator_gen(workingdf)
-    # _ = gen_disc.Disc_gen(workingdf)
+    _ = gen_disc.Disc_gen(workingdf)
     # _ = gen_scope.ScopeGen(workingdf)
-    # _ = gen_misc_nb.Misc_notebook_gen(workingdf)
+    # _ = gen_misc_nb.MiscNbGen(workingdf)
     print('DONE')

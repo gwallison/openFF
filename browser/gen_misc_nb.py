@@ -19,12 +19,30 @@ today = datetime.today()
 
 class MiscNbGen():
 
-    def __init__(self, 
-                 nblist=[], # for testing; if not [], will only work on notebooks in list)
-    ):
+    def __init__(self,workingdf):
+        self.df = workingdf
         print(f'Compiling Misc Notebooks using repository: {hndl.curr_data}')
-        self.fulllist = ['Open-FF_Scope_and_Aggregate_Stats']
-        self.caslist = caslist
-        self.html_fn = os.path.join(hndl.browser_nb_dir,'chemical_report.html')
-        self.no_data_html_fn = os.path.join(hndl.browser_nb_dir,'chemical_report_no_data.html')
-        self.allrec = fh.get_df(hndl.curr_data,cols=dflt.filt_cols)
+        # the following list is in tuples of (file basenane,page title)
+        self.fulllist = [('Open-FF_Catalog','Data Browser'),
+                        ('Open-FF_Scope_and_Aggregate_Stats','Big Picture Analysis'),
+                        ('Ohio_Drilling_Chemicals','Ohio Drilling Chemicals'),
+                        ('Open-FF_Auxillary_Data','Auxillary Data'),
+                        ('Open-FF_CASNumber_and_IngredientName','CASRN & IngredientName pairs'),
+                        ('Open-FF_CompanyNames','Company Name Table'),
+                        ('Open-FF_Data_Dictionary','Data Dictionary'),
+                        ('Open-FF_Synonyms','Chemical Name Synonyms'),
+                        ('Open-FF_TradeNames','Trade Names and Composition Data'),
+                        ('Short_description_of_Open-FF','Short description of Open-FF'),
+                        ('FracFocus_Holes','Holes in FracFocus')
+                        ]
+        self.make_all_nb()
+
+    def make_all_nb(self):
+        for tup in self.fulllist:
+            print(f'Compiling notebook: {tup[0]}')
+            nb_fn = os.path.join(hndl.browser_nb_dir,tup[0]+'.ipynb')
+            outfn = os.path.join(hndl.browser_out_dir,tup[0]+'.html')
+            nbh.make_notebook_output(nb_fn=nb_fn,output_fn=outfn)
+            nbh.fix_nb_title(outfn,tup[1])
+
+    

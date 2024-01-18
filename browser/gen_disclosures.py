@@ -17,11 +17,11 @@ today = datetime.today()
 
 class Disc_gen():
     
-    def __init__(self):
+    def __init__(self,workingdf):
         self.disc_index_fn = os.path.join(hndl.browser_nb_dir,'Disclosure_Index.ipynb')
         self.disc_dictionary_fn = os.path.join(hndl.browser_nb_dir,'disclosure_include.ipynb')
         self.local_includes = hndl.local_includes
-        self.allrec = fh.get_df(hndl.curr_data)
+        self.allrec = workingdf
         # self.allrec = fh.get_table(repo_dir=hndl.repo_dir,
         #                             tname='chemrecs',
         #                         cols = ['TradeName','Purpose','Supplier','bgSupplier',
@@ -39,8 +39,8 @@ class Disc_gen():
         self.alldisc = fh.get_table(repo_dir=hndl.repo_dir,
                                 tname='disclosures')
         ##!! TESTING: FILTER
-        self.alldisc = self.alldisc[(self.alldisc.bgStateName=='pennsylvania')&
-                                    (self.alldisc.bgCountyName.isin(['jefferson']))]
+        self.alldisc = self.alldisc[(self.alldisc.bgStateName=='ohio')] #&
+                                    # (self.alldisc.bgCountyName.isin(['jefferson']))]
         self.alldisc = pd.merge(self.alldisc,gb,on='DisclosureId',how='left')     
         # print(self.alldisc.columns)   
         self.alldisc['st_cnty'] = self.alldisc.api10.str[:5]
@@ -159,17 +159,25 @@ class Disc_gen():
                 self.move_and_rename(apicode,upk)
         self.make_disc_include_page()
  
+    # def make_disc_include_page(self):
+    #     # make the disclosure 'include' file for the end of each disclosure:
+    #     self.chem_disc.to_parquet(os.path.join(self.tmp,'chem_disc.parquet'))
+    #     name = self.disc_dictionary_fn[:-6] + '.html'
+    #     outfn = os.path.join(hndl.browser_out_dir,os.path.basename(name))
+    #     nbh.make_notebook_output(nb_fn=name,output_fn=outfn, basic_output=False)
     def make_disc_include_page(self):
         # make the disclosure 'include' file for the end of each disclosure:
         self.chem_disc.to_parquet(os.path.join(self.tmp,'chem_disc.parquet'))
         name = self.disc_dictionary_fn[:-6] + '.html'
-        outfn = os.path.join(hndl.browser_out_dir,os.path.basename(name))
-        nbh.make_notebook_output(nb_fn=name,output_fn=outfn, basic_output=False)
+        outfn = os.path.join(hndl.browser_out_dir,'disclosures',os.path.basename(name))
+        nbh.make_notebook_output(nb_fn=self.disc_dictionary_fn,
+                                 output_fn=outfn,
+                                 basic_output=False)
  
     def make_disc_index_page(self):
         name = self.disc_index_fn[:-6] + '.html'
         outfn = os.path.join(hndl.browser_out_dir,os.path.basename(name))
-        nbh.make_notebook_output(nb_fn=name,output_fn=outfn, basic_output=False)
+        nbh.make_notebook_output(nb_fn=self.disc_index_fn,output_fn=outfn, basic_output=False)
         # s= f'jupyter nbconvert --no-input --template=basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_index_fn} --to=html --output-dir={hndl.browser_out_dir}'
         # subprocess.run(s)
         nbh.compile_nb_page(fn=outfn,

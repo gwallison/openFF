@@ -152,8 +152,6 @@ class Chem_gen():
                 # self.sitemap_txt += f'\t<url>\n\t\t<loc>{chem}/analysis_{chem}.html</loc>\n\t</url>\n'
             # save data to file for later notebook access
             tt.to_parquet(os.path.join(hndl.sandbox_dir,'data.parquet'),index=False)
-            # tt.to_csv(os.path.join(self.outdir,chem,'data.zip'),index=False,
-            #         compression={'method': 'zip', 'archive_name': 'data.csv'})
             
             nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'chemical_report.ipynb'),
                                     output_fn=fulloutfn)
@@ -190,9 +188,9 @@ calculable, locations, and companies and trade-named products involved when prov
         with open(fn,'w',encoding='utf-8') as f:
             f.write(alltext)
             
-    def fix_no_data_html(self,cas,ing,num_recs,mxmass):
+    def fix_no_data_html(self,cas,ing,num_recs,mxmass,fn):
         # also adds favicon to browser tab
-        with open(self.no_data_fn,'r',encoding='utf-8') as f:
+        with open(fn,'r',encoding='utf-8') as f:
             alltext = f.read()
         alltext  = alltext.replace('<title>chemical_report</title>',
                                 f'<title>{cas}: Open-FF report</title>\n<link rel="icon" href="https://storage.googleapis.com/open-ff-common/favicon.ico">',1)
@@ -210,7 +208,7 @@ calculable, locations, and companies and trade-named products involved when prov
         
         alltext = alltext.replace('<head>',
                                 f'<head>\n<meta name="description" content="{des}">\n')
-        with open(self.jupyter_fn,'w',encoding='utf-8') as f:
+        with open(fn,'w',encoding='utf-8') as f:
             f.write(alltext)
 
  

@@ -39,8 +39,9 @@ class Disc_gen():
         self.alldisc = fh.get_table(repo_dir=hndl.repo_dir,
                                 tname='disclosures')
         ##!! TESTING: FILTER
-        self.alldisc = self.alldisc[(self.alldisc.bgStateName=='ohio')] #&
+        # self.alldisc = self.alldisc[(self.alldisc.bgStateName=='ohio')] #&
                                     # (self.alldisc.bgCountyName.isin(['jefferson']))]
+
         self.alldisc = pd.merge(self.alldisc,gb,on='DisclosureId',how='left')     
         # print(self.alldisc.columns)   
         self.alldisc['st_cnty'] = self.alldisc.api10.str[:5]

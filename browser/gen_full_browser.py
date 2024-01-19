@@ -19,7 +19,7 @@ import openFF.browser.gen_misc_nb as gen_misc_nb
 import openFF.browser.gen_scope as gen_scope
 
 ####
-testing_mode = True
+testing_mode = False
 remake_workingdf = True
 ####
 

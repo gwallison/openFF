@@ -11,8 +11,11 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from openFF.common.file_handlers import save_df
-from openFF.common.handles import pic_dir
+import openFF.common.file_handlers as fh
+import openFF.common.handles as hndl
+
+# from openFF.common.file_handlers import save_df
+# from openFF.common.handles import pic_dir
 
 class Process_SDF():
     def __init__(self,fn):
@@ -84,7 +87,7 @@ def sdf_extract(ci_source,out_dir):
         assert 0==1,'Code only setup for exactly one file'
     pSDF = Process_SDF(to_process[0])
     pSDF.process_all_lines()
-    save_df(pSDF.df,os.path.join(out_dir,hndl.ci_summ_fn))
+    fh.save_df(pSDF.df,os.path.join(out_dir,hndl.ci_summ_fn))
     
 ######################  Used in catalog routines ############
 ci_dir = r"C:\MyDocs\OpenFF\src\testing\chemInfo"
@@ -132,13 +135,13 @@ def make_fingerprint(df,casrn = '107-19-7'):
     t = df[df.CASRN==casrn].drop(['DTXSID','CASRN','Name'],axis=1)
     t = t.fillna('ND')
     #categ = ['VH','H','M','L','I','ND']
-    im_dic = {'I':os.path.join(pic_dir,'ci_icons','grey_question.png'),
-              'ND':os.path.join(pic_dir,'ci_icons','grey_square.png'),
-              'H':os.path.join(pic_dir,'ci_icons','orange_exclamation.png'),
-              'VH':os.path.join(pic_dir,'ci_icons','red_skull.png'),
-              'M':os.path.join(pic_dir,'ci_icons','yellow-minus.png'),
-              'L':os.path.join(pic_dir,'ci_icons','green-minus.png'),
-              'noval':os.path.join(pic_dir,'ci_icons','brown-x.png')}
+    im_dic = {'I':os.path.join(hndl.pic_dir,'ci_icons','grey_question.png'),
+              'ND':os.path.join(hndl.pic_dir,'ci_icons','grey_square.png'),
+              'H':os.path.join(hndl.pic_dir,'ci_icons','orange_exclamation.png'),
+              'VH':os.path.join(hndl.pic_dir,'ci_icons','red_skull.png'),
+              'M':os.path.join(hndl.pic_dir,'ci_icons','yellow-minus.png'),
+              'L':os.path.join(hndl.pic_dir,'ci_icons','green-minus.png'),
+              'noval':os.path.join(hndl.pic_dir,'ci_icons','brown-x.png')}
 
     out = t.values.flatten().tolist()
     
@@ -161,7 +164,7 @@ def make_fingerprint(df,casrn = '107-19-7'):
                            # bboxprops = dict(facecolor='wheat',boxstyle='round',color='black'))
         ax.add_artist(ab)
         ax.set_facecolor('black')
-    plt.savefig(os.path.join(pic_dir,casrn,'haz_fingerprint.png'))    
+    plt.savefig(os.path.join(hndl.pic_dir,casrn,'haz_fingerprint.png'))    
 
 def make_all_fingerprints(caslst,hazdf):
     cas_ignore = ['proprietary','ambiguousID','sysAppMeta','conflictingID']

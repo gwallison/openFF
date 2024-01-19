@@ -82,8 +82,13 @@ class final_test():
         assert self.df[self.df.massCompFlag].calcMass.isna().all(), 'No calcMass when the massComp flag is True'
         assert self.df[~self.df.within_total_tolerance].calcMass.isna().all(), 'All calcMass where percentage is out of tolerance should be NaN'        
 
+    def ingredientsId_test(self):
+        self.print_stage('Confirm that IngredientsId are unique')
+        assert self.df[self.df.IngredientsId.notna()].IngredientsId.duplicated().sum()==0, 'Duplicates in IngredientsId'
+
     def run_all_tests(self):
         self.reckey_test()
+        self.ingredientsId_test()
         self.bgCAS_test()
         self.company_test()
         self.duplicate_test()

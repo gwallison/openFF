@@ -28,7 +28,7 @@ class MiscNbGen():
                         ('Ohio_Drilling_Chemicals','Ohio Drilling Chemicals'),
                         ('Open-FF_Auxillary_Data','Auxillary Data'),
                         ('Open-FF_CASNumber_and_IngredientName','CASRN & IngredientName pairs'),
-                        ('Open-FF_CompanyNames','Company Name Table'),
+                        ('Open-FF_Company_Names','Company Name Table'),
                         ('Open-FF_Data_Dictionary','Data Dictionary'),
                         ('Open-FF_Synonyms','Chemical Name Synonyms'),
                         ('Open-FF_TradeNames','Trade Names and Composition Data'),

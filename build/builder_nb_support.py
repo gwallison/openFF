@@ -19,6 +19,8 @@ from IPython.display import Markdown as md
 from openFF.common.file_handlers import store_df_as_csv, save_df 
 from openFF.common.file_handlers import get_df, get_ext_master_dic
 from openFF.common.nb_helper import completed, make_sandbox
+import openFF.common.handles as hndl
+
 
 use_itables = True
 if use_itables:

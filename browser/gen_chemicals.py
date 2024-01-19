@@ -108,7 +108,6 @@ class Chem_gen():
             #if i>15:  # control the overall list
             #    continue # skip the rest
             chem = row.bgCAS
-            print(chem)
             ing = row.epa_pref_name
             if ing == '':
                 ing= row.bgIngredientName

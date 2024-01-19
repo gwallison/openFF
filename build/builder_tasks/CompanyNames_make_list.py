@@ -86,6 +86,7 @@ def add_new_to_Xlate(rawdf,ref_dir,out_dir):
 def is_company_complete(work_dir):
     try:
         companies = get_new_xlate_df(work_dir)
+        print(len(companies))
         c1 = companies.xlateName.isna().sum()==0
         c2 = companies.status.isna().sum()==0
         c3 = companies.first_date.isna().sum()==0
@@ -95,6 +96,6 @@ def is_company_complete(work_dir):
             print('Apparent incomplete companies_xlate_modified.csv file!')
         return (c1&c2&c3)    
     except:
-        print('No file named "company_xlate_modified.csv" found.  Assuming you want to proceed...')
-        return True
+        print('Something wrong with the company_xlate_modified file')
+        return False
  

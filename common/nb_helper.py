@@ -2,21 +2,17 @@ import pandas as pd
 import os
 import subprocess
 
-from openFF.common.handles import browser_root
-#################### utils used to compile or run notebooks  ############
-
+import openFF.common.handles as hndl
 
 #################### utils used within notebooks ########################
 
-# def show_done(txt='Completed'):
-#     print(txt)
-
 def make_sandbox(name='sandbox'):
     # make output location
+    fn = os.path.join(hndl.sandbox_dir,name)
     try:
-        os.mkdir(name)
+        os.mkdir(fn)
     except:
-        print(f'{name} already exists')
+        print(f'{fn} already exists')
 
 def add_favicon(fn):
     # also adds favicon to browser tab
@@ -63,7 +59,7 @@ def make_notebook_output(nb_fn,output_fn, basic_output=False):
     b_text = ''
     if basic_output:
         b_text = ' --template=basic '
-    s= f'jupyter nbconvert --no-input {b_text}--ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {nb_fn} --to=html --output={out_fn[:-5]} --output-dir={out_dir}'
+    s= f'jupyter nbconvert --no-input {b_text}--ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {nb_fn} --to=html --output="{out_fn[:-5]}" --output-dir="{out_dir}"'
     subprocess.run(s)
     hide_map_warning(output_fn)
 
@@ -77,7 +73,7 @@ def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
         for i in range(link_up_level):
             local_prefix+= '../'
     if use_remote:
-        local_prefix = browser_root
+        local_prefix = hndl.browser_root
         
     logo = """<center><a href="https://frackingchemicaldisclosure.wordpress.com/" title="Open-FF home page, tour and blog"><img src="https://storage.googleapis.com/open-ff-common/openFF_logo.png" alt="openFF logo" width="100" height="100"><h2>Open-FF</h2></a></center>"""
     logoFT = """<center><a href="https://www.fractracker.org/" title="FracTracker Alliance"><img src="https://storage.googleapis.com/open-ff-common/2021_FT_logo_icon.png" alt="FracTracker logo" width="100" height="100"><br><h4>Sponsored by FracTracker Alliance</h4></a></center>"""

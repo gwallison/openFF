@@ -38,7 +38,7 @@ warnings.filterwarnings('ignore')
 
 
 
-def showHeader(name,line2='',subt='',imglnk='',use_remote=False):
+def showHeader(name,line2='',subt='',imglnk='',use_remote=False,link_up_level=0):
     display(HTML(nbh.get_common_header(name,line2=line2,subtitle=subt,imagelink=imglnk,
                                    repo_name=hndl.repo_name,cat_creation_date=hndl.cat_creation_date,
-                                           link_up_level=2,use_remote=use_remote)))
+                                           link_up_level=link_up_level,use_remote=use_remote)))

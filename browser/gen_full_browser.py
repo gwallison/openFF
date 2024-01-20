@@ -10,6 +10,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import openFF.common.handles as hndl 
 import openFF.common.file_handlers as fh 
+import openFF.common.nb_helper as nbh
 
 import openFF.browser.gen_disclosures as gen_disc
 import openFF.browser.gen_chemicals as gen_chem
@@ -19,8 +20,8 @@ import openFF.browser.gen_misc_nb as gen_misc_nb
 import openFF.browser.gen_scope as gen_scope
 
 ####
-testing_mode = False
-remake_workingdf = True
+testing_mode = True
+remake_workingdf = False
 ####
 
 def erase_output_space(dir = hndl.browser_out_dir):
@@ -48,11 +49,11 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
             if remake_workingdf:
                 print('-- creating new test workingdf')
                 df = fh.get_df(os.path.join(hndl.curr_repo_dir,'full_df.parquet'))
-                c2 = df.bgCAS.isin(['1319-33-1','50-00-0','proprietary','7732-18-5','71-43-2'])
-                # c2 = df.bgCountyName == 'monroe'
+                c3 = df.bgCAS.isin(['1319-33-1','50-00-0','proprietary','7732-18-5','71-43-2'])
+                c2 = df.bgCountyName == 'monroe'
                 c1 = df.bgStateName == 'ohio'
-                # c3 = df.bgOperatorName == 'antero'
-                df = df[c1 & c2 ]
+                c4 = df.bgOperatorName == 'antero'
+                df = df[c1 & c2 & c3 & c4]
                 df.to_parquet(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
             workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
         else:
@@ -78,6 +79,7 @@ if __name__ == '__main__':
     if c == 'erase':
         print(f'Initializing {hndl.browser_out_dir}')
         init_output_space()
+    nbh.make_sandbox()
     workingdf = prep_working_df()
     _ = gen_chem.Chem_gen(workingdf)
     _ = gen_states.State_gen(workingdf)

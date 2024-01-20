@@ -22,22 +22,18 @@ class Disc_gen():
         self.disc_dictionary_fn = os.path.join(hndl.browser_nb_dir,'disclosure_include.ipynb')
         self.local_includes = hndl.local_includes
         self.allrec = workingdf
-        # self.allrec = fh.get_table(repo_dir=hndl.repo_dir,
-        #                             tname='chemrecs',
-        #                         cols = ['TradeName','Purpose','Supplier','bgSupplier',
-        #                                 'CASNumber','bgCAS','IngredientName',
-        #                                 'PercentHighAdditive','PercentHFJob','calcMass','cleanMI',
-        #                                 'is_water_carrier','dup_rec',
-        #                                 'DisclosureId','ingKeyPresent']) 
+        self.discl_fields = fh.get_table(repo_dir=hndl.repo_dir,
+                                tname='disclosures').columns.tolist()
         
         # identify disclosures without chemicals
         gb = self.allrec[['DisclosureId','ingKeyPresent']]\
             .groupby('DisclosureId',as_index=False)['ingKeyPresent'].any()\
             .rename({'ingKeyPresent':'has_ingredients'},axis=1)
         
-        # print(' -- fetching discloures')
-        self.alldisc = fh.get_table(repo_dir=hndl.repo_dir,
-                                tname='disclosures')
+        # get disclosure-level fields
+        self.alldisc = workingdf.groupby('DisclosureId',as_index=False)[self.discl_fields].first()
+        # self.alldisc = fh.get_table(repo_dir=hndl.repo_dir,
+        #                         tname='disclosures')
         ##!! TESTING: FILTER
         # self.alldisc = self.alldisc[(self.alldisc.bgStateName=='ohio')] #&
                                     # (self.alldisc.bgCountyName.isin(['jefferson']))]
@@ -182,7 +178,7 @@ class Disc_gen():
         # s= f'jupyter nbconvert --no-input --template=basic --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {self.disc_index_fn} --to=html --output-dir={hndl.browser_out_dir}'
         # subprocess.run(s)
         nbh.compile_nb_page(fn=outfn,
-                        header = nbh.get_common_header(title='Open-FF Disclosure Index',repo_name=hndl.repo_name,
-                                                   cat_creation_date=hndl.cat_creation_date),
+                        # header = nbh.get_common_header(title='Open-FF Disclosure Index',repo_name=hndl.repo_name,
+                        #                            cat_creation_date=hndl.cat_creation_date),
                         nb_title='Disclosure Index of Open-FF')
  

@@ -6,13 +6,12 @@ import openFF.common.handles as hndl
 
 #################### utils used within notebooks ########################
 
-def make_sandbox(name='sandbox'):
+def make_sandbox(dirname=hndl.sandbox_dir):
     # make output location
-    fn = os.path.join(hndl.sandbox_dir,name)
     try:
-        os.mkdir(fn)
+        os.mkdir(dirname)
     except:
-        print(f'{fn} already exists')
+        print(f'{dirname} already exists')
 
 def add_favicon(fn):
     # also adds favicon to browser tab

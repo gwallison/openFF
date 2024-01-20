@@ -20,8 +20,8 @@ import openFF.browser.gen_misc_nb as gen_misc_nb
 import openFF.browser.gen_scope as gen_scope
 
 ####
-testing_mode = True
-remake_workingdf = False
+testing_mode = False
+remake_workingdf = True
 ####
 
 def erase_output_space(dir = hndl.browser_out_dir):

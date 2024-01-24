@@ -23,6 +23,7 @@ import openFF.common.mapping as maps
 # from openFF.common.display_tables import make_compact_chem_summary
 import openFF.common.chem_list_summary as chemls
 import openFF.common.text_handlers as th
+import openFF.common.make_pdf_report as mpr
 from ipywidgets import widgets
 
 
@@ -97,7 +98,8 @@ def show_well_info(apis):
     # save the full data set from these wells to allow users to download
     t.to_csv('all_data_for_selected_wells.csv')
     t.api10 = t.apply(lambda x: make_disc_link(x),axis=1)
-    dgb = t.groupby(['DisclosureId'],as_index=False)[['date','api10','WellName','OperatorName','TotalBaseWaterVolume','ingKeyPresent']].first()
+    dgb = t.groupby(['DisclosureId'],as_index=False)[['date','api10','APINumber','WellName',
+                                                      'OperatorName','TotalBaseWaterVolume','ingKeyPresent']].first()
     iShow(dgb[['date','OperatorName','api10','WellName','TotalBaseWaterVolume','ingKeyPresent']])
     return t, dgb
 
@@ -120,9 +122,17 @@ def show_chem_summary(c_obj):
     iShow(chem_df.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}],
           paging=False)
     
-def save_chem_html_summary(c_obj):
-    chem_html = c_obj.get_html_table(colset='colab_v1')
-    nbh.compile_std_page('chem_summ.html',bodytext=[chem_html])
+def save_pdf_report(well_list):
+    from reportlab.platypus import Paragraph #, Table, TableStyle
+    rgen = mpr.Report_gen(outfn = 'report_test.pdf')
+    well_list['Job End Date'] = well_list.date.dt.strftime('%Y-%m-%d')
+    well_list = well_list.sort_values('date')
+    rgen.add_table(well_list[['Job End Date','OperatorName','APINumber','WellName','TotalBaseWaterVolume']])
+    rgen.create_doc()
+
+# def save_chem_html_summary(c_obj):
+#     chem_html = c_obj.get_html_table(colset='colab_v1')
+#     nbh.compile_std_page('chem_summ.html',bodytext=[chem_html])
     
 
 # def show_chem_summary(t):

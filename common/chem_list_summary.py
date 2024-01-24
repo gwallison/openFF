@@ -15,10 +15,15 @@ class ChemListSummary():
     def __init__(self,df,
                  summarize_by_chem=True, # False: show all records
                  ignore_duplicates=True, # just the std_filtered data
+                 #do_not_list= ['ambiguousID','sysAppMeta'] # leave out of reports
                  ):
         self.df = df
         self.summarize_by_chem = summarize_by_chem
         self.ignore_duplicates = ignore_duplicates
+        self.do_not_list = {'chem_index': [],
+                            'colab_v1' : ['ambiguousID','sysAppMeta'],
+                            'summary_file' : [],
+                            'single_disc': [] }
         # sets of fields to include under different circumstances
         self.colsets = {'chem_index': ['composite_id','refs','img','tot_records','num_w_mass',
                                        'mass_median','mass_90_perc',
@@ -55,7 +60,7 @@ class ChemListSummary():
         return chem_df
 
 
-    def assemble_cas_df(self): 
+    def assemble_cas_df(self,use_remote=True): 
         casdf = fh.get_df(os.path.join(hndl.curr_repo_pkl_dir,'bgCAS.parquet'))
         casingdf = fh.get_df(os.path.join(hndl.curr_repo_pkl_dir,'cas_ing.parquet'))
         gb = casingdf.groupby('bgCAS',as_index=False)['ingredCommonName'].first()
@@ -67,7 +72,7 @@ class ChemListSummary():
         cdf = casdf[casdf.bgCAS.isin(caslst)].copy()
         cdf['fingerprint'] = cdf.bgCAS.map(lambda x: th.getFingerprintImg(x))
         cdf['img'] = cdf.bgCAS.map(lambda x: th.getMoleculeImg(x,size=300))
-        cdf['chem_detail'] = cdf.bgCAS.map(lambda x: th.getCatLink(x,x))
+        cdf['chem_detail'] = cdf.bgCAS.map(lambda x: th.getCatLink(x,x,use_remote=use_remote))
         cdf['PubChem'] = cdf.bgCAS.map(lambda x: th.getPubChemLink(x)) 
         cdf['EPA_ref'] = cdf.DTXSID.map(lambda x: th.getCompToxRef(x))
         cdf['refs'] = cdf.PubChem+'<br>'+cdf.EPA_ref
@@ -82,8 +87,11 @@ class ChemListSummary():
             cdf = cdf.merge(tmp,on='bgCAS',how='left')
             
             tmp = self.df[c1&(self.df.mass>0)].groupby('bgCAS',as_index=False).size().rename({'size':'num_w_mass'},axis=1)
-            tmp.num_w_mass.fillna(0)
+            # print(tmp[tmp.num_w_mass.isna()].head())
+            # print(tmp.head())
             cdf = cdf.merge(tmp,on='bgCAS',how='left')
+            cdf.num_w_mass = cdf.num_w_mass.fillna(0)
+            # print(cdf.columns)
 
             tmp = self.df[c1].groupby('bgCAS',as_index=False)['date'].min().rename({'date':'earliest_date'},axis=1)
             cdf = cdf.merge(tmp,on='bgCAS',how='left')
@@ -112,19 +120,26 @@ class ChemListSummary():
 
     def get_storable_table(self,colset='summary_file',sortby='bgCAS'):
         assert colset in self.colsets, 'Column set not recognized'
+        assert colset in self.do_not_list, 'Column set not recognized'
         if sortby in self.colsets[colset]:
             self.chem_df = self.chem_df.sort_values(sortby)
         return self.chem_df[self.colsets[colset]]
 
-    
-    def get_display_table(self,colset='chem_index',sortby='composite_id'):
+    def prep_chem_table(self,colset,sortby):
         assert colset in self.colsets, 'Column set not recognized'
         if sortby in self.colsets[colset]:
             self.chem_df = self.chem_df.sort_values(sortby)
-        return self.chem_df[self.colsets[colset]]
 
-    def get_html_table(self,colset='chem_index'):
-        pass
+
+    def get_display_table(self,colset='chem_index',sortby='composite_id'):
+        self.prep_chem_table(colset,sortby)
+        tmp = self.chem_df[~self.chem_df.bgCAS.isin(self.do_not_list[colset])].copy()
+        return tmp[self.colsets[colset]]
+
+    def get_html_table(self,colset='chem_index',sortby='composite_id'):
+        self.prep_chem_table(colset,sortby)
+        return self.chem_df[self.colsets[colset]].to_html()
+
 
     def get_pdf_table(self,colset='chem_index'):
         pass

@@ -18,7 +18,7 @@ else:
 
 import openFF.common.handles as hndl
 import openFF.common.nb_helper as nbh 
-# from openFF.common.file_handlers import get_df_from_url
+import openFF.common.file_handlers as fh
 import openFF.common.mapping as maps 
 # from openFF.common.display_tables import make_compact_chem_summary
 import openFF.common.chem_list_summary as chemls
@@ -33,9 +33,9 @@ df_fn = os.path.join(out_dir,'full_df.parquet')
 
 ##### execute the following on run 
 nbh.make_sandbox(out_dir)
-# df = get_df_from_url(df_url,df_fn)
-# df = df[df.in_std_filtered]
-df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
+df = fh.get_df_from_url(df_url,df_fn)
+df = df[df.in_std_filtered]
+# df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
 nbh.completed()
 
 def show_lat_lon_input(latlon_str):
@@ -90,7 +90,7 @@ def get_apis(df,lat,lon,radius_in_feet=5280):
     return maps.find_wells_near_point(lat,lon,gdf,buffer_m=radius_m)
 
 def make_disc_link(row):
-    return th.getDisclosureLink(row.api10,row.DisclosureId,row.api10)
+    return th.getDisclosureLink(row.api10,row.DisclosureId,row.api10,use_remote=True)
 
 def show_well_info(apis):
     t = df[df.api10.isin(apis)].copy()
@@ -117,7 +117,13 @@ def create_chem_summary(t):
 
 def show_chem_summary(c_obj):
     chem_df = c_obj.get_display_table(colset='colab_v1')
-    iShow(chem_df.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}])
+    iShow(chem_df.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}],
+          paging=False)
+    
+def save_chem_html_summary(c_obj):
+    chem_html = c_obj.get_html_table(colset='colab_v1')
+    nbh.compile_std_page('chem_summ.html',bodytext=[chem_html])
+    
 
 # def show_chem_summary(t):
 #     # import intg_support.construct_tables_for_display as ctfd

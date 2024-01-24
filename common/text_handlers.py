@@ -87,10 +87,11 @@ def getFFLink(row, txt=''):
 
 def getDisclosureLink(APINumber,disclosureid,text_to_show='disclosure',
                       use_remote=False,up_level=True):
-    if use_remote:
-        preamble = hndl.browser_root
+    preamble = ''
     if up_level:
         preamble = '../'
+    if use_remote: # this should trump up_level
+        preamble = hndl.browser_root
     APINumber = str(APINumber)
     api5 = APINumber.replace('-','')[:5]
     s =  f'{preamble}disclosures/{api5}/{disclosureid}.html'

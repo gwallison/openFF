@@ -45,8 +45,10 @@ ext_data_master_list = os.path.join(ext_data,'ext_data_master_list.csv')
 sandbox_dir = os.path.join(root_code,'sandbox')
 local_includes = os.path.join(root_code,'includes')
 browser_root = "https://storage.googleapis.com/open-ff-browser/"
+browser_root = "https://storage.googleapis.com/browser-beta/"
 # browser_root = r"C:\MyDocs\integrated\disc_browser_spike\browser_out"
 full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
+full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo_FFV4/full_df.parquet"
 
 ######################  for Browser generation #######
 # catalog_ver = 'beta for FFV4'

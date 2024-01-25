@@ -79,7 +79,7 @@ def get_df(fn,cols=None):
         assert 1==0
 
 def get_table(repo_dir=hndl.repo_dir, repo_name=hndl.repo_name,tname='disclosures',cols=None):
-    """ Used to pull in repo's pickled tables"""
+    """ Used to pull in repo's pickled tables; works with local only!"""
     return pd.read_parquet(os.path.join(repo_dir,repo_name,'pickles',tname+'.parquet'),
                            columns=cols)
 

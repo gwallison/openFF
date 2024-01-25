@@ -35,9 +35,12 @@ df_fn = os.path.join(out_dir,'full_df.parquet')
 
 ##### execute the following on run 
 nbh.make_sandbox(out_dir)
-df = fh.get_df_from_url(df_url,df_fn)
+if hndl.curr_platform=='remote':
+    df = fh.get_df_from_url(df_url,df_fn)
+else:
+    df = fh.get_df(df_fn)
+    # df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
 df = df[df.in_std_filtered]
-# df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
 nbh.completed()
 
 def show_lat_lon_input(latlon_str):

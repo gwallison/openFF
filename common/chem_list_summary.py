@@ -62,8 +62,8 @@ class ChemListSummary():
 
     def assemble_cas_df(self,use_remote=True): 
         if hndl.curr_platform=='remote':
-            casdf = fh.get_df_from_url(hndl.repo_pickles_url+'bgCAS.parquet')
-            casingdf = fh.get_df_from_url(hndl.repo_pickles_url+'CAS_ING.parquet')
+            casdf = fh.get_df_from_url(hndl.repo_pickles_url+'bgCAS.parquet','bgCAS.parquet')
+            casingdf = fh.get_df_from_url(hndl.repo_pickles_url+'CAS_ING.parquet','CAS_ING.parquet')
         else:
             casdf = fh.get_df(os.path.join(hndl.curr_repo_pkl_dir,'bgCAS.parquet'))
             casingdf = fh.get_df(os.path.join(hndl.curr_repo_pkl_dir,'cas_ing.parquet'))

@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 from IPython.display import HTML, display
 
@@ -113,6 +114,7 @@ def show_water_used(dgb):
                  )
     ax.set_title('Water Volume (gal) used in separate fracking events',fontsize=14)
     ax = gca().yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    plt.savefig('water_use.jpg')
 
 def create_chem_summary(t):
     return chemls.ChemListSummary(t,summarize_by_chem=True, ignore_duplicates=True)
@@ -123,11 +125,17 @@ def show_chem_summary(c_obj):
           paging=False)
     
 def save_pdf_report(well_list):
-    from reportlab.platypus import Paragraph #, Table, TableStyle
-    rgen = mpr.Report_gen(outfn = 'report_test.pdf')
+    from reportlab.platypus import Paragraph, Image #, Table, TableStyle
+    rgen = mpr.Report_gen(outfn = 'report_test.pdf',custom_title='Test title',
+                          report_title='Summary of fracking chemicals disclosed')
+    rgen.add_heading('Well List',"Heading1")
     well_list['Job End Date'] = well_list.date.dt.strftime('%Y-%m-%d')
     well_list = well_list.sort_values('date')
     rgen.add_table(well_list[['Job End Date','OperatorName','APINumber','WellName','TotalBaseWaterVolume']])
+    rgen.add_spacer()
+    rgen.add_heading('Water use',"Heading1")
+    rgen.add_image(Image('water_use.jpg',width=400,height=300))
+
     rgen.create_doc()
 
 # def save_chem_html_summary(c_obj):

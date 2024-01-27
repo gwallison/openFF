@@ -1,5 +1,5 @@
 """Used to create various reports, mostly for the colab notebooks"""
-
+import os
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -8,6 +8,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.rl_config import defaultPageSize
+import requests
+from io import BytesIO
 
 
 import openFF.common.handles as hndl
@@ -23,14 +25,15 @@ class Report_gen():
         self.gen_title_page()
 
     def gen_title_page(self):
-        self.add_spacer(2)
-        self.add_heading(self.custom_title,"Title")
-        self.add_spacer(2)
-        self.add_heading(self.report_title,"Title")
-        self.story.append(PageBreak())
+        l = []
+        l.append(self.make_spacer(2))
+        l.append(self.make_paragraph(self.custom_title,"Title"))
+        l.append(self.make_spacer(2))
+        l.append(self.make_paragraph(self.report_title,"Title"))
+        l.append(PageBreak())
+        self.add_list_to_story(l)
         
- 
-
+        
     def first_page(self,canvas,document):
         PAGE_HEIGHT = defaultPageSize[1]
         PAGE_WIDTH = defaultPageSize[0]
@@ -57,33 +60,37 @@ class Report_gen():
         data_list = df.values.tolist()
         return [column_names] + data_list
 
-    def add_spacer(self,num=1):
-        spacer = Spacer(1,0.5*inch)
-        for i in range(num):
-            self.story.append(spacer)
+    def make_spacer(self,num=1):
+        return Spacer(1,0.5*inch*num)
 
-    def add_table(self,df):
-        data = self.convert_df(df)
-        table = Table(data, 
-                      style = [('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Center header
+    def make_simple_row(self,data,style=None):
+        t = Table(data)
+        if not style:
+            t.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
+        return t
+    
+    def make_table(self,df,convert=True):
+        data = df
+        if convert:
+            data = self.convert_df(df)
+        return Table(data, 
+                      style = [('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center 
                                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),  # Highlight header row
                                ('GRID',(0,0),(-1,-1),0.5,colors.black)
                                 ])
-        self.story.append(table)
 
-    def add_paragraph(self,txt):
-        para = Paragraph(txt,style=self.styles["Normal"])
-        self.story.append(para)
+    # def add_paragraph(self,txt):
+    #     para = Paragraph(txt,style=self.styles["Normal"])
+    #     self.story.append(para)
 
-    def add_heading(self,txt,kind="Heading1"):
+    def make_paragraph(self,txt,kind="Normal"):
         # styles available: Heading1-6, Bullet, Code, Definition, Normal, Title, OrderedList, UnorderedList
-        para = Paragraph(txt,style=self.styles[kind])
-        self.story.append(para)
-        
-    def add_image(self,img):
-        # img = Image(fn)
-        self.story.append(img)
-        
+        return Paragraph(txt,style=self.styles[kind])
+  
+    def add_list_to_story(self,lst):
+        for item in lst:
+            self.story.append(item)
+       
     def create_doc(self):
         doc = SimpleDocTemplate(self.outfn, pagesize=letter,
                             rightMargin=72,
@@ -93,5 +100,24 @@ class Report_gen():
         doc.build(self.story,onFirstPage=self.first_page,onLaterPages=self.later_pages)
     
 
+############################################
+    # functions to make reportlab-friendly values from Open-FF data
+    def getMoleculeImg_RL(self,cas,width=120,height=120):
+        # uses file in openFF code repo for image, not url in browser
+        ct_path = os.path.join(hndl.pic_dir,cas,'comptoxid.png')
+        if os.path.exists(ct_path):
+            # and is not empty:  # this is the normal return
+            if os.path.getsize(ct_path) > 0:
+                return Image(ct_path,width=width,height=height)
+        return Paragraph('Image not available')
 
+    def getFingerprintImg_RL(self,cas,width=90, height=65):
+        fp_path = os.path.join(hndl.pic_dir,cas,'haz_fingerprint.png')
+        cas_ignore = ['7732-18-5','proprietary','conflictingID',
+                    'ambiguousID','sysAppMeta','cas_not_assigned']
+        if not cas in cas_ignore:
+            if os.path.exists(fp_path):
+                return Image(fp_path,width=width,height=height)
+        return self.make_paragraph(' -- ',"Normal")
+   
     

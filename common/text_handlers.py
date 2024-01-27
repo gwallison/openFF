@@ -114,6 +114,7 @@ def getPubChemLink(cas):
     return ''
 
 def getMoleculeImg(cas,size=120): #,chemical_report=False):
+    # returns an html image link
     prefix = hndl.browser_root
     # if chemical_report: prefix='../'
     ct_path = os.path.join(hndl.pic_dir,cas,'comptoxid.png')
@@ -130,6 +131,7 @@ def getMoleculeImg(cas,size=120): #,chemical_report=False):
     return "<center>Image not available</center>"
 
 def getFingerprintImg(cas,size=140):
+    # returns an html image link when possible
     # check if we have it locally, but link to the cloud version
     fp_path = os.path.join(hndl.pic_dir,cas,'haz_fingerprint.png')
     # take comptox version if it exists
@@ -141,13 +143,6 @@ def getFingerprintImg(cas,size=140):
         return f"""<center><img src="https://storage.googleapis.com/open-ff-browser/images/{cas}/haz_fingerprint.png" onerror="this.onerror=null; this.remove();" width={size}></center>"""
     return "<center>ChemInformatics not available</center>"
     
-# def getFingerprintStatus(cas):
-#     #!!!!! Doesn't work for colab - need to pull from storage, not local
-#     fp_path = os.path.join(pic_dir,cas,'haz_fingerprint.png')
-#     # take comptox version if it exists
-#     if os.path.exists(fp_path):
-#         return 'Yes'
-#     return 'No'
     
 def getCompToxRef(DTXSID):
     #return DTXSID   

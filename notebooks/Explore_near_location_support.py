@@ -38,8 +38,10 @@ nbh.make_sandbox(out_dir)
 if hndl.curr_platform=='remote':
     df = fh.get_df_from_url(df_url,df_fn)
 else:
-    df = fh.get_df(df_fn)
-    # df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
+    # df = fh.get_df(df_fn)
+    # tmp = df[(df.bgStateName=='pennsylvania')&(df.bgCountyName=='westmoreland')]
+    # tmp.to_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
+    df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
 df = df[df.in_std_filtered]
 nbh.completed()
 
@@ -127,18 +129,56 @@ def show_chem_summary(c_obj):
     iShow(chem_df.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}],
           paging=False)
     
-def save_pdf_report(well_list):
-    from reportlab.platypus import Paragraph, Image #, Table, TableStyle
+def save_pdf_report(well_list,c_obj):
+    from reportlab.platypus import Paragraph, Image, KeepTogether, PageBreak, HRFlowable
+    from reportlab.lib.units import inch
+    from reportlab.lib import colors
+    import requests
+    from io import BytesIO
+
+    l = [] # list of flowables
     rgen = mpr.Report_gen(outfn = 'report_test.pdf',custom_title='Test title',
                           report_title='Summary of fracking chemicals disclosed')
-    rgen.add_heading('Well List',"Heading1")
+    l.append(rgen.make_paragraph('Well List',"Heading1"))
     well_list['Job End Date'] = well_list.date.dt.strftime('%Y-%m-%d')
     well_list = well_list.sort_values('date')
-    rgen.add_table(well_list[['Job End Date','OperatorName','APINumber','WellName','TotalBaseWaterVolume']])
-    rgen.add_spacer()
-    rgen.add_heading('Water use',"Heading1")
-    rgen.add_image(Image('water_use.jpg',width=400,height=300))
-
+    l.append(rgen.make_table(well_list[['Job End Date','OperatorName',
+                               'APINumber','WellName',
+                               'TotalBaseWaterVolume']]))
+    l.append(rgen.make_spacer())
+    l.append(rgen.make_paragraph('Water use',"Heading1"))
+    l.append(Image('water_use.jpg',width=400,height=300))
+    l.append(PageBreak())
+    # now the chemical report
+    l.append(rgen.make_paragraph('Reported Chemical use',"Heading1"))
+    l.append(HRFlowable(width="100%", thickness=1, color=colors.blue))
+    chemdf = c_obj.get_display_table(colset='pdf_report1')
+    chemdf = chemdf.sort_values('bgCAS')
+    chemdf.rq_lbs = chemdf.rq_lbs.fillna(' -- ')
+    # print(chemdf.composite_id)
+    for i,row in chemdf.iterrows():
+        items = []
+        # items.append(rgen.make_spacer())
+        data = [[rgen.make_paragraph(row.bgCAS,"Heading1"),
+                 rgen.make_paragraph(row.epa_pref_name,"Heading3")]]
+        items.append(rgen.make_simple_row(data))
+        # items.append(rgen.make_spacer())
+        # items.append(rgen.make_paragraph(row.bgCAS,"Heading1"))
+        # items.append(rgen.make_paragraph(row.epa_pref_name,"Heading3"))
+        data = [['Number of records','records with mass','sum of mass (lbs)','Reportable quantity (lbs)'],
+                [Paragraph(str(row.tot_records)),Paragraph(str(int(row.num_w_mass))),
+                 Paragraph(str(row.tot_mass)),Paragraph(str(row.rq_lbs))]]
+        items.append(rgen.make_table(data,convert=False))
+        # items.append(rgen.make_paragraph('Is on these lists:<br/>'+row.coc_lists))
+        # items.append(rgen.make_spacer())
+        fp = rgen.getFingerprintImg_RL(row.bgCAS)
+        # print(fp)
+        data = [['ChemInformatics Fingerprint','Lists that include this chemical'],
+                [fp, Paragraph(row.coc_lists)]]
+        items.append(rgen.make_simple_row(data))
+        items.append(HRFlowable(width="100%", thickness=5, color=colors.blue))
+        l.append(KeepTogether(items))
+    rgen.add_list_to_story(l)
     rgen.create_doc()
 
 # def save_chem_html_summary(c_obj):

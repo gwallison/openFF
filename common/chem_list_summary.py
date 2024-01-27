@@ -23,7 +23,8 @@ class ChemListSummary():
         self.do_not_list = {'chem_index': [],
                             'colab_v1' : ['ambiguousID','sysAppMeta'],
                             'summary_file' : [],
-                            'single_disc': [] }
+                            'single_disc': [],
+                            'pdf_report1': ['ambiguousID','sysAppMeta']}
         # sets of fields to include under different circumstances
         self.colsets = {'chem_index': ['composite_id','refs','img','tot_records','num_w_mass',
                                        'mass_median','mass_90_perc',
@@ -39,7 +40,11 @@ class ChemListSummary():
                                         'epa_pref_name','PercentHighAdditive','PercentHFJob',
                                         'mass','massSource',
                                         'MassIngredient','calcMass','extrnl','fingerprint',
-                                        'refs','is_water_carrier','dup_rec','ingKeyPresent']
+                                        'refs','is_water_carrier','dup_rec','ingKeyPresent'],
+                        'pdf_report1': ['bgCAS','epa_pref_name','ingredCommonName',
+                                        'refs','img','tot_records','num_w_mass','tot_mass',
+                                       'mass_median','mass_90_perc','coc_lists',
+                                       'rq_lbs','fingerprint','extrnl','earliest_date'],
                         }
         
         self.assemble_cas_df()
@@ -56,6 +61,8 @@ class ChemListSummary():
         chem_df.extrnl = np.where(chem_df.is_on_UVCB,chem_df.extrnl+'UVCB<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_diesel,chem_df.extrnl+'diesel<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_IRIS,chem_df.extrnl+'IRIS    ',chem_df.extrnl)
+        chem_df['coc_lists'] = chem_df.extrnl.copy()
+        chem_df.coc_lists = chem_df.coc_lists.str.replace('<br>','<br/>')
         chem_df.extrnl = '<p style="color:green;font-size:105%;text-align:center;background-color:lightgrey;">'+chem_df.extrnl.str[:-4]+'</p>'
         return chem_df
 
@@ -147,7 +154,7 @@ class ChemListSummary():
         return self.chem_df[self.colsets[colset]].to_html()
 
 
-    def get_pdf_table(self,colset='chem_index'):
+    def get_pdf_table(self,colset='colab_v1'):
         pass
 
     def get_disclosure_table(self,colset="disc_table"):

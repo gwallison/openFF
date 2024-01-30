@@ -3,33 +3,50 @@ import os
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, Image, TableStyle, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, Image, TableStyle, Spacer, PageBreak, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.rl_config import defaultPageSize
-import requests
-from io import BytesIO
+# import requests
+# from io import BytesIO
+from datetime import datetime
 
 
 import openFF.common.handles as hndl
 
 class Report_gen():
-    def __init__(self,outfn,custom_title='Custom Title',report_title='Report title'):
+    def __init__(self,outfn,custom_title='Custom Title',report_title='Report title',
+                 description=''):
         self.styles = getSampleStyleSheet()
         self.outfn = outfn
         self.custom_title = custom_title
         self.report_title = report_title
+        self.description = description
         self.doc = SimpleDocTemplate(outfn)
         self.story = [] # contains the elements, in order
         self.gen_title_page()
 
     def gen_title_page(self):
         l = []
-        l.append(self.make_spacer(2))
+        l.append(HRFlowable(width="100%", thickness=1, color=colors.black))
+        logos = [[Image(os.path.join(hndl.logos_dir,'openFF_logo.png'),width=80,height=80),
+                 self.make_paragraph('Open-FF Notebook Report','Title'),
+                 Image(os.path.join(hndl.logos_dir,'2021_FT_logo_icon.png'),width=80,height=80)],
+                 [self.make_paragraph('Open-FF'),'',self.make_paragraph('Sponsored by FracTracker')]]
+        l.append(self.make_simple_row(logos))
+        l.append(HRFlowable(width="100%", thickness=1, color=colors.black))
+        l.append(self.make_spacer(1))
         l.append(self.make_paragraph(self.custom_title,"Title"))
         l.append(self.make_spacer(2))
         l.append(self.make_paragraph(self.report_title,"Title"))
+        l.append(self.make_spacer(3))
+        l.append(self.make_paragraph("FracFocus download date: "+hndl.bulkdata_date,"Heading4"))
+        l.append(self.make_paragraph("Open-FF data repository: "+hndl.repo_name,"Heading4"))
+        l.append(self.make_paragraph(f'This report generated on {datetime.today():%B %d, %Y}',"Heading4"))
+        l.append(self.make_spacer())
+
+        l.append(self.make_paragraph(self.description))
         l.append(PageBreak())
         self.add_list_to_story(l)
         
@@ -65,8 +82,9 @@ class Report_gen():
 
     def make_simple_row(self,data,style=None):
         t = Table(data)
+        # print(f'row style: {style}')
         if not style:
-            t.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
+            t.setStyle(TableStyle([('HALIGN', (0, 0), (-1, -1), 'TA_CENTER')]))
         return t
     
     def make_table(self,df,convert=True):
@@ -85,7 +103,8 @@ class Report_gen():
 
     def make_paragraph(self,txt,kind="Normal"):
         # styles available: Heading1-6, Bullet, Code, Definition, Normal, Title, OrderedList, UnorderedList
-        return Paragraph(txt,style=self.styles[kind])
+        style = getSampleStyleSheet()[kind]
+        return Paragraph(txt,style=style)
   
     def add_list_to_story(self,lst):
         for item in lst:

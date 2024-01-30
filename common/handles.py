@@ -85,6 +85,9 @@ nb_images_dir = os.path.join(image_dir,'nb_images')
 # regularly updated images that go into blog
 blog_im_dir = os.path.join(image_dir,'blog_images')
 
+# logos and favicons
+logos_dir = os.path.join(image_dir,'logos')
+
 # images used in the documents section (not in the image dir)
 docs_images = os.path.join(root_code,'docs','images') 
 

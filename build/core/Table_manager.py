@@ -28,20 +28,15 @@ class Table_constructor():
                        'cas_ing': None,
                        'bgCAS': None,
                        'companies': None, # all company data is also in records/disc
+                       'water_source':None,
                        }
-
-        # self.pickle_fn = {'disclosures': os.path.join(self.pkldir,'disclosures.pkl'),
-        #                   'chemrecs': os.path.join(self.pkldir,'chemrecs.pkl'),
-        #                   'cas_ing': os.path.join(self.pkldir,'cas_ing.pkl'),
-        #                   'bgCAS': os.path.join(self.pkldir,'bgCAS.pkl'),
-        #                   'companies': os.path.join(self.pkldir,'companies.pkl'),
-        #                   }
 
         self.pickle_fn = {'disclosures': os.path.join(self.pkldir,'disclosures.parquet'),
                           'chemrecs': os.path.join(self.pkldir,'chemrecs.parquet'),
                           'cas_ing': os.path.join(self.pkldir,'cas_ing.parquet'),
                           'bgCAS': os.path.join(self.pkldir,'bgCAS.parquet'),
                           'companies': os.path.join(self.pkldir,'companies.parquet'),
+                          'water_source': os.path.join(self.pkldir,'water_source.parquet'),
                           }
         self.cas_ing_fn = os.path.join(self.trans_dir,'casing_curated.parquet')
         self.cas_ing_source = get_df(self.cas_ing_fn)
@@ -111,10 +106,28 @@ class Table_constructor():
                                      ci_source=self.trans_dir)
         self.tables['bgCAS'] = df
 
-    def assemble_PADUS_data(self,df):
-        # ext_sources_dir = self.extdir
-        return et.process_PADUS(df,sources=self.extdir,
-                                outdir=self.outdir)
+    def assemble_water_source_table(self, wsdf):
+        self.print_step('assembling water source table')
+        # print(f'len water source df: {len(wsdf)}')
+        # print(wsdf.head())
+        piv = wsdf.pivot_table(columns='Description',index='DisclosureId',values='Percent').reset_index()
+        # print(piv.head())
+        piv = piv.rename({'Produced Water':'perc_pw',
+                          'Groundwater, < 1000TDS': 'perc_gw_low_TDS',
+                          'Groundwater, > 1000TDS': 'perc_gw_high_TDS',
+                          'Surface Water, < 1000TDS': 'perc_sw_low_TDS',
+                          'Surface Water, > 1000TDS': 'perc_sw_high_TDS',
+                          'Other, < 1000TDS': 'perc_other_low_TDS',
+                          'Other, > 1000TDS': 'perc_other_high_TDS',},
+                          axis=1)
+        piv = piv.fillna(0)
+        self.tables['water_source'] = piv
+        # print(piv.head(10))
+
+    # def assemble_PADUS_data(self,df):
+    #     # ext_sources_dir = self.extdir
+    #     return et.process_PADUS(df,sources=self.extdir,
+    #                             outdir=self.outdir)
         
         
     #########   DISCLOSURE TABLE   ################
@@ -176,6 +189,29 @@ class Table_constructor():
                       validate='1:1')
         df = self.make_date_fields(df)
         # df = self.assemble_PADUS_data(df) # adds bgFederalWell, bgNat...
+
+        #  water source info?
+        # print(self.tables['water_source'].head(6))
+        tmp = self.tables['water_source'].copy()
+        # print(f'len tmp {len(tmp)}')
+        disclst = tmp.DisclosureId.unique().tolist()
+        # print(f'disclst {disclst}')
+        # df['has_water_source'] = df.DisclosureId.isin(disclst)
+        cols = tmp.columns.tolist()
+        # print(cols)
+        clist =[]
+        for c in cols:
+            # identify the percent columns
+            if c[:4] == 'perc':
+                clist.append(c)
+        # print(f'clist {clist}')
+        # print(tmp.perc_pw.head())
+        # print(tmp[clist].head())
+        tmp['ws_perc_total'] = tmp[clist].sum(axis=1, numeric_only=True)
+        # print(tmp.info())
+        # print(f'df col: {df.columns}')    
+        df = df.merge(tmp, on='DisclosureId',how='left',validate='1:1')
+        # print(df[df.ws_perc_total>0][['DisclosureId','ws_perc_total']].head(20))
         self.tables['disclosures']= df
 
 
@@ -472,8 +508,9 @@ class Table_constructor():
         for name in self.tables.keys():
             self.print_size(self.tables[name],name)
      
-    def assemble_all_tables(self,df):
+    def assemble_all_tables(self,df,waterdf):
         # ct.na_check(df,txt='top of assemble all tables')
+        self.assemble_water_source_table(waterdf)
         self.assemble_cas_ing_table(df)
         self.assemble_companies_table()
         self.assemble_bgCAS_table(self.tables['cas_ing'])

@@ -33,7 +33,8 @@ class MiscNbGen():
                         ('Open-FF_Synonyms','Chemical Name Synonyms'),
                         ('Open-FF_TradeNames','Trade Names and Composition Data'),
                         ('Short_description_of_Open-FF','Short description of Open-FF'),
-                        ('FracFocus_Holes','Holes in FracFocus')
+                        ('FracFocus_Holes','Holes in FracFocus'),
+                        ('Make_blog_images','Make data-dependent images')
                         ]
         self.make_all_nb()
 

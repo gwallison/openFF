@@ -27,7 +27,8 @@ class Read_FF():
                  zipdir='./working/',
                  workdir='./working/',
                  origdir='./orig_dir/',
-                 flat_pickle = 'raw_flat.parquet'):
+                 flat_pickle = 'raw_flat.parquet',
+                 flat_water_source = 'ws_flat.parquet'):
         self.zname = os.path.join(zipdir,in_name)
         #self.sources = sources
         self.working = workdir
@@ -45,6 +46,7 @@ class Read_FF():
                               'CASNumber','IngredientName']
         self.cols_to_lower = ['IngredientName']
         self.picklefn = os.path.join(self.working,flat_pickle)
+        self.picklewsfn = os.path.join(self.working,flat_water_source)
         
     def getMissingList(self):
         df = pd.read_csv(os.path.join(self.curdur,"missing_values.csv"),
@@ -182,6 +184,45 @@ class Read_FF():
         assert(len(final)==len(final.reckey.unique()))
         # final.to_pickle(self.picklefn)
         save_df(final,self.picklefn)
+        #return final
+        
+    def import_water_source(self):
+        """
+        """
+        fill_lst = ['Description','Percent']
+        dflist = []
+        with zipfile.ZipFile(self.zname) as z:
+            inf = []
+            for fn in z.namelist():
+                # the files in the FF archive with the Ingredient records
+                #  always start with this prefix...
+                if fn[:11]=='WaterSource':
+                    # need to extract number of file to correctly order them
+                    num = int(re.search(r'\d+',fn).group())
+                    inf.append((num,fn))
+                    
+            inf.sort()
+            infiles = [x for _,x in inf]  # now we have a well-sorted list
+            #print(self.startfile,self.endfile)
+            for fn in infiles[0:]:
+                with z.open(fn) as f:
+                    print(f' -- processing {fn}')
+                    t = pd.read_csv(f,low_memory=False,
+                                    na_values = self.missing_values
+                                    )
+                    
+                    t['raw_ws_filename'] = fn # helpful for manual searches of raw files
+                    for col in fill_lst:
+                        t[col].fillna('MISSING',inplace=True)
+
+                    dflist.append(t)
+        final = pd.concat(dflist,sort=True)
+        
+        final.reset_index(drop=True,inplace=True) #  single integer as index
+        final['wskey'] = final.index.astype(int)
+        final = final[['DisclosureId','WaterSourceId','Description','Percent','wskey']]
+        assert(len(final)==len(final.wskey.unique()))
+        save_df(final,self.picklewsfn)
         #return final
         
     def import_raw_version3(self):

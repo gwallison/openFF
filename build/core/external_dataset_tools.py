@@ -111,54 +111,54 @@ def add_all_bgCAS_tables(df,sources,ci_source):
     return df
 
 #################  PADUS shape files ############################
-def process_PADUS(df,sources='./sources/external_refs/',
-                         outdir='./outdir/'):
-    """Find joins with the PADUS database.  Note that some wells may have
-    more than one join.  This routine will add the boolean fields 
-       bgFederalWells and
-       bgNativeWells
-    as well as a csv file with more details.
-    concat geopandas: https://gis.stackexchange.com/questions/162659/joining-concat-list-of-similar-dataframes-in-geopandas
-    """
-    print(' -- searching for wells on Fed and Native lands')
-    reffn = ext_fn(ext_dir=sources,handle='padus_pkl')
-    # pkl_name = os.path.join(sources,'shape_files','padus.pkl')
-    out_name = os.path.join(outdir,'PADUS_hits.csv')
-    try:
-        shdf = pd.read_pickle(reffn)
-    except:
-        print('  -- fetch PADUS from zip files')
-        allshp = []
-        # shp_fn = r"C:\MyDocs\OpenFF\data\external_refs\shape_files\PADUS3_0_Region_7_SHP.zip!PADUS3_0Combined_Region7.shp"
-        for i in range(1,12):
-            print(f'     PADUS {i} file processed')
-            shp_fn = os.path.join(sources,'shape_files',
-                                  f'PADUS3_0_Region_{i}_SHP.zip!PADUS3_0Combined_Region{i}.shp')
-            shpdf = geopandas.read_file(shp_fn).to_crs(final_crs)
-            allshp.append(shpdf)
+# def process_PADUS(df,sources='./sources/external_refs/',
+#                          outdir='./outdir/'):
+#     """Find joins with the PADUS database.  Note that some wells may have
+#     more than one join.  This routine will add the boolean fields 
+#        bgFederalWells and
+#        bgNativeWells
+#     as well as a csv file with more details.
+#     concat geopandas: https://gis.stackexchange.com/questions/162659/joining-concat-list-of-similar-dataframes-in-geopandas
+#     """
+#     print(' -- searching for wells on Fed and Native lands')
+#     reffn = ext_fn(ext_dir=sources,handle='padus_pkl')
+#     # pkl_name = os.path.join(sources,'shape_files','padus.pkl')
+#     out_name = os.path.join(outdir,'PADUS_hits.csv')
+#     try:
+#         shdf = pd.read_pickle(reffn)
+#     except:
+#         print('  -- fetch PADUS from zip files')
+#         allshp = []
+#         # shp_fn = r"C:\MyDocs\OpenFF\data\external_refs\shape_files\PADUS3_0_Region_7_SHP.zip!PADUS3_0Combined_Region7.shp"
+#         for i in range(1,12):
+#             print(f'     PADUS {i} file processed')
+#             shp_fn = os.path.join(sources,'shape_files',
+#                                   f'PADUS3_0_Region_{i}_SHP.zip!PADUS3_0Combined_Region{i}.shp')
+#             shpdf = geopandas.read_file(shp_fn).to_crs(final_crs)
+#             allshp.append(shpdf)
     
-        shdf = geopandas.GeoDataFrame(pd.concat(allshp,
-                                                ignore_index=True), 
-                                      crs=allshp[0].crs)
-        shdf.to_pickle(reffn)
+#         shdf = geopandas.GeoDataFrame(pd.concat(allshp,
+#                                                 ignore_index=True), 
+#                                       crs=allshp[0].crs)
+#         shdf.to_pickle(reffn)
     
-    t = df.groupby('DisclosureId',as_index=False)[['bgLatitude','bgLongitude',
-                                            'bgStateName','APINumber']].first()
-    gdf = geopandas.GeoDataFrame(t,
-                                 geometry= geopandas.points_from_xy(t.bgLongitude, 
-                                                                    t.bgLatitude,
-                                                                    crs=final_crs))
+#     t = df.groupby('DisclosureId',as_index=False)[['bgLatitude','bgLongitude',
+#                                             'bgStateName','APINumber']].first()
+#     gdf = geopandas.GeoDataFrame(t,
+#                                  geometry= geopandas.points_from_xy(t.bgLongitude, 
+#                                                                     t.bgLatitude,
+#                                                                     crs=final_crs))
 
-    hits = geopandas.sjoin(gdf,shdf,how='left')  
-    fed = hits[hits.Own_Type=='FED'].DisclosureId.unique().tolist()
-    stat = hits[hits.Own_Type=='STAT'].DisclosureId.unique().tolist()
-    nat = hits[(hits.Mang_Type=='TRIB') | (hits.Des_Tp=='TRIBL')].DisclosureId.unique().tolist()
-    hits['bgFederalLand'] = hits.DisclosureId.isin(fed)
-    hits['bgStateLand'] = hits.DisclosureId.isin(stat)
-    hits['bgNativeAmericanLand'] = hits.DisclosureId.isin(nat)
-    df['bgFederalLand'] = df.DisclosureId.isin(fed)
-    df['bgStateLand'] = df.DisclosureId.isin(stat)
-    df['bgNativeAmericanLand'] = df.DisclosureId.isin(nat)
-    hits[hits.index_right.notna()].to_csv(out_name,quotechar='$',
-                                          encoding='utf-8')
-    return df
+#     hits = geopandas.sjoin(gdf,shdf,how='left')  
+#     fed = hits[hits.Own_Type=='FED'].DisclosureId.unique().tolist()
+#     stat = hits[hits.Own_Type=='STAT'].DisclosureId.unique().tolist()
+#     nat = hits[(hits.Mang_Type=='TRIB') | (hits.Des_Tp=='TRIBL')].DisclosureId.unique().tolist()
+#     hits['bgFederalLand'] = hits.DisclosureId.isin(fed)
+#     hits['bgStateLand'] = hits.DisclosureId.isin(stat)
+#     hits['bgNativeAmericanLand'] = hits.DisclosureId.isin(nat)
+#     df['bgFederalLand'] = df.DisclosureId.isin(fed)
+#     df['bgStateLand'] = df.DisclosureId.isin(stat)
+#     df['bgNativeAmericanLand'] = df.DisclosureId.isin(nat)
+#     hits[hits.index_right.notna()].to_csv(out_name,quotechar='$',
+#                                           encoding='utf-8')
+#     return df

@@ -79,6 +79,11 @@ def get_raw_df(cols=None,work_dir=work_dir):
   return pd.read_parquet(os.path.join(work_dir,'raw_flat.parquet'),
                          columns=cols)
 
+def get_water_source_df(cols=None,work_dir=work_dir):
+  """without a list of cols, whole df will be returned"""
+  return pd.read_parquet(os.path.join(work_dir,'ws_flat.parquet'),
+                         columns=cols)
+
 ####  ------ Functions called by the builder notebook
 
 def create_and_fill_folders(download_repo=True,
@@ -203,6 +208,7 @@ def create_master_raw_df(create_raw=True,work_dir=work_dir,orig_dir=orig_dir):
                           zipdir=work_dir,workdir = work_dir,
                           origdir=orig_dir,
                           flat_pickle = 'raw_flat.parquet')
+        rff.import_water_source()
         rff.import_raw()
         raw_df = get_raw_df(cols=['reckey'])
         # get number of records from old, repository data set
@@ -451,6 +457,7 @@ def builder_step2(final_dir=final_dir,ext_dir=ext_dir,ext_dict=''):
     import openFF.build.core.Data_set_constructor as dsc
     
     dataobj = dsc.Data_set_constructor(rawdf=get_raw_df(),
+                                       waterdf=get_water_source_df(),
                                        ref_dir=final_dir,
                                        out_dir=final_dir,
                                        extdir=ext_dir)

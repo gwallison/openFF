@@ -15,12 +15,12 @@ import openFF.build.core.Table_manager as c_tab
 
 
 class Data_set_constructor():
-    def __init__(self,rawdf,ref_dir,out_dir,extdir):
+    def __init__(self,rawdf,waterdf,ref_dir,out_dir,extdir):
         self.ref_dir = ref_dir
         self.out_dir = out_dir
         self.pickledir = os.path.join(self.out_dir,'pickles')
         self.raw_df = rawdf
-        #self.ext_dir = r"C:\MyDocs\OpenFF\data\external_refs"
+        self.water_df = waterdf
         self.ext_dir = extdir
         
                            
@@ -40,7 +40,7 @@ class Data_set_constructor():
         mark_missing = ['CASNumber','IngredientName','Supplier','OperatorName']
         for col in mark_missing:
             self.raw_df[col].fillna('MISSING',inplace=True)
-        tab_const.assemble_all_tables(self.raw_df)
+        tab_const.assemble_all_tables(self.raw_df,self.water_df)
         print(f'  -- Number disclosure in table manager: {len(tab_const.tables["disclosures"])}')     
         
         return tab_const

@@ -11,8 +11,10 @@ import os
 import datetime
 import openFF.build.core.mass_tools as mt
 #import openFF.build.core.cas_tools as ct
+import openFF.build.core.flag_issues as fi
 import openFF.build.core.external_dataset_tools as et
 from openFF.common.file_handlers import save_df, get_df, ext_fn
+
 
 class Table_constructor():
     
@@ -37,6 +39,8 @@ class Table_constructor():
                           'bgCAS': os.path.join(self.pkldir,'bgCAS.parquet'),
                           'companies': os.path.join(self.pkldir,'companies.parquet'),
                           'water_source': os.path.join(self.pkldir,'water_source.parquet'),
+                          'disc_issues': os.path.join(self.pkldir,'disc_issues.parquet'),
+                          'rec_issues': os.path.join(self.pkldir,'rec_issues.parquet'),
                           }
         self.cas_ing_fn = os.path.join(self.trans_dir,'casing_curated.parquet')
         self.cas_ing_source = get_df(self.cas_ing_fn)
@@ -124,6 +128,34 @@ class Table_constructor():
         self.tables['water_source'] = piv
         # print(piv.head(10))
 
+#     def assemble_issues_tables(self,df):
+#         self.print_step('assembling tables of FracFocus flaws')
+#         obj = fi.Flag_issues(df)
+#         obj.detect_all_issues()
+#         # now add single flag fields to each
+#         t = obj.disc_df
+#         t['d_flags'] = ''
+#         cols = t.columns.tolist().remove('DisclosureId')  # all the rest should be flag columns
+#         for col in cols:
+#             dkeys = t[t[col]].DisclosureId.tolist() # list of DId that are True
+#             t.d_flags = np.where(t.DisclosureId.isin(dkeys),
+#                                  t.d_flag+col+' ',
+#                                  t.d_flag)
+#         self.tables['disc_issues'] = t
+
+#         t = obj.rec_df
+#         t['r_flags'] = ''
+#         cols = t.columns.tolist().remove('reckey')  # all the rest should be flag columns
+#         for col in cols:
+#             rkeys = t[t[col]].reckey.tolist() # list of DId that are True
+#             t.r_flags = np.where(t.reckey.isin(rkeys),
+#                                  t.r_flag+col+' ',
+#                                  t.r_flag)
+#         self.tables['rec_issues'] = t
+        
+
+
+
     # def assemble_PADUS_data(self,df):
     #     # ext_sources_dir = self.extdir
     #     return et.process_PADUS(df,sources=self.extdir,
@@ -209,8 +241,9 @@ class Table_constructor():
         # print(tmp[clist].head())
         tmp['ws_perc_total'] = tmp[clist].sum(axis=1, numeric_only=True)
         # print(tmp.info())
-        # print(f'df col: {df.columns}')    
+        #print(f'df col: {df.columns}')    
         df = df.merge(tmp, on='DisclosureId',how='left',validate='1:1')
+        #print(f'df col: {df.columns}')    
         # print(df[df.ws_perc_total>0][['DisclosureId','ws_perc_total']].head(20))
         self.tables['disclosures']= df
 
@@ -226,7 +259,10 @@ class Table_constructor():
         are labelled.
         To handle this problem, hopefully temporarily, we use a data set created with a pre-FFV4 archive that
         found the duplicates and labels them.  It also has the DisclosureId attached.   """
-        reffn = ext_fn(ext_dir=self.sources,handle='trans_dup_recs')
+        # reffn = ext_fn(ext_dir=self.sources,handle='trans_dup_recs')
+
+        # pulling ext_dir from default, not local
+        reffn = ext_fn(handle='trans_dup_recs')
         self.print_step('USING archived data to flag Version 3 duplicate records',2)
         trans_df = get_df(reffn,cols=['DisclosureId','IngredientName','CASNumber','MassIngredient',
                                                 'PercentHFJob','PercentHighAdditive'])
@@ -260,6 +296,7 @@ class Table_constructor():
         return records.drop(['FFVersion','old_dup_rec'],axis=1)
     
     def assemble_chem_rec_table(self,raw_df):
+        """as of FFV4, records where ingKeyPreset==False, bgCAS is set to 'non_chem_record'"""
         self.print_step('assembling chemical records table')
         df= raw_df[['DisclosureId','CASNumber','IngredientName','PercentHFJob',
                     'Supplier','Purpose','TradeName','FFVersion',
@@ -274,7 +311,9 @@ class Table_constructor():
         df = pd.merge(df,self.tables['cas_ing'],
                                 on=['CASNumber','IngredientName'],
                                 how='left')     
-        # ct.na_check(df,txt='bgCAS add')
+        # as of FFV4
+        df.bgCAS = np.where(df.ingKeyPresent,df.bgCAS,'non_chem_record')
+
         unCAS = df[df.bgCAS.isna()]\
                     .groupby(['CASNumber','IngredientName'],as_index=False)\
                         ['DisclosureId'].count()
@@ -523,6 +562,7 @@ class Table_constructor():
         self.gen_primarySupplier()
         self.make_whole_dataset_flags()
         self.mass_calculations()
+        # self.assemble_issues_tables()
         self.pickle_tables()
         self.show_size()
         

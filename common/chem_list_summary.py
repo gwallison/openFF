@@ -15,16 +15,18 @@ class ChemListSummary():
     def __init__(self,df,
                  summarize_by_chem=True, # False: show all records
                  ignore_duplicates=True, # just the std_filtered data
+                 use_remote=False,
                  #do_not_list= ['ambiguousID','sysAppMeta'] # leave out of reports
                  ):
         self.df = df
         self.summarize_by_chem = summarize_by_chem
         self.ignore_duplicates = ignore_duplicates
-        self.do_not_list = {'chem_index': [],
-                            'colab_v1' : ['ambiguousID','sysAppMeta'],
+        self.use_remote = use_remote
+        self.do_not_list = {'chem_index': ['non_chem_report'],
+                            'colab_v1' : ['ambiguousID','non_chem_report'],
                             'summary_file' : [],
                             'single_disc': [],
-                            'pdf_report1': ['ambiguousID','sysAppMeta']}
+                            'pdf_report1': ['ambiguousID','non_chem_report']}
         # sets of fields to include under different circumstances
         self.colsets = {'chem_index': ['composite_id','refs','img','tot_records','num_w_mass',
                                        'mass_median','mass_90_perc',
@@ -47,7 +49,7 @@ class ChemListSummary():
                                        'rq_lbs','fingerprint','extrnl','earliest_date'],
                         }
         
-        self.assemble_cas_df()
+        self.assemble_cas_df(use_remote=self.use_remote)
         
     def make_extrnl_column(self,chem_df):
         chem_df['extrnl'] = np.where(chem_df.is_on_CWA,'CWA<br>','    ')

@@ -4,7 +4,8 @@ import os
 class Disclosure_Issues():
     def __init__(self,df):
         self.df = df
-        self.gb = df.groupby('DisclosureId',as_index=False)[['APINumber','TotalBaseWaterVolume']].first()
+        self.gb = df.groupby('DisclosureId',as_index=False)[['APINumber','TotalBaseWaterVolume','has_TBWV',
+                                                             'is_duplicate','MI_inconsistent','ws_perc_total']].first()
 
     # ALL Issues must be named "dIssues_x"  where x is usually a consecutive number.
     # x will become the flag's name as in "d_x"
@@ -13,14 +14,25 @@ class Disclosure_Issues():
         disc_set = self.gb[cond].DisclosureId.tolist()
         return disc_set
 
-    def dIssue_1(self):
-        cond = ~(self.gb.TotalBaseWaterVolume>0)
+    def dIssue_001(self):
+        '''TotalBaseWaterVolume is missing or zero. Mass calculations are not possible.'''
+        cond = self.gb.has_TBWV==False
         return self.get_disc_set(cond)
 
-    def dIssue_2(self):
-        cond = self.gb.TotalBaseWaterVolume==10000
+    def dIssue_002(self):
+        """ this disclosure has a duplicate in FracFocus; that is, has the same APINumber and JobEndDate."""
+        cond = self.gb.is_duplicate
         return self.get_disc_set(cond)
 
+    def dIssue_003(self):
+        """ The MassIngredient data do not pass the internal consistency test, so are is used when reporting mass."""
+        cond = self.gb.MI_inconsistent
+        return self.get_disc_set(cond)
+
+    def dIssue_004(self):
+        """ The reported water source percentages do not sum to 100%"""
+        cond = ~(self.gb.ws_perc_total==100)
+        return self.get_disc_set(cond)
 
 class Record_Issues():
     def __init__(self,df):
@@ -33,8 +45,14 @@ class Record_Issues():
         reckey_set = self.df[cond].reckey.tolist()
         return reckey_set
 
-    def rIssue_1(self):
+    def rIssue_001(self):
+        """This flag indicates that a record is a redundant duplicate of another in the same disclosure."""
         c1 = self.df.dup_rec
+        return self.get_rec_set(c1)
+
+    def rIssue_002(self):
+        """PercentHFJob is 0 or not reported; mass cannot be calculated and MassIngredient is typically also missing."""
+        c1 = self.df.ingKeyPresent & ~(self.df.PercentHFJob>0)
         return self.get_rec_set(c1)
 
 class Flag_issues():
@@ -68,7 +86,7 @@ class Flag_issues():
             if item[:7] == 'rIssue_':
                 name = 'r_'+item[7:]
                 self.rec_issue_dic['self.rIssues.'+item+'()'] = name
-        print(self.rec_issue_dic)
+        # print(self.rec_issue_dic)
 
     def make_rec_flag_df(self,reckey_set,rec_issues):
         self.rec_df = pd.DataFrame({'reckey':list(reckey_set)})

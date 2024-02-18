@@ -14,9 +14,9 @@ def make_full_set_file(sources,outdir):
     wsfn =  os.path.join(sources,'pickles','water_source.parquet')
     outfn = os.path.join(outdir,'full_df.parquet')
     
-    df = pd.merge(fh.get_df(descfn),get_df(recsfn),on='DisclosureId',how='inner')
-    df = pd.merge(fh.df,get_df(wsfn),on='DisclosureId',how='left',validate='m:1')
-    df = pd.merge(fh.df,get_df(casfn),on='bgCAS',how='left',validate='m:1')
+    df = pd.merge(fh.get_df(descfn),fh.get_df(recsfn),on='DisclosureId',how='inner')
+    # df = pd.merge(df,fh.get_df(wsfn),on='DisclosureId',how='left',validate='m:1')
+    df = pd.merge(df,fh.get_df(casfn),on='bgCAS',how='left',validate='m:1')
     
     df['in_std_filtered'] = ~(df.is_duplicate)&~(df.dup_rec)
 

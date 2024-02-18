@@ -87,12 +87,13 @@ def get_water_source_df(cols=None,work_dir=work_dir):
 ####  ------ Functions called by the builder notebook
 
 def create_and_fill_folders(download_repo=True,
-                            repo_root='https://storage.googleapis.com/open-ff-common/repos/current_repo',
+                            repo_root='https://storage.googleapis.com/open-ff-common/repos/current_repo_FFV4',
                             orig_dir=orig_dir,
                             work_dir=work_dir,
                             final_dir=final_dir,
                             ext_dir=ext_dir):   
     import urllib.request
+    print(f'Using repo location **{repo_root}** as starting point.')
     dirs = [orig_dir,work_dir,final_dir,ext_dir]
     for d in dirs:
         if os.path.isdir(d):
@@ -425,7 +426,7 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
     files = [
              'missing_values.csv',
              'new_state_county_ref.csv',
-             'IngName_non-specific_list.parquet'
+             'IngName_non-specific_list.parquet',
      ]
     for fn in files:
         shutil.copy(os.path.join(orig_dir,'curation_files',fn),
@@ -447,7 +448,9 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
              'location_curated.parquet',
              'disclosureId_ref.parquet', 
              'upload_dates.parquet',
-             'CI_sdf_summary.parquet']
+             'CI_sdf_summary.parquet',
+             'ws_flat.parquet',
+             ]
     for fn in files:
         shutil.copy(os.path.join(work_dir,fn),
                     os.path.join(final_dir,'curation_files',fn))
@@ -477,6 +480,17 @@ def builder_step3(final_dir=final_dir):
     tests.run_all_tests()
     completed()
     
+def create_issues_data_set(final_dir=final_dir):
+    import FF_issues.flag_issues as fi
+    import numpy as np
+
+    print('assembling tables of FracFocus flaws')
+    df = get_df(os.path.join(final_dir,'full_df.parquet'))
+
+    obj = fi.Flag_issues(df,final_dir)
+    obj.detect_all_issues()
+    print(' -- issues detected, now compiling flag fields')
+    obj.add_summary_fields()
     
 def make_repository(create_zip=False,final_dir=final_dir):
     directories = []

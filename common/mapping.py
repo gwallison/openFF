@@ -264,7 +264,7 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
 def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,include_shape=False,area_df=None,
                      fields=['APINumber','TotalBaseWaterVolume','year','OperatorName','ingKeyPresent'],
                      aliases=['API Number','Water Volume','year','Operator','has chem recs'],
-                     include_disc_link=True,
+                     use_remote=False,
                      width=600,height=400):
     """ClusterMarker and GeoJsonPopup dont work together, so we do it by hand"""
     # only the first item of the area df is used.  Meant to be a simple outline, like a county line
@@ -314,7 +314,11 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,i
         html = tmpdf.to_html(header=False,
                              classes="table table-striped table-hover table-condensed table-responsive")
         if inc_disc_link:
-            html += '<br><h4>'+ th.getDisclosureLink(row.APINumber,row.DisclosureId,'Disclosure link') + '</h4>'
+            html += '<h5>Click for details from:</h5>'
+            html += '-- '+ th.getFFLink(row,'FracFocus')
+            html += '<br>-- '+ th.getDisclosureLink(row.APINumber,row.DisclosureId,'Open-FF',
+                                                    use_remote=use_remote)
+
         popup = folium.Popup(html)
         folium.Marker(
             location=[row.bgLatitude,row.bgLongitude],

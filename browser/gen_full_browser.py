@@ -49,11 +49,12 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
             if remake_workingdf:
                 print('-- creating new test workingdf')
                 df = fh.get_df(os.path.join(hndl.curr_repo_dir,'full_df.parquet'))
-                c3 = df.bgCAS.isin(['1319-33-1','50-00-0','proprietary','7732-18-5','71-43-2'])
+                c3 = df.bgCAS.isin(['1319-33-1','50-00-0','proprietary','7732-18-5','71-43-2','non_chem_record','ambiguousID'])
                 c2 = df.bgCountyName == 'monroe'
                 c1 = df.bgStateName == 'ohio'
                 c4 = df.bgOperatorName == 'antero'
-                df = df[c1 & c2 & c3 & c4]
+                # df = df[c1 & c2 & c3 & c4]
+                df = df[c3]
                 df.to_parquet(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
             workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
         else:
@@ -81,10 +82,10 @@ if __name__ == '__main__':
         init_output_space()
     nbh.make_sandbox()
     workingdf = prep_working_df()
-    _ = gen_chem.Chem_gen(workingdf)
-    _ = gen_states.State_gen(workingdf)
-    _ = gen_operators.Operator_gen(workingdf)
-    _ = gen_disc.Disc_gen(workingdf)
-    _ = gen_scope.ScopeGen(workingdf)
+    # _ = gen_chem.Chem_gen(workingdf)
+    # _ = gen_states.State_gen(workingdf)
+    # _ = gen_operators.Operator_gen(workingdf)
+    # _ = gen_disc.Disc_gen(workingdf)
+    # _ = gen_scope.ScopeGen(workingdf)
     _ = gen_misc_nb.MiscNbGen(workingdf)
     print('DONE')

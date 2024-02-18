@@ -86,9 +86,19 @@ class final_test():
         self.print_stage('Confirm that IngredientsId are unique')
         assert self.df[self.df.IngredientsId.notna()].IngredientsId.duplicated().sum()==0, 'Duplicates in IngredientsId'
 
+    def emptyIngredients(self):
+        """confirm that records without IngredientsID are truly without chemical data"""
+        self.print_stage('Confirm that records without an IngredientsId are indeed lacking chem info')
+        c = ~self.df.ingKeyPresent
+        assert (self.df[c].CASNumber=='MISSING').all()
+        assert (self.df[c].IngredientName == 'missing').all()
+        assert self.df[c].PercentHFJob.notna().sum()==0
+        assert self.df[c].PercentHighAdditive.notna().sum()==0
+
     def run_all_tests(self):
         self.reckey_test()
         self.ingredientsId_test()
+        self.emptyIngredients()
         self.bgCAS_test()
         self.company_test()
         self.duplicate_test()

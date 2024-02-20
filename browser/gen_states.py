@@ -87,11 +87,12 @@ class State_gen():
                                                                 'OperatorName','bgOperatorName',
                                                                 'no_chem_recs']].first()
             gb1 = workdf.groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
-                                                              'is_on_PFAS_list']].sum()
+                                                              'is_on_PFAS_list']].count()
             gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
-            
+            # gb.to_csv('./tmp/gb.csv')
             #print(gb.columns)
             # tmpfn = './work/state.csv'
+            # print(gb[gb.is_on_DWSHA==False][['APINumber','date','is_on_CWA']])
             gb.to_parquet(os.path.join(hndl.sandbox_dir,'state.parquet'),index=False)
             # fn = os.path.join(self.statesdir,state.replace(' ','_')+'_df.zip')
             # with zipfile.ZipFile(fn,'w') as z:
@@ -108,7 +109,7 @@ class State_gen():
                                                                                               'bgLatitude','bgLongitude',
                                                                                               'OperatorName','no_chem_recs']].first()
                 gb1 = workdf[workdf.bgCountyName==county].groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
-                                                                                                'is_on_PFAS_list']].sum()
+                                                                                                'is_on_PFAS_list']].count()
                 gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
                 gb['TBWV'] = gb.TotalBaseWaterVolume.map(lambda x: th.round_sig(x,3,guarantee_str='??')) + ' gallons'
                 # gb.APINumber = gb.APINumber.map(lambda x: self.text_APINumber(x))

@@ -10,6 +10,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import openFF.common.handles as hndl 
 import openFF.common.file_handlers as fh 
+import openFF.common.text_handlers as th 
 import openFF.common.nb_helper as nbh
 
 import openFF.browser.gen_disclosures as gen_disc
@@ -20,7 +21,7 @@ import openFF.browser.gen_misc_nb as gen_misc_nb
 import openFF.browser.gen_scope as gen_scope
 
 ####
-testing_mode = False
+testing_mode = True
 remake_workingdf = True
 ####
 
@@ -49,12 +50,12 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
             if remake_workingdf:
                 print('-- creating new test workingdf')
                 df = fh.get_df(os.path.join(hndl.curr_repo_dir,'full_df.parquet'))
-                c3 = df.bgCAS.isin(['1319-33-1','50-00-0','proprietary','7732-18-5','71-43-2','non_chem_record','ambiguousID'])
+                c3 = df.bgCAS.isin(['1319-33-1','50-00-0'])#,'proprietary']) #,'7732-18-5','71-43-2','non_chem_record','ambiguousID'])
                 c2 = df.bgCountyName == 'monroe'
                 c1 = df.bgStateName == 'ohio'
                 c4 = df.bgOperatorName == 'antero'
-                # df = df[c1 & c2 & c3 & c4]
-                df = df[c3]
+                df = df[c1 & c2 & c3 & c4]
+                # df = df[c3]
                 df.to_parquet(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
             workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
         else:
@@ -68,6 +69,11 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
         workdf = workdf.merge(gb1[['DisclosureId','perc_proprietary']],
                             on='DisclosureId',how='left',validate='m:1')
         # add easy to use links
+        gb2 = workdf.groupby('APINumber', as_index=False).size()
+        gb2['FF_disc'] = gb2.apply(lambda x: th.getFFLink(x),axis=1)
+        workdf = workdf.merge(gb2[['APINumber','FF_disc']], on='APINumber',
+                              how='left',validate='m:1')
+
       
         fh.save_df(workdf,(os.path.join(hndl.sandbox_dir,'workdf.parquet'))) # for the indexes
     else:
@@ -82,10 +88,10 @@ if __name__ == '__main__':
         init_output_space()
     nbh.make_sandbox()
     workingdf = prep_working_df()
-    # _ = gen_chem.Chem_gen(workingdf)
+    _ = gen_chem.Chem_gen(workingdf)
     # _ = gen_states.State_gen(workingdf)
     # _ = gen_operators.Operator_gen(workingdf)
     # _ = gen_disc.Disc_gen(workingdf)
     # _ = gen_scope.ScopeGen(workingdf)
-    _ = gen_misc_nb.MiscNbGen(workingdf)
+    # _ = gen_misc_nb.MiscNbGen(workingdf)
     print('DONE')

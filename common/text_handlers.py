@@ -44,11 +44,12 @@ def getCatLink(cas,text_to_show='Analysis',use_remote=False):
 def getOpLink(opname,text_to_show='Operator details',
               use_remote=False, up_level=False):
     preamble = ''
+    oneword = opname.replace(' ','_')
     if up_level:
         preamble = '../'
     if use_remote: # this should trump up_level
         preamble = hndl.browser_root
-    s = f'{preamble}operators/{opname}.html'
+    s = f'{preamble}operators/{oneword}.html'
     return wrap_URL_in_html(s,text_to_show)
 
 def getStateLink(state,text_to_show='State details',use_remote=False):

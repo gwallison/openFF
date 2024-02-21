@@ -32,6 +32,7 @@ import openFF.common.handles as hndl
 import openFF.common.file_handlers as fh
 import openFF.common.text_handlers as th
 import openFF.common.mapping as mapping
+import openFF.common.common_plots as c_plots
 
 import warnings
 warnings.filterwarnings('ignore')

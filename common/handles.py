@@ -17,7 +17,8 @@ import platform
 
 locals = ['Dell_2023_Gary','M2']
 
-repo_name = 'openFF_data_2024_02_17'
+# repo_name = 'openFF_data_2024_02_17'
+repo_name = 'current_repo'
 bulkdata_date = 'February 17, 2024'
 
 curr_platform = ''
@@ -47,7 +48,7 @@ local_includes = os.path.join(root_code,'includes')
 browser_root = "https://storage.googleapis.com/open-ff-browser/"
 browser_root = "https://storage.googleapis.com/browser-beta/"
 # browser_root = r"C:\MyDocs\integrated\disc_browser_spike\browser_out"
-repo_root_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo_FFV4/"
+repo_root_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/"
 repo_pickles_url = repo_root_url+'pickles/'
 full_url = repo_root_url+"full_df.parquet"
 # full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"

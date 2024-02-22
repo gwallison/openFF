@@ -36,6 +36,14 @@ class Operator_gen():
         with open(fn,'w',encoding='utf-8') as f:
             f.write(alltext)
 
+    def count_all_trues(self,df):
+        cols = df.columns.tolist()
+        cols.remove('DisclosureId')
+        # the following code is needed because there will sometimes be "None" in the boolean
+        # which can clobber the "sum" function
+        t = df.groupby('DisclosureId',as_index=False)[cols].apply(lambda x: x[x==True].sum())
+        return t
+    
     def make_all_files(self):
         t = self.allrec[(self.allrec.in_std_filtered)\
                         &(self.allrec.bgOperatorName.notna())]
@@ -59,11 +67,15 @@ class Operator_gen():
                                                              'bgLatitude','bgLongitude','location_error',
                                                              'OperatorName','no_chem_recs','WellName',
                                                              'perc_proprietary']].first()
-            gb1 = workdf.groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA','is_on_prop65',
-                                                                 'is_on_UVCB','is_on_diesel','is_on_PFAS_list',
-                                                                 'is_proprietary']].count()
+            gb1 = self.count_all_trues(workdf[['DisclosureId','is_on_DWSHA','is_on_CWA','is_on_prop65',
+                                                'is_on_UVCB','is_on_diesel','is_on_PFAS_list',
+                                                'is_proprietary']])
+            # print(gb1.head())
+            # gb1 = workdf.groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA','is_on_prop65',
+            #                                                      'is_on_UVCB','is_on_diesel','is_on_PFAS_list',
+            #                                                      'is_proprietary']].count()
             gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
-            
+            # print(gb.columns)
             gb.to_parquet(os.path.join(hndl.sandbox_dir,'operator.parquet'),index=False)
             #workdf.to_parquet(os.path.join(hndl.sandbox_dir,'operator.parquet'),index=False)
             print(f'** {op:<40} **  n recs: {len(workdf):>10,}')

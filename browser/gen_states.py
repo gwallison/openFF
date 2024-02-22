@@ -55,6 +55,13 @@ class State_gen():
         with open(fn,'w',encoding='utf-8') as f:
             f.write(alltext)
 
+    def count_all_trues(self,df):
+        cols = df.columns.tolist()
+        cols.remove('DisclosureId')
+        # the following code is needed because there will sometimes be "None" in the boolean
+        # which can clobber the "sum" function
+        t = df.groupby('DisclosureId',as_index=False)[cols].apply(lambda x: x[x==True].sum())
+        return t
 
     def make_all_files(self):
         statelst = self.workdf.bgStateName.unique().tolist()
@@ -86,8 +93,10 @@ class State_gen():
                                                                 'bgLatitude','bgLongitude','location_error',
                                                                 'OperatorName','bgOperatorName',
                                                                 'no_chem_recs']].first()
-            gb1 = workdf.groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
-                                                              'is_on_PFAS_list']].count()
+            gb1 = self.count_all_trues(workdf[['DisclosureId','is_on_DWSHA','is_on_CWA',
+                                                              'is_on_PFAS_list']])
+            # gb1 = workdf.groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
+            #                                                   'is_on_PFAS_list']].count()
             gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
             # gb.to_csv('./tmp/gb.csv')
             #print(gb.columns)
@@ -108,8 +117,10 @@ class State_gen():
                                                                                               'bgCountyName','bgStateName','WellName',
                                                                                               'bgLatitude','bgLongitude',
                                                                                               'OperatorName','no_chem_recs']].first()
-                gb1 = workdf[workdf.bgCountyName==county].groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
-                                                                                                'is_on_PFAS_list']].count()
+                gb1 = self.count_all_trues(workdf[workdf.bgCountyName==county][['DisclosureId','is_on_DWSHA',
+                                                                                'is_on_CWA','is_on_PFAS_list']])
+                # gb1 = workdf[workdf.bgCountyName==county].groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
+                #                                                                                 'is_on_PFAS_list']].count()
                 gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
                 gb['TBWV'] = gb.TotalBaseWaterVolume.map(lambda x: th.round_sig(x,3,guarantee_str='??')) + ' gallons'
                 # gb.APINumber = gb.APINumber.map(lambda x: self.text_APINumber(x))

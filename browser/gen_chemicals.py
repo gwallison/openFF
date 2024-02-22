@@ -143,10 +143,10 @@ class Chem_gen():
                 continue             
             # report with data
             print(f'{i}: ** {chem:>13} **  n recs: {len(tt):>7,};  max mass: {mx:>10,}')               
-            if len(tt)>0:
-                tt['map_link'] = tt.apply(lambda x: th.getMapLink(x),axis=1)
-            else:
-                tt['map_link'] = ''
+            # if len(tt)>0:
+            tt['map_link'] = tt.apply(lambda x: th.getMapLink(x),axis=1)
+            # else:
+            #     tt['map_link'] = ''
             # if len(tt)>5: # don't map the very small chemicals
                 # self.sitemap_txt += f'\t<url>\n\t\t<loc>{chem}/analysis_{chem}.html</loc>\n\t</url>\n'
             # save data to file for later notebook access

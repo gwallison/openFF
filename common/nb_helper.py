@@ -27,12 +27,12 @@ def hide_map_warning(fn):
     with open(fn,'r',encoding='utf-8') as f:
         alltext = f.read()
     text = """<div class="jp-OutputArea-child">
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
 <pre>WARNING:fiona.ogrext:Skipping field geo_point_2d: invalid type 3
 </pre>
 </div>
 </div>"""
+    # text = """"""
     alltext  = alltext.replace(text,'')
     with open(fn,'w',encoding='utf-8') as f:
         f.write(alltext)

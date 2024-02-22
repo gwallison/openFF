@@ -21,8 +21,8 @@ import openFF.browser.gen_misc_nb as gen_misc_nb
 import openFF.browser.gen_scope as gen_scope
 
 ####
-testing_mode = False
-remake_workingdf = True
+testing_mode = True
+remake_workingdf = False
 ####
 
 def erase_output_space(dir = hndl.browser_out_dir):
@@ -54,8 +54,8 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
                 c2 = df.bgCountyName == 'monroe'
                 c1 = df.bgStateName == 'ohio'
                 c4 = df.bgOperatorName.isin(['antero','eclipse resources'])
-                # df = df[c1 & c2 & c3 & c4]
-                df = df[c4 & c1]
+                df = df[c1 & c2 & c3 & c4]
+                # df = df[c4 & c1]
                 df.to_parquet(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
             workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
         else:

@@ -14,11 +14,18 @@ def proprietary_bars(df,plot_title='TEST_title'):
                                   'between 25 and 50% of records\nare proprietary designations',
                                   'greater than 50% of records\nare proprietary designations'])
         
-    t = df.propCut.value_counts(sort=False).reset_index()
-    totcnt = t.propCut.sum()
-    t['prop_perc'] = t.propCut/totcnt *100
+    # t = df.propCut.value_counts(sort=False).reset_index()
+    # totcnt = t.propCut.sum()
+    # t['prop_perc'] = t.propCut/totcnt *100
 
-    ax = sns.barplot(data=t,y='index',x='propCut',palette='Reds',orient="h")
+    # ax = sns.barplot(data=t,y='index',x='propCut',palette='Reds',orient="h")
+    t = df.propCut.value_counts(sort=False).reset_index(name='count')
+    t = t.rename({'count':'pcount'},axis=1)
+
+    totcnt = t['pcount'].sum()
+    t['prop_perc'] = t['pcount']/totcnt *100
+
+    ax = sns.barplot(data=t,x='pcount',y='propCut',palette='Reds',orient="h")
     ax.set_xlabel("Number of disclosures")
     ax.set_ylabel("")
     ax.set_title(plot_title)

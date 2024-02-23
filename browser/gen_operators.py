@@ -42,6 +42,9 @@ class Operator_gen():
         # the following code is needed because there will sometimes be "None" in the boolean
         # which can clobber the "sum" function
         t = df.groupby('DisclosureId',as_index=False)[cols].apply(lambda x: x[x==True].sum())
+
+        # we still must correct for the disclosures that are only one record long.
+        t = t.replace({True:1,False:0})
         return t
     
     def make_all_files(self):

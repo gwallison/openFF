@@ -46,7 +46,7 @@ The code in this repository has been designed to run in a python environment. To
 
     > pip install geopandas
 
-    > conda install -c conda-forge matplotlib jupyterlab geopy openpyxl ipyleaflet pyarrow plotly nodejs folium pytest statsmodels seaborn
+    > conda install -c conda-forge matplotlib jupyterlab geopy openpyxl ipyleaflet pyarrow plotly nodejs folium pytest statsmodels seaborn reportlab
 
     > pip install requests-html
 

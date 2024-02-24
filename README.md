@@ -26,7 +26,7 @@ The Open-FF project aims to remedy these issues to provide an independent, free 
 
 The project uses a combination of automated methods and manual curation to remove much of the ambiguity of both chemical identification and quantity in the FracFocus data.
 
-Open-FF’s development between 2019 and 2023 is documented at [CodeOcean](https://doi.org/10.24433/CO.1058811.v16) and is currently being developed at GitHub. Publications using the Open-FF data include an analysis of chemicals regulated by the Safe Drinking Water Act, from which the industry has been exempted () and examinations of PFAS use and trade secret claims().  Up-to-date data sets and an online data browser are currently maintained through the sponsorship by [the FracTracker Alliance](https://www.fractracker.org/).
+Open-FF’s development between 2019 and 2023 is documented at [CodeOcean](https://doi.org/10.24433/CO.1058811.v16) and is currently being developed at GitHub. Publications using the Open-FF data include [an analysis of chemicals regulated](https://doi.org/10.1016/j.envpol.2022.120552) by the Safe Drinking Water Act, from which the industry has been exempted and [examinations of PFAS](https://psr.org/wp-content/uploads/2022/01/fracking-with-forever-chemicals-in-colorado.pdf) use and [trade secret claims](https://doi.org/10.1016/j.jenvman.2023.119611).  Up-to-date data sets and an online data browser are currently maintained through the sponsorship by [the FracTracker Alliance](https://www.fractracker.org/).
 
 
 # Installation

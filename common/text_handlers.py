@@ -114,17 +114,25 @@ def getPubChemLink(cas):
         pass
     return ''
 
-def getMoleculeImg(cas,size=120): #,chemical_report=False):
+def getMoleculeImg(cas,size=120,use_remote=False,link_up_level=0):
     # returns an html image link
-    prefix = hndl.browser_root
+    prefix = ''
+    if link_up_level:
+        for i in range(link_up_level):
+            prefix += '../'
+    if use_remote: # override link_up_level
+        prefix = hndl.browser_root
     # if chemical_report: prefix='../'
     ct_path = os.path.join(hndl.pic_dir,cas,'comptoxid.png')
+    # print(ct_path)
     # take comptox version if it exists
     if os.path.exists(ct_path):
         # and is not empty:  # this is the normal return
         if os.path.getsize(ct_path) > 0:
+            # print('got it')
             return f"""<center><img src="{prefix}images/{cas}/comptoxid.png" onerror="this.onerror=null; this.remove();" width="{size}"></center>"""
     else: # but if all else fails, try linking ot chemid
+        # print('ct_path didt exist')
         ci_path = os.path.join(hndl.pic_dir,cas,'chemid.png')
         if os.path.exists(ci_path):
             if os.path.getsize(ci_path) > 0:

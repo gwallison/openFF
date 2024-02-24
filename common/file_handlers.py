@@ -122,15 +122,28 @@ def get_df_from_url(df_url,df_fn,force_freshen=False,inp_format='parquet'):
 
 #### get specific data sets
 
-# def get_curr_df(curr_data=curr_data,cols=[],minimal=False):
-#     # Fetch openFF data frame from the current repository
-#     if minimal: # testing mode
-#         cols = ['DisclosureId','APINumber','date']
-#     if cols!=[]: # not empty so filter
-#         return pd.read_parquet(curr_data,columns=cols)
-#     return pd.read_parquet(curr_data)    
+def get_cas_list():
+    """returns list of all bgCAS numbers in current repository"""
+    # repoloc = r"C:\MyDocs\OpenFF\data\repos/"+repo_name
+    pkl = pd.read_parquet(os.path.join(hndl.curr_repo_pkl_dir,'bgCAS.parquet'))
+    #pkl.to_csv('./tmp/bgCAS.csv')
+    lst = pkl.bgCAS.str.strip().unique().tolist()
+    for cas in lst:
+        if (cas[-1]==' ')|(cas[0]==' '):
+            print(f'CAS list error: <<{cas}>>')
+    return lst
 
 
+def get_comptox_df():
+    """returns df of bgCAS with DTXSID ids as well as bgCAS"""
+    # repoloc = r"C:\MyDocs\OpenFF\data\repos/"+repo_name
+    pkl = pd.read_parquet(os.path.join(hndl.curr_repo_pkl_dir,'bgCAS.parquet'))
+    # pkl = pd.read_parquet(os.path.join(repoloc,'pickles/bgCAS.parquet'))
+    #print(f'Len dtxsid: {pkl.DTXSID.notna().sum()}, {len(pkl)}')
+    #print(f'{pkl[["bgCAS","DTXSID"]].head(10)}')
+    print('CAS without DTXSID:')
+    print(pkl[pkl.DTXSID.isna()].bgCAS.tolist())
+    return pkl[pkl.DTXSID.notna()][['bgCAS','DTXSID']]
 
 ##### external file dictionary handler
 def get_ext_master_dic(url="https://storage.googleapis.com/open-ff-common/ext_data/ext_data_master_list.csv"):

@@ -32,14 +32,16 @@ def erase_output_space(dir = hndl.browser_out_dir):
 
 def init_output_space(dir = hndl.browser_out_dir):
     dirs = [hndl.browser_inc_dir,hndl.browser_states_dir,
-            hndl.browser_operators_dir,hndl.browser_disclosures_dir]
+            hndl.browser_operators_dir,hndl.browser_disclosures_dir,
+            # hndl.browser_image_dir
+            ]
     erase_output_space(dir)
     for dir in dirs:
         os.mkdir(dir)
-    try:
-        shutil.copytree(hndl.pic_dir, hndl.image_dir)
-    except:
-        print('image directory not copied, already exists?')
+    # try:
+    shutil.copytree(hndl.pic_dir, hndl.browser_image_dir)
+    # except:
+    #     print('image directory not copied, already exists?')
             # shutil.copyfile(self.css_fn,
             #                 os.path.join(self.outdir,'style.css'))
 
@@ -50,7 +52,7 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
             if remake_workingdf:
                 print('-- creating new test workingdf')
                 df = fh.get_df(os.path.join(hndl.curr_repo_dir,'full_df.parquet'))
-                c3 = df.bgCAS.isin(['1319-33-1','50-00-0','proprietary','7732-18-5','71-43-2','non_chem_record','ambiguousID'])
+                c3 = df.bgCAS.isin(['1319-33-1','50-00-0'])#,'proprietary','7732-18-5','71-43-2','non_chem_record','ambiguousID'])
                 c2 = df.bgCountyName == 'monroe'
                 c1 = df.bgStateName == 'ohio'
                 c4 = df.bgOperatorName.isin(['antero','eclipse resources'])
@@ -88,10 +90,10 @@ if __name__ == '__main__':
         init_output_space()
     nbh.make_sandbox()
     workingdf = prep_working_df()
-    # _ = gen_chem.Chem_gen(workingdf)
+    _ = gen_chem.Chem_gen(workingdf)
     _ = gen_states.State_gen(workingdf)
     _ = gen_operators.Operator_gen(workingdf)
-    # _ = gen_disc.Disc_gen(workingdf)
-    # _ = gen_scope.ScopeGen(workingdf)
-    # _ = gen_misc_nb.MiscNbGen(workingdf)
+    _ = gen_disc.Disc_gen(workingdf)
+    _ = gen_scope.ScopeGen(workingdf)
+    _ = gen_misc_nb.MiscNbGen(workingdf)
     print('DONE')

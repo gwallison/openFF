@@ -46,7 +46,7 @@ ext_data_master_list = os.path.join(ext_data,'ext_data_master_list.csv')
 sandbox_dir = os.path.join(root_code,'sandbox')
 local_includes = os.path.join(root_code,'includes')
 browser_root = "https://storage.googleapis.com/open-ff-browser/"
-browser_root = "https://storage.googleapis.com/browser-beta/"
+# browser_root = "https://storage.googleapis.com/browser-beta/"
 # browser_root = r"C:\MyDocs\integrated\disc_browser_spike\browser_out"
 repo_root_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/"
 repo_pickles_url = repo_root_url+'pickles/'
@@ -68,6 +68,7 @@ browser_states_dir = os.path.join(browser_out_dir,"states")
 browser_operators_dir = os.path.join(browser_out_dir,"operators")
 browser_disclosures_dir = os.path.join(browser_out_dir,"disclosures")
 browser_scope_dir = os.path.join(browser_out_dir,"scope")
+browser_image_dir = os.path.join(browser_out_dir,"images")
 
 ref_fn = os.path.join(sandbox_dir,'ref.csv')
 

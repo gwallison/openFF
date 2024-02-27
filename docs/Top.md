@@ -8,6 +8,7 @@ To do:
 # Open-FF documentation
 - [What is FracFocus?](What_is_FracFocus.md)
 - [Open-FF Overview](Open-FF_overview.md)
+- [Data Limitations](Limitations.md)
 - [Quick tour of Open-FF](https://frackingchemicaldisclosure.wordpress.com/introduction-and-tour/) (external site)
 ### Creating a new Open-FF data set
 Currently this is performed about monthly under [FracTracker](https://www.fractracker.org/)'s sponsorship.  While most users don't need to create a data set from scratch, understanding **how** the data are generated is often helpful to getting the most from the data. 

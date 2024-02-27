@@ -1,6 +1,7 @@
 *.zip
 *.pyc
 .ipynb_checkpoints/
+.virtual_documents/
 test_fixture/
 sandbox/
 out/

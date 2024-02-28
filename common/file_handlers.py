@@ -84,18 +84,17 @@ def get_table(repo_dir=hndl.repo_dir, repo_name=hndl.repo_name,tname='disclosure
                            columns=cols)
 
 def make_tables_local(pickles_url=hndl.repo_pickles_url, pklnames= hndl.pickle_list, 
-                      local_dir=os.path.join(hndl.sandbox_dir,'pickles')):
+                      local_dir=os.path.join(hndl.sandbox_dir,'pickles'),
+                      force_refresh=False):
     if not os.path.exists(local_dir):
         os.mkdir(local_dir)
     for name in pklnames:
         fn = os.path.join(local_dir,name+'.parquet')
-        if os.path.exists(fn):
-            print(f'local <{name}> already exists ')
-        else:
+        if (not os.path.exists(fn))| (force_refresh) :
             print(f'fetching {name} table')
             fetch_file_from_url(pickles_url+name+'.parquet',fn)
-
-    pass
+        else:
+            print(f'local <{name}> already exists ')
 
 def get_repo_tables(pkl_dir=hndl.curr_repo_pkl_dir):
     tables = {}
@@ -117,7 +116,7 @@ def fetch_file_from_url(url,fn):
     # get file from url, save it at fn
     sz = get_size_of_url_file(url)
     if sz>100000000: # alert that a large file download is in progress
-        print('Fetching file, please be patient...')
+        print(' - Fetching large remote file, please be patient...')
     urllib.request.urlretrieve(url,fn)
 
 def get_df_from_url(df_url,df_fn,force_freshen=False,inp_format='parquet'):

@@ -5,7 +5,7 @@ import os
 from IPython.display import HTML, display
 from IPython.display import Markdown as md
 
-use_itables = True
+use_itables = False
 if use_itables:
     from itables import init_notebook_mode
     init_notebook_mode(all_interactive=True)

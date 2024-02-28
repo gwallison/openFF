@@ -34,6 +34,9 @@ out_dir = hndl.sandbox_dir
 df_url = hndl.full_url
 df_fn = os.path.join(out_dir,'full_df.parquet')
 
+# df_url = hndl.working_url
+# df_fn = os.path.join(out_dir,'working_df.parquet')
+
 ##### execute the following on run 
 nbh.make_sandbox(out_dir)
 if hndl.curr_platform=='remote':

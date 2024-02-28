@@ -83,6 +83,20 @@ def get_table(repo_dir=hndl.repo_dir, repo_name=hndl.repo_name,tname='disclosure
     return pd.read_parquet(os.path.join(repo_dir,repo_name,'pickles',tname+'.parquet'),
                            columns=cols)
 
+def make_tables_local(pickles_url=hndl.repo_pickles_url, pklnames= hndl.pickle_list, 
+                      local_dir=os.path.join(hndl.sandbox_dir,'pickles')):
+    if not os.path.exists(local_dir):
+        os.mkdir(local_dir)
+    for name in pklnames:
+        fn = os.path.join(local_dir,name+'.parquet')
+        if os.path.exists(fn):
+            print(f'local <{name}> already exists ')
+        else:
+            print(f'fetching {name} table')
+            fetch_file_from_url(pickles_url+name+'.parquet',fn)
+
+    pass
+
 def get_repo_tables(pkl_dir=hndl.curr_repo_pkl_dir):
     tables = {}
     print(f'Pulling repo tables from: {pkl_dir}')

@@ -479,6 +479,7 @@ def builder_step3(final_dir=final_dir):
     tests = tof.final_test(df)
     tests.run_all_tests()
     completed()
+
     
 def create_issues_data_set(final_dir=final_dir):
     import FF_issues.flag_issues as fi
@@ -541,6 +542,10 @@ def make_repository(create_zip=False,final_dir=final_dir):
     shutil.copy(os.path.join(final_dir,'full_df.parquet'),repodir)
     directories.append('')
     filenames.append('full_df.parquet')
+    
+    shutil.copy(os.path.join(final_dir,'working_df.parquet'),repodir)
+    directories.append('')
+    filenames.append('working_df.parquet')
     
     arcv_fn =  get_new_repo_info(variable='FF_archive_filename')
     shutil.copy(os.path.join(work_dir,'testData.zip'),

@@ -44,8 +44,6 @@ nbh.make_sandbox(out_dir)
 
 custom = cds.Custom_Data_Set(force_refresh=False)
 df = custom.final_df
-print('IS IT in custom?')
-print(df[df.api10=='3712929207'])
 
 # print(len(df))
 # print(df.columns)
@@ -60,8 +58,6 @@ print(df[df.api10=='3712929207'])
 #     #below is used to use the small test df
 #     # df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
 df = df[df.in_std_filtered]
-print('IS IT in std_filtered?')
-print(df[df.api10=='3712929207'])
 
 nbh.completed()
 
@@ -113,7 +109,7 @@ def process_radius_input(radius_input):
 
 def get_apis(df,lat,lon,radius_in_feet=5280):
     radius_m = radius_in_feet * 0.3048
-    print(df.columns)
+    # print(df.columns)
     gdf = maps.make_as_well_gdf(df)
     return maps.find_wells_near_point(lat,lon,gdf,buffer_m=radius_m)
 

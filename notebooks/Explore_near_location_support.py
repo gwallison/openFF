@@ -5,7 +5,7 @@ import os
 from IPython.display import HTML, display
 from IPython.display import Markdown as md
 
-use_itables = False
+use_itables = True
 if use_itables:
     from itables import init_notebook_mode
     init_notebook_mode(all_interactive=True)
@@ -26,6 +26,8 @@ import openFF.common.mapping as maps
 import openFF.common.chem_list_summary as chemls
 import openFF.common.text_handlers as th
 import openFF.common.make_pdf_report as mpr
+
+import openFF.common.custom_data_set as cds
 from ipywidgets import widgets
 
 
@@ -39,16 +41,28 @@ df_fn = os.path.join(out_dir,'full_df.parquet')
 
 ##### execute the following on run 
 nbh.make_sandbox(out_dir)
-if hndl.curr_platform=='remote':
-    df = fh.get_df_from_url(df_url,df_fn)
-else:
-    df = fh.get_df(df_fn)
-    # below is used to create a test df
-    # tmp = df[(df.bgStateName=='pennsylvania')&(df.bgCountyName=='westmoreland')]
-    # tmp.to_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
-    #below is used to use the small test df
-    # df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
+
+custom = cds.Custom_Data_Set(force_refresh=False)
+df = custom.final_df
+print('IS IT in custom?')
+print(df[df.api10=='3712929207'])
+
+# print(len(df))
+# print(df.columns)
+
+# if hndl.curr_platform=='remote':
+#     df = fh.get_df_from_url(df_url,df_fn)
+# else:
+#     df = fh.get_df(df_fn)
+#     # below is used to create a test df
+#     # tmp = df[(df.bgStateName=='pennsylvania')&(df.bgCountyName=='westmoreland')]
+#     # tmp.to_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
+#     #below is used to use the small test df
+#     # df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
 df = df[df.in_std_filtered]
+print('IS IT in std_filtered?')
+print(df[df.api10=='3712929207'])
+
 nbh.completed()
 
 def show_lat_lon_input(latlon_str):
@@ -99,6 +113,7 @@ def process_radius_input(radius_input):
 
 def get_apis(df,lat,lon,radius_in_feet=5280):
     radius_m = radius_in_feet * 0.3048
+    print(df.columns)
     gdf = maps.make_as_well_gdf(df)
     return maps.find_wells_near_point(lat,lon,gdf,buffer_m=radius_m)
 

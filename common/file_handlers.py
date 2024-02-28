@@ -85,7 +85,7 @@ def get_table(repo_dir=hndl.repo_dir, repo_name=hndl.repo_name,tname='disclosure
 
 def make_tables_local(pickles_url=hndl.repo_pickles_url, pklnames= hndl.pickle_list, 
                       local_dir=os.path.join(hndl.sandbox_dir,'pickles'),
-                      force_refresh=False):
+                      force_refresh=False, verbose=False):
     if not os.path.exists(local_dir):
         os.mkdir(local_dir)
     for name in pklnames:
@@ -94,7 +94,8 @@ def make_tables_local(pickles_url=hndl.repo_pickles_url, pklnames= hndl.pickle_l
             print(f'fetching {name} table')
             fetch_file_from_url(pickles_url+name+'.parquet',fn)
         else:
-            print(f'local <{name}> already exists ')
+            if verbose:
+                print(f'local <{name}> already exists ')
 
 def get_repo_tables(pkl_dir=hndl.curr_repo_pkl_dir):
     tables = {}

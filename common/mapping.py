@@ -30,6 +30,7 @@ def make_as_well_gdf(in_df,latName='bgLatitude',lonName='bgLongitude',
                 in_crs=final_crs):
     # produce a gdf grouped by api10 (that is, by wells)
     # in_df['api10'] = in_df.APINumber.str[:10]
+
     gb = in_df.groupby('api10',as_index=False)[[latName,lonName]].first()
     gdf =  gpd.GeoDataFrame(gb, geometry= gpd.points_from_xy(gb[lonName], 
                                                              gb[latName],
@@ -46,7 +47,6 @@ def find_wells_near_point(lat,lon,wellgdf,crs=final_crs,name='test',
     s = s.to_crs(proj_crs)
     s = gpd.GeoDataFrame(geometry=s.geometry.buffer(buffer_m))
     s['name'] = name
-    # tmp = gpd.sjoin(t,s,how='inner',predicate='within') Causing error after full update
     tmp = gpd.sjoin(t,s,how='inner')#,predicate='within')
     return tmp.api10.tolist()
 

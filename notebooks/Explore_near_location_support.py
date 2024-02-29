@@ -177,7 +177,8 @@ def show_water_used(dgb):
     plt.savefig('water_use.jpg')
 
 def create_chem_summary(t):
-    return chemls.ChemListSummary(t,summarize_by_chem=True, ignore_duplicates=True)
+    return chemls.ChemListSummary(t,summarize_by_chem=True, ignore_duplicates=True,
+                                  use_remote=True)
 
 def show_chem_summary(c_obj):
     chem_df = c_obj.get_display_table(colset='colab_v1')

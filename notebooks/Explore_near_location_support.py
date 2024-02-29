@@ -33,17 +33,17 @@ from ipywidgets import widgets
 
 # handles to use in notebook
 out_dir = hndl.sandbox_dir
-df_url = hndl.full_url
-df_fn = os.path.join(out_dir,'full_df.parquet')
+# df_url = hndl.full_url
+# df_fn = os.path.join(out_dir,'full_df.parquet')
 
 # df_url = hndl.working_url
 # df_fn = os.path.join(out_dir,'working_df.parquet')
 
 ##### execute the following on run 
-nbh.make_sandbox(out_dir)
+# nbh.make_sandbox(out_dir)
 
-custom = cds.Custom_Data_Set(force_refresh=False)
-df = custom.final_df
+# custom = cds.Custom_Data_Set(force_refresh=False)
+# df = custom.final_df
 
 # print(len(df))
 # print(df.columns)
@@ -57,9 +57,47 @@ df = custom.final_df
 #     # tmp.to_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
 #     #below is used to use the small test df
 #     # df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
-df = df[df.in_std_filtered]
+# df = df[df.in_std_filtered]
 
 nbh.completed()
+
+def show_state_name_input():
+    style = {'description_width': 'initial'}
+    name_input = widgets.Text(
+                value='Pennsylvania',
+                layout=widgets.Layout(width="500px"),
+                description='',
+                disabled=False,
+                indent=True,
+                style=style
+            )
+    return name_input
+
+# display this on loading
+state_name_input = show_state_name_input()
+display(md("### Enter target state name below"))
+display(state_name_input)
+
+
+def get_state_name(state_name_input):
+    name = state_name_input.value
+    # print(f'Selected state name is {name} ')
+    return name.strip().lower()
+
+def make_working_data_set(state_name_input):
+    statename = get_state_name(state_name_input)
+    newfilt = {'bgStateName':[statename]}
+    nbh.make_sandbox(out_dir)
+    custom = cds.Custom_Data_Set(force_refresh=False)
+    custom.make_final_data_set(filters=newfilt)
+
+    # set up the next step
+    display(md("### Latitude, Longitude entry:"))
+    lat_lon_input = show_lat_lon_input('40.38415163662122, -79.62416933177497') # default is pa well pad
+    display(lat_lon_input)
+
+    return custom.final_df, lat_lon_input
+
 
 def show_lat_lon_input(latlon_str):
     style = {'description_width': 'initial'}
@@ -116,7 +154,7 @@ def get_apis(df,lat,lon,radius_in_feet=5280):
 def make_disc_link(row):
     return th.getDisclosureLink(row.api10,row.DisclosureId,row.api10,use_remote=True)
 
-def show_well_info(apis):
+def show_well_info(apis,df):
     t = df[df.api10.isin(apis)].copy()
     # save the full data set from these wells to allow users to download
     t.to_csv('all_data_for_selected_wells.csv')
@@ -149,7 +187,7 @@ def show_chem_summary(c_obj):
 def show_report_name_input():
     style = {'description_width': 'initial'}
     name_input = widgets.Text(
-                value='Enter name here',
+                value='Enter report title here',
                 layout=widgets.Layout(width="500px"),
                 description='',
                 disabled=False,

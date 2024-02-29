@@ -15,6 +15,8 @@ import os
 
 import openFF.common.handles as hndl
 import openFF.common.file_handlers as fh
+import openFF.common.nb_helper as nbh
+
 
 # parquet schema code from; https://stackoverflow.com/questions/41567081/get-schema-of-parquet-file-in-python
 import pyarrow.parquet
@@ -58,9 +60,6 @@ class Custom_Data_Set():
                                     'is_on_UVCB', 'rq_lbs']}
 
         self.cols_wanted = list(set(self.col_sets[use_set] + added_cols + list(filters.keys())+ ['dup_rec','is_duplicate']))
-        self.get_all_table_cols()
-        self.get_table_list()
-        self.assemble_tables()
 
     def get_all_table_cols(self):
         # use schema to keep from loading whole file.
@@ -112,3 +111,10 @@ class Custom_Data_Set():
 
         self.final_df = out
     
+    def make_final_data_set(self,filters={}):
+        self.filters = filters
+        self.get_all_table_cols()
+        self.get_table_list()
+        self.assemble_tables()
+        nbh.completed()
+

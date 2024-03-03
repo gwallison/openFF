@@ -170,7 +170,8 @@ class Read_FF():
                     t['density_from_comment'] = t.IngredientComment\
                                                 .map(lambda x: self.get_density_from_comment(x))
                     for col in fill_lst:
-                        t[col].fillna('MISSING',inplace=True)
+                        # t[col].fillna('MISSING',inplace=True)  # mar 2024, pandas started complaining about this 
+                        t[col] = t[col].fillna('MISSING')
                         
                     t = self.clean_cols(t)            
                     t = self.get_api10(t)
@@ -213,7 +214,7 @@ class Read_FF():
                     
                     t['raw_ws_filename'] = fn # helpful for manual searches of raw files
                     for col in fill_lst:
-                        t[col].fillna('MISSING',inplace=True)
+                        t[col] = t[col].fillna('MISSING')
 
                     dflist.append(t)
         final = pd.concat(dflist,sort=True)

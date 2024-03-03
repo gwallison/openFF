@@ -50,9 +50,8 @@ def store_FF_bulk(newdir='./newdir/',sources = './sources/',
     tempfn = os.path.join(newdir,'testData.zip')
     today = datetime.today()
 
-    url = 'http://fracfocusdata.org/digitaldownload/fracfocuscsv.zip'
-    #url = 'https://storage.googleapis.com/open-ff-browser/100-42-5/data.zip'
-    # url = 'https://storage.googleapis.com/open-ff-browser/100-42-5/analysis_100-42-5.html'
+    url = 'http://fracfocusdata.org/digitaldownload/fracfocuscsv.zip' # old address
+    url = 'https://www.fracfocusdata.org/digitaldownload/FracFocusCSV.zip'
     print(f'Downloading FracFocus data from {url}')
     r = requests.get(url, allow_redirects=True,timeout=20.0)
     open(tempfn, 'wb').write(r.content)

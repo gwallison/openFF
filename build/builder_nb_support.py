@@ -87,7 +87,7 @@ def get_water_source_df(cols=None,work_dir=work_dir):
 ####  ------ Functions called by the builder notebook
 
 def create_and_fill_folders(download_repo=True,
-                            repo_root='https://storage.googleapis.com/open-ff-common/repos/current_repo_FFV4',
+                            repo_root='https://storage.googleapis.com/open-ff-common/repos/current_repo',
                             orig_dir=orig_dir,
                             work_dir=work_dir,
                             final_dir=final_dir,
@@ -450,6 +450,7 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
              'upload_dates.parquet',
              'CI_sdf_summary.parquet',
              'ws_flat.parquet',
+             'raw_flat.parquet'
              ]
     for fn in files:
         shutil.copy(os.path.join(work_dir,fn),

@@ -53,7 +53,6 @@ repo_pickles_url = repo_root_url+'pickles/'
 pickle_list = ['disclosures','chemrecs','bgCAS','cas_ing','companies','water_source']
 
 full_url = repo_root_url+"full_df.parquet"
-# working_url = repo_root_url+"working_df.parquet"
 
 # working_df_cols = ['DisclosureId', 'JobEndDate', 'JobStartDate', 'OperatorName', 'APINumber',
 #                    'TotalBaseWaterVolume', 'TotalBaseNonWaterVolume', 'FFVersion', 'TVD',
@@ -67,6 +66,8 @@ full_url = repo_root_url+"full_df.parquet"
 #                     'massSource', 'mass', 'bgIngredientName', 'is_on_CWA', 'is_on_DWSHA', 'is_on_AQ_CWA', 'is_on_HH_CWA', 
 #                     'is_on_IRIS', 'is_on_PFAS_list', 'epa_pref_name', 'is_on_NPDWR', 'is_on_prop65', 'is_on_TEDX', 'is_on_diesel', 
 #                     'is_on_UVCB', 'rq_lbs', 'in_std_filtered']
+
+
 # full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
 # full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo_FFV4/full_df.parquet"
 

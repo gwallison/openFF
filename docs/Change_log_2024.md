@@ -84,7 +84,7 @@ We supplied the breakdown of companies involved and we asked:
 - added some more instructions in the notebook and (hopefully) makes the workflow through the notebook more intuitive
 - added a report generator that creates a PDF of the results you assemble.
 
-
+**March 6, 2024** We released a notebook that allows users to create customized data set. Unfortunately the size of the current FracFocus data set prevents this notebook from running in Colab. (If you want to try, go to ["Data Set Customizer"](https://colab.research.google.com/github/gwallison/openFF/blob/master/notebooks/Data_set_customizer.ipynb)).  Until we get that worked out, please contact us if you want a custom data set.
 
 
 [Return to Index](Top.md)

@@ -33,32 +33,6 @@ from ipywidgets import widgets
 
 # handles to use in notebook
 out_dir = hndl.sandbox_dir
-# df_url = hndl.full_url
-# df_fn = os.path.join(out_dir,'full_df.parquet')
-
-# df_url = hndl.working_url
-# df_fn = os.path.join(out_dir,'working_df.parquet')
-
-##### execute the following on run 
-# nbh.make_sandbox(out_dir)
-
-# custom = cds.Custom_Data_Set(force_refresh=False)
-# df = custom.final_df
-
-# print(len(df))
-# print(df.columns)
-
-# if hndl.curr_platform=='remote':
-#     df = fh.get_df_from_url(df_url,df_fn)
-# else:
-#     df = fh.get_df(df_fn)
-#     # below is used to create a test df
-#     # tmp = df[(df.bgStateName=='pennsylvania')&(df.bgCountyName=='westmoreland')]
-#     # tmp.to_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
-#     #below is used to use the small test df
-#     # df = pd.read_parquet(r"C:\MyDocs\OpenFF\src\testing\tmp\small_df.parquet")
-# df = df[df.in_std_filtered]
-
 nbh.completed()
 
 def show_state_name_input():

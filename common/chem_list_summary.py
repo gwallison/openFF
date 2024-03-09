@@ -86,7 +86,7 @@ class ChemListSummary():
         caslst = self.df[c1].bgCAS.unique().tolist()
         cdf = casdf[casdf.bgCAS.isin(caslst)].copy()
         cdf['fingerprint'] = cdf.bgCAS.map(lambda x: th.getFingerprintImg(x))
-        cdf['img'] = cdf.bgCAS.map(lambda x: th.getMoleculeImg(x,size=300,use_remote=use_remote))
+        cdf['img'] = cdf.bgCAS.map(lambda x: th.getMoleculeImg(x,size=200,use_remote=use_remote))
         cdf['chem_detail'] = cdf.bgCAS.map(lambda x: th.getCatLink(x,x,use_remote=use_remote))
         cdf['PubChem'] = cdf.bgCAS.map(lambda x: th.getPubChemLink(x)) 
         cdf['EPA_ref'] = cdf.DTXSID.map(lambda x: th.getCompToxRef(x))

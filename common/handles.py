@@ -54,18 +54,18 @@ pickle_list = ['disclosures','chemrecs','bgCAS','cas_ing','companies','water_sou
 
 full_url = repo_root_url+"full_df.parquet"
 
-# working_df_cols = ['DisclosureId', 'JobEndDate', 'JobStartDate', 'OperatorName', 'APINumber',
-#                    'TotalBaseWaterVolume', 'TotalBaseNonWaterVolume', 'FFVersion', 'TVD',
-#                     'WellName', 'FederalWell', 'IndianWell', 'bgOperatorName', 'StateName', 'bgStateName',
-#                     'CountyName', 'bgCountyName', 'Latitude', 'bgLatitude', 'Longitude', 'bgLongitude',
-#                     'bgLocationSource', 'latlon_too_coarse', 'loc_name_mismatch', 'loc_within_state', 'loc_within_county',
-#                     'date','ws_perc_total', 'no_chem_recs', 'is_duplicate', 'primarySupplier',
-#                     'MI_inconsistent', 'IngredientsId', 'CASNumber', 'IngredientName', 'PercentHFJob', 'Supplier', 'Purpose', 
-#                     'TradeName', 'PercentHighAdditive', 'MassIngredient', 'ingKeyPresent', 'reckey',
-#                     'bgCAS', 'ingredCommonName', 'bgSupplier', 'dup_rec', 'cleanMI', 'calcMass', 'massComp', 'massCompFlag',
-#                     'massSource', 'mass', 'bgIngredientName', 'is_on_CWA', 'is_on_DWSHA', 'is_on_AQ_CWA', 'is_on_HH_CWA', 
-#                     'is_on_IRIS', 'is_on_PFAS_list', 'epa_pref_name', 'is_on_NPDWR', 'is_on_prop65', 'is_on_TEDX', 'is_on_diesel', 
-#                     'is_on_UVCB', 'rq_lbs', 'in_std_filtered']
+working_df_cols = ['DisclosureId', 'JobEndDate', 'JobStartDate', 'OperatorName', 'APINumber',
+                   'TotalBaseWaterVolume', 'TotalBaseNonWaterVolume', 'FFVersion', 'TVD',
+                    'WellName', 'FederalWell', 'IndianWell', 'bgOperatorName', 'StateName', 'bgStateName',
+                    'CountyName', 'bgCountyName', 'Latitude', 'bgLatitude', 'Longitude', 'bgLongitude',
+                    'bgLocationSource', 'latlon_too_coarse', 'loc_name_mismatch', 'loc_within_state', 'loc_within_county',
+                    'date','ws_perc_total', 'no_chem_recs', 'is_duplicate', 'primarySupplier',
+                    'MI_inconsistent', 'IngredientsId', 'CASNumber', 'IngredientName', 'PercentHFJob', 'Supplier', 'Purpose', 
+                    'TradeName', 'PercentHighAdditive', 'MassIngredient', 'ingKeyPresent', 'reckey',
+                    'bgCAS', 'ingredCommonName', 'bgSupplier', 'dup_rec', 'cleanMI', 'calcMass', 'massComp', 'massCompFlag',
+                    'massSource', 'mass', 'bgIngredientName', 'is_on_CWA', 'is_on_DWSHA', 'is_on_AQ_CWA', 'is_on_HH_CWA', 
+                    'is_on_IRIS', 'is_on_PFAS_list', 'epa_pref_name', 'is_on_NPDWR', 'is_on_prop65', 'is_on_TEDX', 'is_on_diesel', 
+                    'is_on_UVCB', 'rq_lbs', 'in_std_filtered']
 
 
 # full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"

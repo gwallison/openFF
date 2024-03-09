@@ -51,10 +51,10 @@ def make_xlate_df(raw_df):
     sout['rawName'] = sout.Supplier
     
     out = pd.merge(oout,sout,on='rawName',how='outer')
-    out.OpCount.fillna(0,inplace=True)
-    out.SupCount.fillna(0,inplace=True)
-    out.OperatorYears.fillna('',inplace=True)
-    out.SupplierYears.fillna('',inplace=True)
+    out.OpCount = out.OpCount.fillna(0)
+    out.SupCount = out.SupCount.fillna(0)
+    out.OperatorYears = out.OperatorYears.fillna('')
+    out.SupplierYears = out.SupplierYears.fillna('')
     return out[['rawName','OpCount','OperatorYears','SupCount','SupplierYears']]
     
 def add_new_to_Xlate(rawdf,ref_dir,out_dir):

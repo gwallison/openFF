@@ -40,7 +40,10 @@ def calc_overall_percentages(rec_df,disc_df):
     disc_df = pd.merge(disc_df,valid,on='DisclosureId',how='left')
     disc_df = pd.merge(disc_df,allrecs,on='DisclosureId',how='left')
     # make sure disclosures without chem records are also marked as out of tolerance
-    disc_df.within_total_tolerance = disc_df.within_total_tolerance.fillna(False) 
+    cond = (disc_df.within_total_tolerance==False)|(disc_df.within_total_tolerance.isna())
+
+    disc_df.within_total_tolerance = np.where(cond,False,True) 
+    # disc_df.within_total_tolerance = disc_df.within_total_tolerance.fillna(False) 
     
     return disc_df
 

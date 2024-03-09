@@ -81,7 +81,7 @@ def getAPILink(row, txt='',latname='bgLatitude',lonname='bgLongitude'):
 
 def getFFLink(row, txt=''):
     # link to the FF disclosure with the (default) text as the APINumber
-    lnk = f'https://fracfocus.org/wells/{row.APINumber}'
+    lnk = f'https://www.fracfocus.org/wells/{row.APINumber}'
     if txt=='':
         txt = row.APINumber
     return wrap_URL_in_html(lnk,txt)

@@ -56,7 +56,7 @@ class Carrier_ID():
         self.df = pd.merge(self.df,casing[['CASNumber','IngredientName',
                                            'bgCAS','is_valid_CAS']],
                            on=['CASNumber','IngredientName'],how='left')
-        self.df.is_valid_CAS.fillna(False,inplace=True)
+        self.df.is_valid_CAS = self.df.is_valid_CAS.fillna(False)
         
         
     def make_percent_sums(self):
@@ -101,7 +101,7 @@ class Carrier_ID():
         # trying to remove disclosures where non-water individual records are too big
         # c1 is the standard chemicals used as carriers; c2 covers ambiguousID etc
         # the salts are sometimes used as proxies for water; as in brine water is labelled as 7647-14-5
-        self.df.bgCAS.fillna('unknown',inplace=True)
+        self.df.bgCAS = self.df.bgCAS.fillna('unknown')
         c1 = self.df.bgCAS.isin(['7732-18-5', # water
                                  '7447-40-7', # potassium chloride
                                  '10043-52-4', # calcium chloride
@@ -356,7 +356,7 @@ class Carrier_ID():
         t = t.drop('has_purp',axis=1)
         t = pd.merge(t,gbp,on='DisclosureId',how='left')
         t.TradeName = t.TradeName.str.lower()
-        t.TradeName.fillna('empty',inplace=True)
+        t.TradeName = t.TradeName.fillna('empty')
         c1 = t.has_purp==1  # only 1 record with Purpose in wlst
         c2 = t.bgCAS == 'ambiguousID'  # must be water
         c3 = (t.PercentHFJob >= 50)&(t.PercentHFJob < 100)  # should be at least this amount
@@ -410,7 +410,7 @@ class Carrier_ID():
         
         t = self.df.copy()
         t.TradeName = t.TradeName.str.lower()
-        t.TradeName.fillna('empty',inplace=True)
+        t.TradeName = t.TradeName.fillna('empty')
         c1 = t.Purpose == 'unrecorded purpose'
         c2 = t.bgCAS.isin(['ambiguousID','7732-18-5'])         
         c3 = t.IngredientName=='MISSING'
@@ -441,7 +441,7 @@ class Carrier_ID():
         
         t = self.df.copy()
         t.TradeName = t.TradeName.str.lower()
-        t.TradeName.fillna('empty',inplace=True)
+        t.TradeName = t.TradeName.fillna('empty')
         c1 = t.Purpose.str.strip().str.lower().isin(self.wlst) 
         c2 = t.bgCAS.isin(['ambiguousID','7732-18-5'])         
         c3 = t.IngredientName=='MISSING'
@@ -476,7 +476,7 @@ class Carrier_ID():
         t = t.drop('has_purp',axis=1)
         t = pd.merge(t,gbp,on='DisclosureId',how='left')
         t.TradeName = t.TradeName.str.lower()
-        t.TradeName.fillna('empty',inplace=True)
+        t.TradeName = t.TradeName.fillna('empty')
         c1 = t.CASNumber.str.lower() == 'listed below'  # must be water
         c2 = (t.PercentHFJob >= 50)&(t.PercentHFJob <= 100)  # should be at least this amount
         c3 =  t.Purpose.str.strip().str.lower().isin(self.wlst)

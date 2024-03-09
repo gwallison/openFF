@@ -50,6 +50,8 @@ Incidentally, over those two weeks, about 60 disclosures were removed including 
 
 **March 4, 2024** Upon comparing the PDFs and bulk download data from early disclosures, it appears that one of the recent changes taken by FracFocus in FFV4 is put back the initial TradeName, Purpose and Supplier that were originally in the disclosures (mostly 2013-2025) that had been replaced with "Ingredient Container" etc.  It seems this returns the disclosures to their original states.  Perhaps they will be doing the same for the disclosure with `dup_recs` as well.
 
+**March 7, 2024** Indeed, a large number of disclosre have been modified and now Open-FF can detect the duplicate records in the same way both pre and post FFV4.  This means that we do not have to rely on a translation table between UploadKey and DisclosureId.  With that code resolved, we now detect more that 235,000 records as duplicates.
+
 <!-- this is a test of a comment 
 This text is not correct
 to separate the "multiple TradeName" entries (for example, common for Schlumberger, [42389328870000](https://fracfocus.org/wells/42389328870000)) from the chemical records.  These are the numerous disclosures in which companies created their own version of the Systems Approach by just reporting that all chemicals came from a long list of products.  I believe that this change in FracFocus will make the difference between System Approach and MSDS+ more distinguishable, though it may be odd to have multiple copies when that non_chemical record that previously corresponded to multiple chemical records.

@@ -39,7 +39,7 @@ class Data_set_constructor():
         self._banner('Table_manager')
         mark_missing = ['CASNumber','IngredientName','Supplier','OperatorName']
         for col in mark_missing:
-            self.raw_df[col].fillna('MISSING',inplace=True)
+            self.raw_df[col] = self.raw_df[col].fillna('MISSING')
         tab_const.assemble_all_tables(self.raw_df,self.water_df)
         print(f'  -- Number disclosure in table manager: {len(tab_const.tables["disclosures"])}')     
         

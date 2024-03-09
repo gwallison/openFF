@@ -25,7 +25,10 @@ In these affected disclosures, there can be many duplicates.  For these disclosu
 
 These duplications, while they do not add unique checmicals to a disclosure, erroneously inflate the calculated mass of the chemicals there.  
 
-Before December 2023 and the introduction of FracFocus version 4, Open-FF was able to detect those duplicated records (over 200,000) and flag them to be removed before any statisitcal operations were performed.  Unfortunately, FracFocus Version 4 has changed the format and undermined Open-FF's ability to detect those duplicates.  We are currently using archived indications of duplicates to flag them.  While this is not ideal, it allows us to continue to remove duuplicates until FracFocus can provide a better solution.
+As of March 2024, Open-FF can now detect these duplicate records regardless of the FracFocus version. (Between Dec. 2023, the launch of FFVersion 4, and Feb 2024, we had to use archived indications of duplicates to flag them.  In addition, FracFocus data sets downloaded from that period are rife with other unintended duplications.  FracFocus subsequently corrected some coding and reinstated the cues in FFV3 data that Open-FF uses to distinguish the unintended duplicates from valid ones.)  
+
+<!-- Before December 2023 and the introduction of FracFocus version 4, Open-FF was able to detect those duplicated records (over 200,000) and flag them to be removed before any statisitcal operations were performed.  Unfortunately, FracFocus Version 4 has changed the format and undermined Open-FF's ability to detect those duplicates.  We are currently using archived indications of duplicates to flag them.  While this is not ideal, it allows us to continue to remove duuplicates until FracFocus can provide a better solution.
+-->
 
 ## Using Open-FF without these duplicates
 The full version of the Open-FF data set contains all records and disclosures that are included in the FracFocus bulk download.  However, for many operations, users may want to avoid the duplicate disclosures and records.  
@@ -35,5 +38,6 @@ Three fields can be used to remove these duplicates:
 - The field 'dup_rec' is a flag that, when True, indicates that the given record is a detected erroneous duplicate.
 - The field `in_std_filtered` is a flag that, when True, allows a user to keep only the dsclosures and records in Open-FF that are not duplicated.  The Data Browser (with a few exceptions) uses ths data set.
 
+Users should be aware that the unintended duplications created by FracFocus at the start of FFVersion 4 (Dec 2023 - Feb 2024; mentioned above) were not detectable by Open-FF and should be wary of using archived data from that period.  
 
 |[Prev](Proprietary_records.md)|[Index](Top.md)|[Next](Generating_the_Open-FF_data_set.md)|

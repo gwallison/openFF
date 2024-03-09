@@ -177,8 +177,9 @@ class Table_constructor():
         df = pd.merge(df,tab,on='d2',how='left',validate='m:1')
         df = df.drop(['d1','d2'],axis=1)
         
+        # print(df.date_added.tail())
         #convert date_added field
-        df.date_added = pd.to_datetime(df.date_added)
+        df.date_added = pd.to_datetime(df.date_added,format='mixed')
         df['pub_delay_days'] = (df.date_added-df.date).dt.days
         # Any date_added earlier than 10/2018 is unknown
         refdate = datetime.datetime(2018,10,1) # date that I started keeping track
@@ -263,12 +264,12 @@ class Table_constructor():
 
         # pulling ext_dir from default, not local
         reffn = ext_fn(handle='trans_dup_recs')
-        self.print_step('USING archived data to flag Version 3 duplicate records',2)
-        trans_df = get_df(reffn,cols=['DisclosureId','IngredientName','CASNumber','MassIngredient',
-                                                'PercentHFJob','PercentHighAdditive'])
-        trans_df = trans_df[~trans_df[['DisclosureId','IngredientName','CASNumber','MassIngredient',
-                                                'PercentHFJob','PercentHighAdditive']].duplicated()]
-        trans_df['old_dup_rec'] = True
+        # self.print_step('USING archived data to flag Version 3 duplicate records',2)
+        # trans_df = get_df(reffn,cols=['DisclosureId','IngredientName','CASNumber','MassIngredient',
+        #                                         'PercentHFJob','PercentHighAdditive'])
+        # trans_df = trans_df[~trans_df[['DisclosureId','IngredientName','CASNumber','MassIngredient',
+        #                                         'PercentHFJob','PercentHighAdditive']].duplicated()]
+        # trans_df['old_dup_rec'] = True
         # print(f'TRANS len: {len(trans_df)}')
 
         records['dup_rec'] = records.duplicated(subset=['DisclosureId',
@@ -278,22 +279,38 @@ class Table_constructor():
                                                     'PercentHFJob',
                                                     'PercentHighAdditive'],
                                         keep=False)
-        records = pd.merge(records,trans_df,on=['DisclosureId','IngredientName',
-                                                'CASNumber','MassIngredient',
-                                                'PercentHFJob','PercentHighAdditive'],
-                                            how='left')
+        # records = pd.merge(records,trans_df,on=['DisclosureId','IngredientName',
+        #                                         'CASNumber','MassIngredient',
+        #                                         'PercentHFJob','PercentHighAdditive'],
+        #                                     how='left')
         # print(f'RECORDS merge with FFV3 trans: {records._merge.value_counts()}')
         # records.to_csv('./sandbox/dup_rec.csv')
         c0 = records.ingKeyPresent
-        cV3 = records.dup_rec & records.old_dup_rec & (records.Supplier=='Ingredient Container')
-        c2 = (records.Supplier.str.lower()=='listed above')&(records.FFVersion==4)
-        c3 = (records.Purpose.str.lower().str[:9]=='see trade')&(records.FFVersion==4)
-        cV4 = c2&c3
 
-        records['dup_rec'] = np.where(records.dup_rec&c0&(cV3|cV4),True,False)
+        ## In early phases of FFV4 (Dec-Feb2024), old dup records had "Ingredient Container" in TradeName
+        ##  and Supplier and so we used that to help detect the records below the red line.  Sometime in
+        ##  late Feb early March 2024, they changed those records again to be labeled "Other Chemical(s)" 
+        ##  and "Listed Above" and Purpose is now "See Trade Name(s) List".  This change appears to have 
+        ##  made the old records now consistant with the duplicate records in FFV4. This is an improvement
+        ##  such that we may not need to use the saved disclosure/UploadKey translation table to identify
+        ##  those old disclosures with duplicates before applying the V4 criteria (which is just from Supplier
+        ##  and Purpose)
+        # cV3 = records.dup_rec & records.old_dup_rec & (records.Supplier=='Ingredient Container')
+        # c2 = (records.Supplier.str.lower()=='listed above')&(records.FFVersion==4)
+        # c3 = (records.Purpose.str.lower().str[:9]=='see trade')&(records.FFVersion==4)
+        # cV4 = c2&c3
+
+        # records['dup_rec'] = np.where(records.dup_rec&c0&(cV3|cV4),True,False)
+        ##### cV3 = records.dup_rec & records.old_dup_rec & (records.Supplier=='Ingredient Container')
+        c2 = records.Supplier.str.lower()=='listed above'#&(records.FFVersion==4)
+        c3 = records.Purpose.str.lower().str[:9]=='see trade' #)&(records.FFVersion==4)
+        #### cV4 = c2&c3
+
+        records['dup_rec'] = np.where(records.dup_rec&c0&c2&c3,True,False)
         self.print_step(f'Number dups: {records.dup_rec.sum()}',2)
         # print(records[records.dup_rec].FFVersion.value_counts())
-        return records.drop(['FFVersion','old_dup_rec'],axis=1)
+        # return records.drop(['FFVersion','old_dup_rec'],axis=1)
+        return records.drop(['FFVersion'],axis=1)
     
     def assemble_chem_rec_table(self,raw_df):
         """as of FFV4, records where ingKeyPreset==False, bgCAS is set to 'non_chem_record'"""

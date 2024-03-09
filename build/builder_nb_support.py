@@ -540,6 +540,10 @@ def make_repository(create_zip=False,final_dir=final_dir):
     directories.append('')
     filenames.append('repo_info.csv')
 
+    shutil.copy(os.path.join(work_dir,'raw_flat.parquet'),repodir)
+    directories.append('')
+    filenames.append('raw_flat.parquet')
+
     shutil.copy(os.path.join(final_dir,'full_df.parquet'),repodir)
     directories.append('')
     filenames.append('full_df.parquet')
@@ -547,7 +551,15 @@ def make_repository(create_zip=False,final_dir=final_dir):
     shutil.copy(os.path.join(final_dir,'working_df.parquet'),repodir)
     directories.append('')
     filenames.append('working_df.parquet')
-    
+
+    shutil.copy(os.path.join(final_dir,'disclosure_issues.parquet'),repodir)
+    directories.append('')
+    filenames.append('disclosure_issues.parquet')
+
+    shutil.copy(os.path.join(final_dir,'record_issues.parquet'),repodir)
+    directories.append('')
+    filenames.append('record_issues.parquet')
+
     arcv_fn =  get_new_repo_info(variable='FF_archive_filename')
     shutil.copy(os.path.join(work_dir,'testData.zip'),
                 os.path.join(repodir, arcv_fn))    

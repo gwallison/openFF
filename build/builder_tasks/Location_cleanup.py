@@ -66,8 +66,8 @@ class Location_ID():
          return out
 
     def fetch_clean_loc_names(self,latlon_df):
-        latlon_df.StateName.fillna('missing',inplace=True)
-        latlon_df.CountyName.fillna('missing',inplace=True)
+        latlon_df.StateName = latlon_df.StateName.fillna('missing')
+        latlon_df.CountyName = latlon_df.CountyName.fillna('missing')
         old = self.get_cur_table()
         # print(f'old: {old.columns}')
         # print(f'latlon: {latlon_df.columns}')    
@@ -125,8 +125,8 @@ class Location_ID():
         # For now, replace na lat and lons with dummy values
         for in_epsg in crs_types:
             t = df[df.epsg==in_epsg].copy()
-            t.Latitude.fillna(0,inplace=True)
-            t.Longitude.fillna(0,inplace=True)
+            t.Latitude = t.Latitude.fillna(0)
+            t.Longitude = t.Longitude.fillna(0)
             # print(f'{in_epsg}, Num na in lat: {t[t.Latitude.isna()].api10.tolist()}, tot: {len(t)}')
             t = geopandas.GeoDataFrame(t, geometry= geopandas.points_from_xy(t.Longitude, t.Latitude,crs=in_epsg))
             if in_epsg != final_crs:
@@ -225,8 +225,8 @@ class Location_ID():
         county_flag = pd.concat(ct_collect,sort=True)
         final = pd.merge(final,county_flag,on='DisclosureId',how='left')
     
-        final.loc_within_state.fillna('unknown',inplace=True)        
-        final.loc_within_county.fillna('unknown',inplace=True)        
+        final.loc_within_state = final.loc_within_state.fillna('unknown')        
+        final.loc_within_county = final.loc_within_county.fillna('unknown')        
         return final
         
 

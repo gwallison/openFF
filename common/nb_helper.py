@@ -102,7 +102,12 @@ def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
     if imagelink:
         image_alt = f'<center>{imagelink}</center>'
     
-    table = f"""<style>
+    alert = """<a href="alert.html">
+  <img src="alert.png" onerror="this.onerror=null; this.remove();" >
+</a>"""
+    
+    table = f"""{alert}
+                <style>
                 </style>{cat_txt}<hr>
                 <table style='margin: 0 auto' >
                 <tr>

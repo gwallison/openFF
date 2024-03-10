@@ -17,9 +17,9 @@ import platform
 
 locals = ['Dell_2023_Gary','M2']
 
-# repo_name = 'openFF_data_2024_02_17'
-repo_name = 'current_repo'
-bulkdata_date = 'February 17, 2024'
+repo_name = 'openFF_data_2024_03_07'
+# repo_name = 'current_repo'
+bulkdata_date = 'March 7, 2024'
 
 curr_platform = ''
 if not platform.node() in locals:
@@ -83,6 +83,7 @@ browser_out_dir = os.path.join(root_data,"browser_out")
 browser_inc_dir = os.path.join(browser_out_dir,"includes")
 browser_states_dir = os.path.join(browser_out_dir,"states")
 browser_operators_dir = os.path.join(browser_out_dir,"operators")
+browser_flaws_dir = os.path.join(browser_out_dir,"flaws")
 browser_disclosures_dir = os.path.join(browser_out_dir,"disclosures")
 browser_scope_dir = os.path.join(browser_out_dir,"scope")
 browser_image_dir = os.path.join(browser_out_dir,"images")

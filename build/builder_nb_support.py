@@ -488,8 +488,10 @@ def create_issues_data_set(final_dir=final_dir):
 
     print('assembling tables of FracFocus flaws')
     df = get_df(os.path.join(final_dir,'full_df.parquet'))
+    cas_curated = get_df(os.path.join(final_dir,'curation_files','cas_curated.parquet'))
 
-    obj = fi.Flag_issues(df,final_dir)
+    obj = fi.Flag_issues(df=df,cas_curated=cas_curated,
+                         out_dir=final_dir)
     obj.detect_all_issues()
     print(' -- issues detected, now compiling flag fields')
     obj.add_summary_fields()

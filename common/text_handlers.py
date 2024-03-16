@@ -67,6 +67,15 @@ def getCountyLink(county,state,text_to_show='County details',use_remote=False):
     s = f'{preamble}{name}.html'    
     return wrap_URL_in_html(s,text_to_show)
 
+def getFlawLink(flaw_id,text_to_show='',use_remote=False):
+    if text_to_show=='':
+        text_to_show = flaw_id
+    preamble = 'flaws/'
+    if use_remote:
+        preamble = hndl.browser_root+'flaws/'
+    s = f'{preamble}Issue_{flaw_id}.html'
+    return wrap_URL_in_html(s,text_to_show)
+
 # def getDataLink(cas):
 #     s = f'{cas}/data.zip'
 #     return wrap_URL_in_html(s,'data; ')

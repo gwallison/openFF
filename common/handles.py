@@ -51,6 +51,7 @@ browser_root = "https://storage.googleapis.com/open-ff-browser/"
 repo_root_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/"
 repo_pickles_url = repo_root_url+'pickles/'
 pickle_list = ['disclosures','chemrecs','bgCAS','cas_ing','companies','water_source']
+archive_diff_pkl = os.path.join(curr_repo_dir,'curation_files','archive_diff_dict.pkl')
 
 full_url = repo_root_url+"full_df.parquet"
 

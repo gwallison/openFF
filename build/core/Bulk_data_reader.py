@@ -34,7 +34,7 @@ class Read_FF():
         self.working = workdir
         self.origdir = origdir
         self.curdur = os.path.join(self.origdir,'curation_files')
-        self.missing_values = self.getMissingList()
+        # self.missing_values = self.getMissingList()
         self.dropList = ['ClaimantCompany', #'DTMOD', 'DisclosureKey', 
                          #'IngredientComment', 
                          #'IngredientMSDS',
@@ -48,10 +48,24 @@ class Read_FF():
         self.picklefn = os.path.join(self.working,flat_pickle)
         self.picklewsfn = os.path.join(self.working,flat_water_source)
         
-    def getMissingList(self):
+    def getMissingList(self,cols):
+        """as of Mar 2024, we are using a dictionary for missing values so 
+        that we can pass separate lists depending on the field.  In particular,
+        the IngredientComment field should not be subject to the normal set
+        of missing values."""
+        special = {'IngredientComment':[]}
         df = pd.read_csv(os.path.join(self.curdur,"missing_values.csv"),
-                          quotechar='$',encoding='utf-8')
-        return df.missing_value.tolist()
+                          quotechar='$',encoding='utf-8',
+                          keep_default_na=False # otherwise, many vals are changed to NaN!
+                          )
+        stdlist = df.missing_value.tolist()
+        outdict = {}
+        for col in cols:
+            if col in special:
+                outdict[col] = special[col]
+            else:
+                outdict[col] = stdlist
+        self.missing_values = outdict
     
     def get_api10(self,df):
         df['api10'] = df.APINumber.str[:10]
@@ -142,7 +156,14 @@ class Read_FF():
                     
             inf.sort()
             infiles = [x for _,x in inf]  # now we have a well-sorted list
-            #print(self.startfile,self.endfile)
+            
+            # we must first fetch the column list to create the missing_values dict
+            with z.open(infiles[0]) as f:
+                t = pd.read_csv(f,nrows=2)
+            cols = t.columns.tolist()
+            self.getMissingList(cols)
+            
+            #now process all files
             for fn in infiles[0:]:
                 with z.open(fn) as f:
                     print(f' -- processing {fn}')
@@ -157,7 +178,9 @@ class Read_FF():
                                            'CountyName':'str',
                                            'FederalWell':'str',
                                            'IndianWell':'str',
-                                           'IngredientComment': 'str'},
+                                           'IngredientComment': 'str',
+                                           },
+                                    keep_default_na=False, # new as of Mar 2024
                                     na_values = self.missing_values
                                     )
                     
@@ -183,9 +206,10 @@ class Read_FF():
         final['reckey'] = final.index.astype(int)
         final.drop(columns=self.dropList,inplace=True)
         assert(len(final)==len(final.reckey.unique()))
+        # print(final.info())
         # final.to_pickle(self.picklefn)
         save_df(final,self.picklefn)
-        #return final
+        return final
         
     def import_water_source(self):
         """
@@ -204,11 +228,19 @@ class Read_FF():
                     
             inf.sort()
             infiles = [x for _,x in inf]  # now we have a well-sorted list
+            
+            # we must first fetch the column list to create the missing_values dict
+            with z.open(infiles[0]) as f:
+                t = pd.read_csv(f,nrows=2)
+            cols = t.columns.tolist()
+            self.getMissingList(cols)
+
             #print(self.startfile,self.endfile)
             for fn in infiles[0:]:
                 with z.open(fn) as f:
                     print(f' -- processing {fn}')
                     t = pd.read_csv(f,low_memory=False,
+                                    keep_default_na=False, # new as of Mar 2024                                    
                                     na_values = self.missing_values
                                     )
                     

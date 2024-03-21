@@ -35,7 +35,7 @@ codetext_drv_tw = """
 """
 
 def add_codelet(filepath,codetext=codetext_google,
-                change_repo_name = True):
+                change_repo_name = False):
     with open(filepath,'r',encoding='utf-8') as f:
         alltext = f.read()
     alltext  = alltext.replace('<head>',
@@ -77,6 +77,7 @@ def add_google_verification_file(dirpath):
 def change_header_repo_name(alltext,
                             existing = 'from data repository: current_repo',
                             replace_with = 'from data repository: openFF_data_2024_02_17'):
+    # not usually necessary if the source repo is named with a date.
     alltext = alltext.replace(existing,replace_with)
     return alltext
 
@@ -91,8 +92,8 @@ def walk_all_files(filepath,version='google'):
                     add_codelet(os.path.join(root, file),codetext_drv_tw)
     if version=='google':
         add_google_verification_file(filepath)
-        modify_sitemap(filepath,"https://storage.googleapis.com/open-ff-browser/")
-        create_index(filepath)
+        # create_index(filepath)
+        # modify_sitemap(filepath,"https://storage.googleapis.com/open-ff-browser/")
 
 if __name__ == '__main__':
     dirpath = r"C:\MyDocs\integrated\browser_to_google"

@@ -20,6 +20,7 @@ from openFF.common.file_handlers import store_df_as_csv, save_df
 from openFF.common.file_handlers import get_df, get_ext_master_dic
 from openFF.common.nb_helper import completed, make_sandbox
 import openFF.common.handles as hndl
+import openFF.build.core.fetch_archive_difference_set as fads
 
 
 use_itables = True
@@ -248,7 +249,18 @@ def update_upload_date_file(work_dir=work_dir,orig_dir=orig_dir):
     outdf = pd.concat([outdf,gb],sort=True)
     # outdf.to_csv(os.path.join(work_dir,'upload_dates.csv'),index=False)
     save_df(outdf,os.path.join(work_dir,'upload_dates.parquet'))    
+    
+def create_difference_pickle(work_dir=work_dir, orig_dir=orig_dir):
+    import pickle
+    output = fads.get_difference_set_FFV4(os.path.join(orig_dir,
+                                                       'curation_files',
+                                                       'raw_flat.parquet'),
+                                          os.path.join(work_dir,
+                                                       'raw_flat.parquet'))
+    with open(os.path.join(work_dir,'archive_diff_dict.pkl'),'wb') as f:
+        pickle.dump(output,f)
     completed()
+    
     
 def cas_curate_step1():
     import openFF.build.builder_tasks.CAS_master_list as casmaster
@@ -450,7 +462,8 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
              'upload_dates.parquet',
              'CI_sdf_summary.parquet',
              'ws_flat.parquet',
-             'raw_flat.parquet'
+             'raw_flat.parquet',
+             'archive_diff_dict.pkl'
              ]
     for fn in files:
         shutil.copy(os.path.join(work_dir,fn),

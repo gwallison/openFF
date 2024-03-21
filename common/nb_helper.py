@@ -12,6 +12,12 @@ def make_sandbox(dirname=hndl.sandbox_dir):
         os.mkdir(dirname)
     except:
         print(f'{dirname} already exists')
+        
+def get_archive_diff_dict():
+    import pickle
+    with open(hndl.archive_diff_pkl,'rb') as f:
+        obj = pickle.load(f)
+    return obj
 
 def add_favicon(fn):
     # also adds favicon to browser tab
@@ -267,9 +273,9 @@ def completed(status=True,txt=''):
         clr_cell(txt,color='#ff6666')
 
 
-def displaySource():
-    source = f"""This file generated on {cat_creation_date:%B %d, %Y} from data repository: {repo_name}."""
-    display(HTML(source))
+# def displaySource():
+#     source = f"""This file generated on {cat_creation_date:%B %d, %Y} from data repository: {repo_name}."""
+#     display(HTML(source))
 
 ##################### collapsibles  #######################
 # def setup_collapsibles():

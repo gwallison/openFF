@@ -95,4 +95,8 @@ We have changed the Bulk data reading module to include the field `IngredientCom
 **March 26, 2024**
 Using the `IngredientComment` field, we could then detect an additional 1200 disclosures (though there are probably more) with unintended duplicates. (We alerted FracFocus to this disclovery on Mar 23 by email.) It is important to note that we checked a different source of the disclosures, PA DEP completion data, on a handful of the disclosures and the state data DID NOT have the duplications.  That, and the fact that these duplicated records happen to at least 500 different operators, leads us to believe that the genesis of these duplications is either in the FracFocus software itself or in some software tool that many companies use to prepare their data for FracFocus submission.  (We mentioned that in our letter to FracFocus.)
 
+## Starting a daily download test
+**March 28, 2024**
+With all of the recent flux in the FracFocus data due to the recent version change, and how important those changes could be to the proper operation of FracFocus, we felt the need to regularly test the bulk data download for major changes, day to day.  We implemented a simple comparison of the current download to a previous download (ususally the previous day) to document the changes that occured in that period.  Currently the results from this test is not public, but we may change that so users can regularly see what kinds of changes are happening at FracFocus.
+
 [Return to Index](Top.md)

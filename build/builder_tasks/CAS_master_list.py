@@ -28,7 +28,11 @@ def get_orig_curated_CAS_list(orig_dir):
     return get_df(os.path.join(orig_dir,'curation_files','CAS_curated.parquet'))
 
 def get_new_curated_CAS_list(work_dir):
-    return get_csv(os.path.join(work_dir,'CAS_curated_modified.csv'))
+    # Need to be careful bringing in missing values with this file
+    out = pd.read_csv(os.path.join(work_dir,'CAS_curated_modified.csv'),
+                      keep_default_na=False)
+    return out
+    # return get_csv(os.path.join(work_dir,'CAS_curated_modified.csv'))
 
 def save_comptox_search_list(work_dir):
     df = get_new_curated_CAS_list(work_dir)
@@ -39,6 +43,7 @@ def is_new_complete(work_dir):
     # test to see if CAS_curate work has been done (if it needs to)
     try:    
         df = get_new_curated_CAS_list(work_dir=work_dir)
+        # print(df.head())
         f1 = df.first_date.isna().sum()
         f2 = df.curatedCAS.isna().sum()
         if f1+f2==0:

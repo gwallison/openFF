@@ -8,7 +8,8 @@ Created on Sun Nov 24 14:43:54 2019
 This script is used to download a new raw set, and save it. Not much else.
 
 This script runs independently of the main build_database set.  It is designed 
-to run autonomously, can be executed from a crontab command.
+to run autonomously, can be executed from a crontab command.  This version is for
+a Linux machine.
 
   
 """
@@ -18,7 +19,7 @@ from datetime import datetime
 
 
 today = datetime.today()
-if today.weekday() in [5]: # Monday= 0, Sunday = 6
+if today.weekday() in [1,3,5]: # Monday= 0, Sunday = 6
     archive_file=True
 else:
     archive_file=False

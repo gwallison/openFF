@@ -50,7 +50,7 @@ Incidentally, over those two weeks, about 60 disclosures were removed including 
 
 **March 4, 2024** Upon comparing the PDFs and bulk download data from early disclosures, it appears that one of the recent changes taken by FracFocus in FFV4 is put back the initial TradeName, Purpose and Supplier that were originally in the disclosures (mostly 2013-2025) that had been replaced with "Ingredient Container" etc.  It seems this returns the disclosures to their original states.  Perhaps they will be doing the same for the disclosure with `dup_recs` as well.
 
-**March 7, 2024** Indeed, a large number of disclosre have been modified and now Open-FF can detect the duplicate records in the same way both pre and post FFV4.  This means that we do not have to rely on a translation table between UploadKey and DisclosureId.  With that code resolved, we now detect more that 235,000 records as duplicates.
+**March 7, 2024** Indeed, a large number of disclosures have been modified and now Open-FF can detect the duplicate records in the same way both pre and post FFV4.  This means that we do not have to rely on a translation table between UploadKey and DisclosureId.  With that code resolved, we now detect more that 235,000 records as duplicates.
 
 <!-- this is a test of a comment 
 This text is not correct
@@ -79,7 +79,6 @@ We supplied the breakdown of companies involved and we asked:
 **Mar 1, 2024** FracFocus replied that:
 > "The water source data is voluntarily submitted information.  Thank you for providing the information and we will review it for inclusion as part of a training email sent to users on a periodic basis.  "
 
-
 ## Colab notebooks
 
 **March 2, 2024** We recently released a new version of the ["Explore Near Location"](https://colab.research.google.com/github/gwallison/openFF/blob/master/notebooks/Explore_near_location_v2.ipynb) notebook that is aligned with FFV4 data sets.  This notebook has 
@@ -88,5 +87,12 @@ We supplied the breakdown of companies involved and we asked:
 
 **March 6, 2024** We released a notebook that allows users to create customized data set. Unfortunately the size of the current FracFocus data set prevents this notebook from running in Colab. (If you want to try, go to ["Data Set Customizer"](https://colab.research.google.com/github/gwallison/openFF/blob/master/notebooks/Data_set_customizer.ipynb)).  Until we get that worked out, please contact us if you want a custom data set.
 
+## More duplicated records
+
+**March 22, 2024**
+We have changed the Bulk data reading module to include the field `IngredientComment` into the data set.  (Previously it was used only to document the reported density of a chemical record.) This change was precipitated by the discovery of more duplicated records, this time in Systems Approach disclosures and that, seemingly, the only way to detect these was by the values in that commnet field, in particular the word 'None'.  This change required that we slightly change how we deal with 'missing values' in the pandas function, read_csv.  Essentially, we had to disable the automatic detection of missing values ('None' is normally considered an empty value) in that column.  In addition, it appears that this 'None' value is not always consistent between the PDF version and the bulk download version.
+
+**March 26, 2024**
+Using the `IngredientComment` field, we could then detect an additional 1200 disclosures (though there are probably more) with unintended duplicates. (We alerted FracFocus to this disclovery on Mar 23 by email.) It is important to note that we checked a different source of the disclosures, PA DEP completion data, on a handful of the disclosures and the state data DID NOT have the duplications.  That, and the fact that these duplicated records happen to at least 500 different operators, leads us to believe that the genesis of these duplications is either in the FracFocus software itself or in some software tool that many companies use to prepare their data for FracFocus submission.  (We mentioned that in our letter to FracFocus.)
 
 [Return to Index](Top.md)

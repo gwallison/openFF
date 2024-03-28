@@ -12,8 +12,6 @@ import os
 from math import log10
 import openFF.common.handles as hndl
 
-# pic_dir = r"C:\MyDocs\OpenFF\src\openFF-catalog\pic_dir"
-
 def sort_id(st):
     l = list(st)
     l.sort()

@@ -20,7 +20,7 @@ import FF_issues.process_master_files as pmf
 
 class FF_flaws_gen():
 
-    def __init__(self, workingdf,
+    def __init__(self, workingdf,arc_diff={},use_archive_diff=False,
                  testing_mode=False
     ):
         print(f'Starting Flaws Browser: using repository: {hndl.curr_data}')
@@ -60,6 +60,8 @@ class FF_flaws_gen():
             fulloutfn = os.path.join(hndl.browser_flaws_dir,iss_fn)
             nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'flaw_report.ipynb'),
                                         output_fn=fulloutfn)
+        nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'FF_flaws_index.ipynb'),
+                                 output_fn = os.path.join(hndl.browser_out_dir,'FF_issues_index.html'))
 
 
 

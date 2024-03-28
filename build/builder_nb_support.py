@@ -349,7 +349,8 @@ def casing_step2(work_dir=work_dir,orig_dir=orig_dir):
     import datetime
     Today = datetime.datetime.today().strftime('%Y-%m-%d')
     try:
-        modified = pd.read_csv(os.path.join(work_dir,'casing_modified.csv'))
+        modified = pd.read_csv(os.path.join(work_dir,'casing_modified.csv'),
+                               keep_default_na=False)
         modified['first_date'] = 'D:'+f'{Today}'
         # print(modified.columns)
         oldcasing = get_df(os.path.join(orig_dir,'curation_files','casing_curated.parquet'))

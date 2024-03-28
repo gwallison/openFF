@@ -25,7 +25,8 @@ def get_old_xlate_df(ref_dir):
 def get_new_xlate_df(ref_dir):
     try:
         fn = os.path.join(ref_dir,'company_xlate_modified.csv')
-        new = get_csv(fn)
+        # new = get_csv(fn)
+        new = pd.read_csv(fn,keep_default_na=False)
     except:
         print('NOT FOUND: Modified file of company names.')
     return new

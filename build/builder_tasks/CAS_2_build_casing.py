@@ -41,6 +41,7 @@ def make_casing(df,ref_dir,work_dir):
     print(f'Number of new CAS|ING pairs: {len(casing)}')
 
     CAS_cur = get_df(os.path.join(work_dir,'CAS_curated.parquet'))
+    print(CAS_cur[CAS_cur.CASNumber.duplicated()])
     mg = pd.merge(casing,CAS_cur[['CASNumber','curatedCAS','categoryCAS']],
                   on='CASNumber',how='left',validate='m:1')
     return mg.drop(['_merge'],axis=1)

@@ -509,6 +509,17 @@ def create_issues_data_set(final_dir=final_dir):
     obj.detect_all_issues()
     print(' -- issues detected, now compiling flag fields')
     obj.add_summary_fields()
+
+    print(' -- merging flag fields with full data set.')
+    disc_df = pd.read_parquet(os.path.join(final_dir,'disclosure_issues.parquet'))
+    df = df.merge(disc_df[['DisclosureId','d_flags']],on='DisclosureId',how='left',validate='m:1')
+    df.d_flags = df.d_flags.fillna('')
+
+    rec_df = pd.read_parquet(os.path.join(final_dir,'record_issues.parquet'))
+    df = df.merge(rec_df[['reckey','r_flags']],on='reckey',how='left',validate='1:1')
+    df.r_flags = df.r_flags.fillna('')
+
+    df.to_parquet(os.path.join(final_dir,'full_df.parquet'))
     
 def make_repository(create_zip=False,final_dir=final_dir):
     directories = []

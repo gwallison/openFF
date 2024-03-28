@@ -17,13 +17,14 @@ today = datetime.today()
 
 class Disc_gen():
     
-    def __init__(self,workingdf):
+    def __init__(self,workingdf,arc_diff=None,use_archive_diff=False):
         self.disc_index_fn = os.path.join(hndl.browser_nb_dir,'Disclosure_Index.ipynb')
         self.disc_dictionary_fn = os.path.join(hndl.browser_nb_dir,'disclosure_include.ipynb')
         self.local_includes = hndl.local_includes
         self.allrec = workingdf
         self.discl_fields = fh.get_table(repo_dir=hndl.repo_dir,
                                 tname='disclosures').columns.tolist()
+        self.discl_fields.append('d_flags') # because it is created outside of the table manager
         
         # identify disclosures without chemicals
         gb = self.allrec[['DisclosureId','ingKeyPresent']]\
@@ -130,7 +131,7 @@ class Disc_gen():
             apicode = api[:5]
             metas = self.alldisc[self.alldisc.api10==api].copy()
             upks = metas.DisclosureId.unique().tolist()
-            gb = metas.groupby('DisclosureId',as_index=False)[['date','OperatorName',
+            gb = metas.groupby('DisclosureId',as_index=False)[['date','OperatorName','d_flags',
                                                             'is_duplicate','has_ingredients']]\
                                                             .first()
             gb.to_parquet(os.path.join(self.tmp,'all_disc.parquet'))

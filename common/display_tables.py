@@ -88,13 +88,14 @@ def make_html_of_disclosure_meta(disc_table):
                           flag)
     )    
     # Status flags
-    flag = ~(row.within_total_tolerance) | row.no_chem_recs | row.is_duplicate
+    flag = ~(row.within_total_tolerance) | row.no_chem_recs | row.is_duplicate | len(row.d_flags)>0
     colls.append(collaps.collapse_object(f'<b>STATUS: </b>  ',
                           [f'no chemical records: {row.no_chem_recs}',
                            f'is_duplicate: {row.is_duplicate}',
                            f'within_total_tolerance: {row.within_total_tolerance}',
                            f'FracFocus version: {row.FFVersion}',
-                           f'MI_inconsistent: {row.MI_inconsistent}'],
+                           f'MI_inconsistent: {row.MI_inconsistent}',
+                           f'Disclosure-level flags: {row.d_flags}'],
                            flag)
     )    
     colls.append(collaps.collapse_object('<b>Click here for more details</b>',

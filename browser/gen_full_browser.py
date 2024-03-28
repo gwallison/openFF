@@ -22,7 +22,7 @@ import openFF.browser.gen_misc_nb as gen_misc_nb
 import openFF.browser.gen_scope as gen_scope
 
 ####
-testing_mode = False
+testing_mode = True
 remake_workingdf = False
 use_archive_diff = False # when True, only builds pages that have changed since last build
 arc_diff = {}
@@ -59,7 +59,7 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
                 c2 = df.bgCountyName == 'monroe'
                 c1 = df.bgStateName == 'ohio'
                 c4 = df.bgOperatorName.isin(['antero','eclipse resources'])
-                df = df[c1 & c2 & c3 & c4]
+                df = df[c1 & c2 & c4]
                 # df = df[c4 & c1]
                 df.to_parquet(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
             workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
@@ -91,13 +91,14 @@ if __name__ == '__main__':
     # if c == 'erase':
     #     print(f'Initializing {hndl.browser_out_dir}')
     #     init_output_space()
-    # nbh.make_sandbox()
+    nbh.make_sandbox()
     workingdf = prep_working_df()
+    # print(workingdf.columns)
     # _ = gen_chem.Chem_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_states.State_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_operators.Operator_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_flaws.FF_flaws_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_disc.Disc_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_flaws.FF_flaws_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_disc.Disc_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_scope.ScopeGen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_misc_nb.MiscNbGen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
     print('DONE')

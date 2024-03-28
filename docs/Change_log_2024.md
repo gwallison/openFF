@@ -99,4 +99,8 @@ Using the `IngredientComment` field, we could then detect an additional 1200 dis
 **March 28, 2024**
 With all of the recent flux in the FracFocus data due to the recent version change, and how important those changes could be to the proper operation of FracFocus, we felt the need to regularly test the bulk data download for major changes, day to day.  We implemented a simple comparison of the current download to a previous download (ususally the previous day) to document the changes that occured in that period.  Currently the results from this test is not public, but we may change that so users can regularly see what kinds of changes are happening at FracFocus.
 
+## FracFocus Issues/Flaws flags
+**March 28, 2024**
+We have been developing code to not only detect errors and other issues in the FracFocus data, but to classify and flag it so that users of the Open-FF system can be aware of specific problems that other people have found.  The current set of issues flagged is still small (but we have a growing todo list!).  Today we added code so the full_df data set now has summary flags.  The are disclosure and record level flags, depending on what organizational level is affected.  Further, we added preliminary hooks to the Open-FF disclosures so that users can ee them directly.
+  
 [Return to Index](Top.md)

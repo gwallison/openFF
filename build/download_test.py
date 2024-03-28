@@ -129,9 +129,6 @@ def archive_test_files(outdict,oldfn,newfn,lg=lg):
         pickle.dump(outdict,f)
 
 
-# endit = datetime.now()
-# logtxt = lg(f'\nProcess completed in {endit-st}\n*******************')
-
 if __name__ == '__main__':
     old_raw_fn = get_old_df_fn()
     fetch_new_archive()

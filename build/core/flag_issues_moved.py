@@ -5,7 +5,8 @@ class Disclosure_Issues():
     def __init__(self,df):
         self.df = df
         self.gb = df.groupby('DisclosureId',as_index=False)[['APINumber','TotalBaseWaterVolume','has_TBWV',
-                                                             'is_duplicate','MI_inconsistent','ws_perc_total']].first()
+                                                             'is_duplicate','MI_inconsistent','ws_perc_total',
+                                                             'no_chem_recs']].first()
 
     # ALL Issues must be named "dIssues_x"  where x is usually a consecutive number.
     # x will become the flag's name as in "d_x"
@@ -34,6 +35,13 @@ class Disclosure_Issues():
         cond = ~(self.gb.ws_perc_total==100)
         return self.get_disc_set(cond)
 
+  
+    
+    def dIssue_007(self):
+        """ Chlorine dioxide percentage is over 80%"""
+        cond = (self.df.bgCAS=='10049-04-4') & (self.df.PercentHFJob>80)
+        return self.df[cond].DisclosureId.unique().tolist()
+    
 class Record_Issues():
     def __init__(self,df):
         self.df = df

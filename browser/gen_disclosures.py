@@ -24,8 +24,9 @@ class Disc_gen():
         self.allrec = workingdf
         self.discl_fields = fh.get_table(repo_dir=hndl.repo_dir,
                                 tname='disclosures').columns.tolist()
-        self.discl_fields.append('d_flags') # because it is created outside of the table manager
-        
+        for field in ['d_flags','max_d_warning']:# because they are created outside of the table manager
+            self.discl_fields.append(field) 
+ 
         # identify disclosures without chemicals
         gb = self.allrec[['DisclosureId','ingKeyPresent']]\
             .groupby('DisclosureId',as_index=False)['ingKeyPresent'].any()\
@@ -132,6 +133,7 @@ class Disc_gen():
             metas = self.alldisc[self.alldisc.api10==api].copy()
             upks = metas.DisclosureId.unique().tolist()
             gb = metas.groupby('DisclosureId',as_index=False)[['date','OperatorName','d_flags',
+                                                               'max_d_warning',
                                                             'is_duplicate','has_ingredients']]\
                                                             .first()
             gb.to_parquet(os.path.join(self.tmp,'all_disc.parquet'))

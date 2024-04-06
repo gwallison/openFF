@@ -512,12 +512,31 @@ def create_issues_data_set(final_dir=final_dir):
 
     print(' -- merging flag fields with full data set.')
     disc_df = pd.read_parquet(os.path.join(final_dir,'disclosure_issues.parquet'))
-    df = df.merge(disc_df[['DisclosureId','d_flags']],on='DisclosureId',how='left',validate='m:1')
-    df.d_flags = df.d_flags.fillna('')
+    dwarn = disc_df.d_flags.unique().tolist()
+    warn_df = obj.get_max_warning_as_df(dwarn)
 
+    df = df.merge(disc_df[['DisclosureId','d_flags']],on='DisclosureId',how='left',validate='m:1')
+    df = df.merge(warn_df[['flag_combo','max_level']],left_on='d_flags',right_on='flag_combo',
+                  how='left',validate='m:1')
+    df = df.rename({'max_level':'max_d_warning'},axis =1)
+
+    df.d_flags = df.d_flags.fillna('')
+    df.max_d_warning = df.max_d_warning.fillna('')
+    df = df.drop('flag_combo',axis=1)
+
+  
     rec_df = pd.read_parquet(os.path.join(final_dir,'record_issues.parquet'))
-    df = df.merge(rec_df[['reckey','r_flags']],on='reckey',how='left',validate='1:1')
+    rwarn = rec_df.r_flags.unique().tolist()
+    warn_df = obj.get_max_warning_as_df(rwarn)
+
+    df = df.merge(rec_df[['reckey','r_flags']],on='reckey',how='left',validate='m:1')
+    df = df.merge(warn_df[['flag_combo','max_level']],left_on='r_flags',right_on='flag_combo',
+                  how='left',validate='m:1')
+    df = df.rename({'max_level':'max_r_warning'},axis =1)
+
     df.r_flags = df.r_flags.fillna('')
+    df.max_r_warning = df.max_r_warning.fillna('')
+    df = df.drop('flag_combo',axis=1)
 
     df.to_parquet(os.path.join(final_dir,'full_df.parquet'))
     

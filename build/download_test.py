@@ -14,7 +14,7 @@ A new csv zip file is downloaded into test_dir and a new raw_df is created.
 We bring up the most recent archive raw (if available; otherwise create one from archived zip)
 
 Then compare the two
-Save the results
+Save the results, including to google drive
 Move files from today_dir to archives
 Clear today_dir
 """

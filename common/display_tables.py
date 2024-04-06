@@ -89,7 +89,9 @@ def make_html_of_disclosure_meta(disc_table):
     )    
     # Status flags
     flag = ~(row.within_total_tolerance) | row.no_chem_recs | row.is_duplicate | len(row.d_flags)>0
-    colls.append(collaps.collapse_object(f'<b>STATUS: </b>  ',
+    wflag = row.max_d_warning
+    if wflag == '': wflag = 'none'
+    colls.append(collaps.collapse_object(f'<b>Max warning flag: {wflag} </b>  ',
                           [f'no chemical records: {row.no_chem_recs}',
                            f'is_duplicate: {row.is_duplicate}',
                            f'within_total_tolerance: {row.within_total_tolerance}',

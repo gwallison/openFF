@@ -27,6 +27,8 @@ from datetime import datetime
 import sys
 sys.path.insert(0,'c:/MyDocs/integrated/') # adjust to your setup
 import ff_archive_tools.Data_reader as dreader
+import ff_archive_tools.Meta_reader as mreader
+
 import openFF.build.core.fetch_archive_difference_set as fads
 
 
@@ -128,6 +130,10 @@ def archive_test_files(outdict,oldfn,newfn,lg=lg):
     with open(os.path.join(out_dir,outfn),'wb') as f:
         pickle.dump(outdict,f)
 
+def update_pub_delay():
+    obj = mreader.Make_Meta_From_Archive(zipdir = r"C:\MyDocs\integrated\archive\daily")
+    _ = obj.update_pub_delay_df(archive_dirs=[r"C:\MyDocs\integrated\archive\daily"],
+                                verbose=False)
 
 if __name__ == '__main__':
     old_raw_fn = get_old_df_fn()
@@ -143,6 +149,9 @@ if __name__ == '__main__':
     lg.logline(f'  Changed disclosures: {len(out["changed_disc"])}')
     lg.logline(f'  Removed disclosures: {len(out["removed_disc"])}')
     archive_test_files(out, old_raw_fn,new_raw_fn)
+    update_pub_delay()
+    lg.logline(f'  Updated pub_delay dataframe')
+
     endit = datetime.now()
     lg.logline(f'\nProcess completed in {endit-st}\n')
     lg.update_log()

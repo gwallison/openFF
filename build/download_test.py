@@ -150,7 +150,7 @@ if __name__ == '__main__':
     lg.logline(f'  Removed disclosures: {len(out["removed_disc"])}')
     archive_test_files(out, old_raw_fn,new_raw_fn)
     update_pub_delay()
-    lg.logline(f'  Updated pub_delay dataframe')
+    lg.logline('  Updated pub_delay dataframe')
 
     endit = datetime.now()
     lg.logline(f'\nProcess completed in {endit-st}\n')

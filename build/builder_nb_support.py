@@ -203,10 +203,27 @@ def download_raw_FF(download_FF=True,work_dir=work_dir,orig_dir=orig_dir):
         else:
             completed(False,'Could not find "testData.zip" in work_dir\nFix this issue before proceeding')
             
-def create_master_raw_df(create_raw=True,work_dir=work_dir,orig_dir=orig_dir):
+def fetch_FF_archive_files(fetch_FF_flag=False,work_dir=work_dir):
+    import ff_archive_tools.archive_handler as ah
+
+    if fetch_FF_flag:
+        fn = ah.get_most_recent_archive(work_dir)
+        completed(True,f'Using found file: {fn}')
+        return fn
+    else:
+        lst = os.listdir(work_dir)
+        for fn in lst:
+            if 'ff_archive' in fn:
+                completed(True,f'using {fn} that is already saved in {work_dir}')
+                return fn
+        completed(False,'No archive file found in work dir')
+        
+
+def create_master_raw_df(create_raw=True,in_name='testData.zip',
+                         work_dir=work_dir,orig_dir=orig_dir):
     import openFF.build.core.Bulk_data_reader as bdr
     if create_raw:
-        rff = bdr.Read_FF(in_name='testData.zip', 
+        rff = bdr.Read_FF(in_name=in_name, 
                           zipdir=work_dir,workdir = work_dir,
                           origdir=orig_dir,
                           flat_pickle = 'raw_flat.parquet')
@@ -240,7 +257,7 @@ def update_upload_date_file(work_dir=work_dir,orig_dir=orig_dir):
     ndf = df[c].copy() # just the new ones
     
     gb = ndf.groupby('DisclosureId',as_index=False)['OperatorName'].count()
-    gb['date_added'] = today.strftime("%Y-%m-%d")
+    gb['build_date_when_added'] = today.strftime("%Y-%m-%d")  # note that date_added is no longer used in pub_delay
     gb.rename({'OperatorName':'num_records'}, inplace=True,axis=1)
     print(f'Number of new disclosures added to list: {len(gb)}')
     
@@ -464,7 +481,8 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
              'CI_sdf_summary.parquet',
              'ws_flat.parquet',
              'raw_flat.parquet',
-             'archive_diff_dict.pkl'
+             #'archive_diff_dict.pkl',
+             'pub_delay_df.parquet'
              ]
     for fn in files:
         shutil.copy(os.path.join(work_dir,fn),

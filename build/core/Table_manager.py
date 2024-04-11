@@ -11,7 +11,7 @@ import os
 import datetime
 import openFF.build.core.mass_tools as mt
 #import openFF.build.core.cas_tools as ct
-import openFF.build.core.flag_issues as fi
+import FF_issues.flag_issues as fi
 import openFF.build.core.external_dataset_tools as et
 from openFF.common.file_handlers import save_df, get_df, ext_fn
 
@@ -44,6 +44,7 @@ class Table_constructor():
                           }
         self.cas_ing_fn = os.path.join(self.trans_dir,'casing_curated.parquet')
         self.cas_ing_source = get_df(self.cas_ing_fn)
+        self.pub_delay_fn = os.path.join(self.trans_dir,'pub_delay_df.parquet')
 
 
         self.location_ref_fn = os.path.join(self.trans_dir,'DisclosureId_ref.parquet')
@@ -177,20 +178,27 @@ class Table_constructor():
         df = pd.merge(df,tab,on='d2',how='left',validate='m:1')
         df = df.drop(['d1','d2'],axis=1)
         
-        # print(df.date_added.tail())
-        #convert date_added field
-        df.date_added = pd.to_datetime(df.date_added,format='mixed')
-        df['pub_delay_days'] = (df.date_added-df.date).dt.days
-        # Any date_added earlier than 10/2018 is unknown
-        refdate = datetime.datetime(2018,10,1) # date that I started keeping track
-        df.pub_delay_days = np.where(df.date_added<refdate,
-                                     np.NaN,
-                                     df.pub_delay_days)# is less recent than refdate
-        # any fracking date earlier than 4/1/2011 is before FF started taking data
-        refdate = datetime.datetime(2011,4,1) # date that fracfocus started
-        df.pub_delay_days = np.where(df.date<refdate,
-                                     np.NaN,
-                                     df.pub_delay_days)# is less recent than refdate
+        pubdf = pd.read_parquet(self.pub_delay_fn)
+        pubdf = pubdf[['APINumber','date','disc_ID','pub_delay_days',
+                      'earliest_poss_date','first_detected']]
+        pubdf = pubdf.sort_values(['APINumber','date','first_detected'])
+        pubdf = pubdf[~(pubdf[['APINumber','date']].duplicated(keep='first'))]
+        # pubdf = pubdf.rename({'disc_ID':'DisclosureId'},axis=1)
+        df = df.merge(pubdf,on=['APINumber','date'],how='left',validate='m:1')
+        # # print(df.date_added.tail())
+        # #convert date_added field
+        # df.date_added = pd.to_datetime(df.date_added,format='mixed')
+        # df['pub_delay_days'] = (df.date_added-df.date).dt.days
+        # # Any date_added earlier than 10/2018 is unknown
+        # refdate = datetime.datetime(2018,10,1) # date that I started keeping track
+        # df.pub_delay_days = np.where(df.date_added<refdate,
+        #                              np.NaN,
+        #                              df.pub_delay_days)# is less recent than refdate
+        # # any fracking date earlier than 4/1/2011 is before FF started taking data
+        # refdate = datetime.datetime(2011,4,1) # date that fracfocus started
+        # df.pub_delay_days = np.where(df.date<refdate,
+        #                              np.NaN,
+        #                              df.pub_delay_days)# is less recent than refdate
         return df
 
 

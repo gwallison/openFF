@@ -7,7 +7,7 @@ To do:
 
 # Generating the Open-FF data set
 
-The Open-FF data set is regenerated roughly every month to update with new fracking disclosures and to incorporate and changes that were make to existing disclosures.  The process is performed by the developers of Open-FF and is sponsored by the FracTracker Alliance.  
+The Open-FF data set is regenerated roughly every month to update with new fracking disclosures and to incorporate and changes that were made to existing disclosures.  The process is performed by the developers of Open-FF and is sponsored by the [FracTracker Alliance](https://www.fractracker.org/).  
 
 The process has many steps, some automated, some manual.  It is guided by [a jupyter notebook](https://github.com/gwallison/openFF/blob/master/build/builder_nb.ipynb) that includes instructions, code and tests to validate the process through each step.  The primary steps are:
 
@@ -22,7 +22,7 @@ The process has many steps, some automated, some manual.  It is guided by [a jup
 1. Search the fresh data for new `CASNumber`s; fetch authoritative data about them (SciFinder, CompTox)
 1. Search the fresh data for new `IngredientName`s; try to resolve to an authoritive CASRN.
 1. Assign final `bgCAS` value to each new `bgCAS`:`IngredientName` pairs
-1. Search for new company names and link them to other existing company names is appropriate
+1. Search for new company names and link them to other existing company names as appropriate
 1. Check geographic and location data - flag errors and curate any new counties
 1. Determine the carrier record(s) of every disclosure to facilitate mass calculations
 
@@ -35,7 +35,8 @@ The process has many steps, some automated, some manual.  It is guided by [a jup
 1. Produce full data set
 
 ## Post processing
-15. Perform dataset-wide integrity tests
+1. Perform dataset-wide integrity tests
+1. Detect and flag set of documented "FF_issues." 
 1. Construct a full data repository
 
 |[Prev](Duplication_in_FracFocus.md)|[Index](Top.md)|[Next](External_data_in_Open-FF.md)|

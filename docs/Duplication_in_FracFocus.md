@@ -35,7 +35,7 @@ The full version of the Open-FF data set contains all records and disclosures th
 
 Three fields can be used to remove these duplicates: 
 - The field `is_duplicate` is a flag that, when True, indicates that a given disclosure has a duplicate in FracFocus; that is, they have the same APINumber and JobEndDate.
-- The field 'dup_rec' is a flag that, when True, indicates that the given record is a detected erroneous duplicate.
+- The field `dup_rec` is a flag that, when True, indicates that the given record is a detected erroneous duplicate.
 - The field `in_std_filtered` is a flag that, when True, allows a user to keep only the dsclosures and records in Open-FF that are not duplicated.  The Data Browser (with a few exceptions) uses ths data set.
 
 Users should be aware that the unintended duplications created by FracFocus at the start of FFVersion 4 (Dec 2023 - Feb 2024; mentioned above) were not detectable by Open-FF and should be wary of using archived data from that period.  

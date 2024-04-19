@@ -65,6 +65,7 @@ def get_new_tentative_CAS_list(rawdf,orig_dir,work_dir):
     """Answers the question: are there new tentative CASNumbers that need to be
     added to the CAS SciFinder reference?"""
     old = get_orig_curated_CAS_list(orig_dir)
+    print(f'old cas: {old.columns}')
     new = get_new_CAS_list(rawdf)
     mg = pd.merge(new,old,on=['CASNumber'],
                   how = 'outer',indicator=True)
@@ -169,7 +170,7 @@ def make_CAS_to_curate_file(df,ref_dir,work_dir):
         test['is_new'] = True
         # Now concat with the old data (DONT MERGE - otherwise old gets clobbered!)
         out = pd.concat([test,old],sort=True)
-        
+        print(f'store_df: {out.columns}')
         store_df_as_csv(out[['CASNumber','CAS_prospect','auto_status','on_ref_list',
                              'curatedCAS','categoryCAS','is_new',
                              'comment','first_date',

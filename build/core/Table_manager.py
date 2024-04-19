@@ -281,7 +281,7 @@ class Table_constructor():
         c1 = records.Supplier.str.lower()=='listed above'#&(records.FFVersion==4)
         c2 = records.Purpose.str.lower().str[:9]=='see trade' #)&(records.FFVersion==4)
 
-        print_step(f'Total records with preliminary dup_rec: {records.dup_rec.sum()}',2)
+        self.print_step(f'Total records with preliminary dup_rec: {records.dup_rec.sum()}',2)
         set1 = records[records.dup_rec&c0&c1&c2].IngredientsId.unique().tolist()
         # records['dup_rec'] = np.where(records.dup_rec&c0&c1&c2,True,False)
         self.print_step(f'Number dups in set 1: {len(set1)}',2)

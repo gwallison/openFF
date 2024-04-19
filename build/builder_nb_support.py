@@ -209,12 +209,14 @@ def fetch_FF_archive_files(fetch_FF_flag=False,work_dir=work_dir):
     if fetch_FF_flag:
         fn = ah.get_most_recent_archive(work_dir)
         completed(True,f'Using found file: {fn}')
+        add_to_repo_info('FF_archive_filename', fn)
         return fn
     else:
         lst = os.listdir(work_dir)
         for fn in lst:
             if 'ff_archive' in fn:
                 completed(True,f'using {fn} that is already saved in {work_dir}')
+                add_to_repo_info('FF_archive_filename', fn)
                 return fn
         completed(False,'No archive file found in work dir')
         
@@ -481,7 +483,7 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
              'CI_sdf_summary.parquet',
              'ws_flat.parquet',
              'raw_flat.parquet',
-             #'archive_diff_dict.pkl',
+             'archive_diff_dict.pkl',
              'pub_delay_df.parquet'
              ]
     for fn in files:
@@ -625,7 +627,7 @@ def make_repository(create_zip=False,final_dir=final_dir):
     filenames.append('record_issues.parquet')
 
     arcv_fn =  get_new_repo_info(variable='FF_archive_filename')
-    shutil.copy(os.path.join(work_dir,'testData.zip'),
+    shutil.copy(os.path.join(work_dir,arcv_fn),
                 os.path.join(repodir, arcv_fn))    
     directories.append('')
     filenames.append(arcv_fn)

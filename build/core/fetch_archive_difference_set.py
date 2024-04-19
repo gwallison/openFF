@@ -50,7 +50,12 @@ def get_difference_set_FFV4(early_arch_fn,late_arch_fn,verbose=True):
     for dic in edisc:
         if not dic in ldisc:
             onlyold.append(dic)
-    update_dict['removed_disc'] = onlyold
+    if len(onlyold)>0:
+        gb = diffdf[(diffdf.df=='old')&(diffdf.DisclosureId.isin(onlyold))]\
+          .groupby('DisclosureId',as_index=False)[['APINumber','OperatorName','JobEndDate']].first()
+        update_dict['removed_disc'] = gb
+    else:
+        update_dict['removed_disc'] = pd.DataFrame()
 
     # find new Disclosures - use for "recent disclosures"
     onlynew = []

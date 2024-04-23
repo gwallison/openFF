@@ -118,22 +118,29 @@ def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
 
 def scan_for_col_incompatibility(raw_dir):
     # using columns=None in read_parquet returns just the header
+    change_dates = []
     files = os.listdir(raw_dir)
     files.sort() # put them in chronological order
     efn = files[0]
+    edf = pd.read_parquet(os.path.join(raw_dir,efn),columns=None)
+    ecols = edf.columns.tolist()
+    ecols.sort()
     for lfn in files[1:]:
         print(lfn)
-        edf = pd.read_parquet(os.path.join(raw_dir,efn),columns=None)
-        ecols = edf.columns.tolist()
-        ecols.sort()
         ldf = pd.read_parquet(os.path.join(raw_dir,lfn),columns=None)
         lcols = ldf.columns.tolist()
         lcols.sort()
         if ecols!=lcols:
+            change_dates.append(lfn)
             print(f'Column discontinuity! {efn}, {lfn}')
             print(f'Early list: {ecols}')
             print(f'Late list:  {lcols}')
+        # prep for next file
         efn = lfn
+        edf = ldf
+        ecols = lcols
+        
+    print(f'Files where change is introduced: {change_dates}')
         
     
 

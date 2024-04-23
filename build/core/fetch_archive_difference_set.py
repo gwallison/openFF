@@ -122,6 +122,7 @@ def scan_for_col_incompatibility(raw_dir):
     files.sort() # put them in chronological order
     efn = files[0]
     for lfn in files[1:]:
+        print(lfn)
         edf = pd.read_parquet(os.path.join(raw_dir,efn),columns=None)
         ecols = edf.columns.tolist()
         ecols.sort()
@@ -132,6 +133,7 @@ def scan_for_col_incompatibility(raw_dir):
             print(f'Column discontinuity! {efn}, {lfn}')
             print(f'Early list: {ecols}')
             print(f'Late list:  {lcols}')
+        efn = lfn
         
     
 

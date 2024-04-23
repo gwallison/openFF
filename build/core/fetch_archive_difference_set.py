@@ -9,15 +9,23 @@ two archived FracFocus bulk downloads
 
 """
 import pandas as pd
+import numpy as np
 import os
 
-def get_difference_set_FFV4(early_arch_fn,late_arch_fn,verbose=True):
+def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
     """"""
     update_dict = {}
-    cols_to_compare = ['DisclosureId','IngredientsId','APINumber','JobStartDate','JobEndDate',
-                       'OperatorName','Supplier','WellName','TotalBaseWaterVolume','TotalBaseNonWaterVolume',
-                       'TradeName','Purpose','CASNumber','IngredientName','PercentHighAdditive','PercentHFJob',
-                       'MassIngredient']
+    if df_ver==4:
+        cols_to_compare = ['DisclosureId','IngredientsId','APINumber','JobStartDate','JobEndDate',
+                           'OperatorName','Supplier','WellName','TotalBaseWaterVolume','TotalBaseNonWaterVolume',
+                           'TradeName','Purpose','CASNumber','IngredientName','PercentHighAdditive','PercentHFJob',
+                           'MassIngredient']
+    else:
+        cols_to_compare = ['UploadKey','IngredientKey','APINumber','JobStartDate','JobEndDate',
+                           'OperatorName','Supplier','WellName','TotalBaseWaterVolume','TotalBaseNonWaterVolume',
+                           'TradeName','Purpose','CASNumber','IngredientName','PercentHighAdditive','PercentHFJob',
+                           'MassIngredient']
+
     if verbose: print(f'fetching {early_arch_fn}')
     edf = pd.read_parquet(os.path.join(early_arch_fn))
     ecols = edf.columns.tolist()
@@ -39,20 +47,25 @@ def get_difference_set_FFV4(early_arch_fn,late_arch_fn,verbose=True):
     if verbose: print('concatenating')
     concatdf = pd.concat([edf,ldf])
     if verbose: print('finding differences...')
-    diffdf = concatdf[~(concatdf[cols_to_compare].duplicated(keep=False))]
+    diffdf = concatdf[~(concatdf[cols_to_compare].duplicated(keep=False))].copy()
     if verbose: print(f'number of differing records: {len(diffdf)}')
     update_dict['num_diff_records'] = len(diffdf)
+    
+    if df_ver==4:
+        diffdf['discID'] = diffdf['DisclosureId']
+    else:
+        diffdf['discID'] = diffdf['UploadKey']
 
     # find removed Disclosures
-    edisc = diffdf[diffdf.df=='old'].DisclosureId.unique().tolist()
-    ldisc = diffdf[diffdf.df=='new'].DisclosureId.unique().tolist()
+    edisc = diffdf[diffdf.df=='old'].discID.unique().tolist()
+    ldisc = diffdf[diffdf.df=='new'].discID.unique().tolist()
     onlyold = []
     for dic in edisc:
         if not dic in ldisc:
             onlyold.append(dic)
     if len(onlyold)>0:
-        gb = diffdf[(diffdf.df=='old')&(diffdf.DisclosureId.isin(onlyold))]\
-          .groupby('DisclosureId',as_index=False)[['APINumber','OperatorName','JobEndDate']].first()
+        gb = diffdf[(diffdf.df=='old')&(diffdf.discID.isin(onlyold))]\
+          .groupby('discID',as_index=False)[['APINumber','OperatorName','JobEndDate']].first()
         update_dict['removed_disc'] = gb
     else:
         update_dict['removed_disc'] = pd.DataFrame()
@@ -62,7 +75,14 @@ def get_difference_set_FFV4(early_arch_fn,late_arch_fn,verbose=True):
     for dic in ldisc:
         if not dic in edisc:
             onlynew.append(dic)
-    update_dict['added_disc'] = onlynew
+    if len(onlynew)>0:
+        gb = diffdf[(diffdf.df=='new')&(diffdf.discID.isin(onlynew))]\
+          .groupby('discID',as_index=False)[['APINumber','OperatorName','JobEndDate']].first()
+        update_dict['added_disc'] = gb
+        # print(gb.head())
+    else:
+        update_dict['added_disc'] = pd.DataFrame()
+    # update_dict[] = onlynew
 
     # add new or changed disclosureIds -  used for browser updates
     update_dict['new_or_changed_disc'] = ldisc
@@ -72,7 +92,13 @@ def get_difference_set_FFV4(early_arch_fn,late_arch_fn,verbose=True):
     for dic in ldisc:
         if  dic in edisc:
             inboth.append(dic)
-    update_dict['changed_disc'] = inboth
+    if len(inboth)>0:
+        gb = diffdf[(diffdf.df=='new')&(diffdf.discID.isin(inboth))]\
+          .groupby('discID',as_index=False)[['APINumber','OperatorName','JobEndDate']].first()
+        update_dict['changed_disc'] = gb
+    else:
+        update_dict['changed_disc'] = pd.DataFrame()
+    # update_dict['changed_disc'] = inboth
     
 
     # CASing involved in changes
@@ -90,9 +116,29 @@ def get_difference_set_FFV4(early_arch_fn,late_arch_fn,verbose=True):
     
     return update_dict
 
+def make_multiple_sets(raw_dirs,early_tup=(2024,3,1),late_tup=(),out_dir='./tmp',verbose=False):
+    import datetime
+    if len(early_tup)==3:
+        edate = datetime.datetime(early_tup[0],early_tup[1],early_tup[2])
+    else:
+        edate = datetime.datetime(2024,3,1)
+
+    if len(late_tup)==3:
+        ldate = datetime.datetime(late_tup[0],late_tup[1],late_tup[2])
+    else:
+        ldate = datetime.today()
+        
+    eref = None
+    for raw_dir in raw_dirs:
+        lst = os.listdir(raw_dir)
+        lst.sort()
+        for fn in lst:
+            
+
 
 if __name__ == '__main__':
-    out = get_difference_set_FFV4(r"D:\archives\raw_df_archive\ff_archive_meta_2024-03-16.parquet",
-                                  r"D:\archives\raw_df_archive\ff_archive_meta_2024-03-18.parquet")
+    out = get_difference_set(r"C:\MyDocs\integrated\archive\raw\raw_2024-03-28.parquet",
+                             r"C:\MyDocs\integrated\archive\raw\raw_2024-03-29.parquet",
+                             df_ver=4)
     for k in out.keys():
-        print(f'{k}: {len(out[k])}')
+        print(f'{k}: {out[k]}')

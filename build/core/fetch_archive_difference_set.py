@@ -144,8 +144,11 @@ def scan_for_col_incompatibility(raw_dir):
         
     
 
-def make_multiple_sets(raw_dirs,early_tup=(2024,3,1),late_tup=(),out_dir='./tmp',verbose=False):
+def make_multiple_sets(raw_dir,early_tup=(2024,3,1),late_tup=(),
+                       out_dir='./tmp',df_ver=4,verbose=False):
     import datetime
+    import pickle
+    
     if len(early_tup)==3:
         edate = datetime.datetime(early_tup[0],early_tup[1],early_tup[2])
     else:
@@ -156,13 +159,37 @@ def make_multiple_sets(raw_dirs,early_tup=(2024,3,1),late_tup=(),out_dir='./tmp'
     else:
         ldate = datetime.today()
         
-    eref = None
-    for raw_dir in raw_dirs:
-        lst = os.listdir(raw_dir)
-        lst.sort()
-        # for fn in lst:
+    # first make list of files to use
+    lst = os.listdir(raw_dir)
+    lst.sort()
+    sel_fn = []
+    print('Making file list')
+    for fn in lst:
+        tdate = datetime.datetime(int(fn[7:11]),int(fn[12:14]),int(fn[15:16]))
+        if (tdate>=edate)&(tdate<=ldate):
+            sel_fn.append(fn)
+
+    efn = os.path.join(raw_dir,sel_fn[0])
+    for fn in sel_fn[1:]:
+        print(fn)
+        lfn = os.path.join(raw_dir,fn)
+        outdict = get_difference_set(efn,lfn,df_ver=df_ver)        
+        outfn = os.path.join(out_dir,f'diff_dict_{fn[7:17]}.pkl')
+        with open(outfn,'wb') as f:
+            pickle.dump(outdict,f)
+        efn = lfn
+    
             
+                                  
 
 
 if __name__ == '__main__':
-    scan_for_col_incompatibility(raw_dir=r"D:\openFF_archive\raw_dataframes")
+    # scan_for_col_incompatibility(raw_dir=r"D:\openFF_archive\raw_dataframes")
+    make_multiple_sets(raw_dir=r"D:\openFF_archive\raw_dataframes",
+                       early_tup=(2018,1,1),late_tup=(2023,12,2),
+                       out_dir = r"D:\openFF_archive\diff_dicts",
+                       df_ver=3)
+    make_multiple_sets(raw_dir=r"D:\openFF_archive\raw_dataframes",
+                       early_tup=(2023,12,3),late_tup=(),
+                       out_dir = r"D:\openFF_archive\diff_dicts",
+                       df_ver=4)

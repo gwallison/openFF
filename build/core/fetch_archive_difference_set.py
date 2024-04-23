@@ -116,6 +116,25 @@ def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
     
     return update_dict
 
+def scan_for_col_incompatibility(raw_dir):
+    # using columns=None in read_parquet returns just the header
+    files = os.listdir(raw_dir)
+    files.sort() # put them in chronological order
+    efn = files[0]
+    for lfn in files[1:]:
+        edf = pd.read_parquet(os.path.join(raw_dir,efn),columns=None)
+        ecols = edf.columns.tolist()
+        ecols.sort()
+        ldf = pd.read_parquet(os.path.join(raw_dir,lfn),columns=None)
+        lcols = ldf.columns.tolist()
+        lcols.sort()
+        if ecols!=lcols:
+            print(f'Column discontinuity! {efn}, {lfn}')
+            print(f'Early list: {ecols}')
+            print(f'Late list:  {lcols}')
+        
+    
+
 def make_multiple_sets(raw_dirs,early_tup=(2024,3,1),late_tup=(),out_dir='./tmp',verbose=False):
     import datetime
     if len(early_tup)==3:
@@ -132,13 +151,9 @@ def make_multiple_sets(raw_dirs,early_tup=(2024,3,1),late_tup=(),out_dir='./tmp'
     for raw_dir in raw_dirs:
         lst = os.listdir(raw_dir)
         lst.sort()
-        for fn in lst:
+        # for fn in lst:
             
 
 
 if __name__ == '__main__':
-    out = get_difference_set(r"C:\MyDocs\integrated\archive\raw\raw_2024-03-28.parquet",
-                             r"C:\MyDocs\integrated\archive\raw\raw_2024-03-29.parquet",
-                             df_ver=4)
-    for k in out.keys():
-        print(f'{k}: {out[k]}')
+    scan_for_col_incompatibility(raw_dir=r"D:\openFF_archive\raw_dataframes")

@@ -67,6 +67,7 @@ def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
         gb = diffdf[(diffdf.df=='old')&(diffdf.discID.isin(onlyold))]\
           .groupby('discID',as_index=False)[['APINumber','OperatorName',
                                              'StateName','CountyName',
+                                             'TotalBaseWaterVolume',
                                              'WellName','JobEndDate']].first()
         update_dict['removed_disc'] = gb
     else:
@@ -81,6 +82,7 @@ def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
         gb = diffdf[(diffdf.df=='new')&(diffdf.discID.isin(onlynew))]\
           .groupby('discID',as_index=False)[['APINumber','OperatorName',
                                              'StateName','CountyName',
+                                             'TotalBaseWaterVolume',
                                              'WellName','JobEndDate']].first()
         update_dict['added_disc'] = gb
         # print(gb.head())
@@ -100,6 +102,7 @@ def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
         gb = diffdf[(diffdf.df=='new')&(diffdf.discID.isin(inboth))]\
           .groupby('discID',as_index=False)[['APINumber','OperatorName',
                                              'StateName','CountyName',
+                                             'TotalBaseWaterVolume',
                                              'WellName','JobEndDate']].first()
         update_dict['changed_disc'] = gb
     else:
@@ -200,4 +203,7 @@ if __name__ == '__main__':
                         early_tup=(2023,12,3),late_tup=(),
                         out_dir = r"D:\openFF_archive\diff_dicts",
                         df_ver=4)
-    
+    # make_multiple_sets(raw_dir=r"C:\MyDocs\integrated\archive\raw",
+    #                     early_tup=(2024,4,3),late_tup=(),
+    #                     out_dir = r"C:\MyDocs\integrated\archive\out",
+    #                     df_ver=4)

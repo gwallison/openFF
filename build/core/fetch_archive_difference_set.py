@@ -65,7 +65,9 @@ def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
             onlyold.append(dic)
     if len(onlyold)>0:
         gb = diffdf[(diffdf.df=='old')&(diffdf.discID.isin(onlyold))]\
-          .groupby('discID',as_index=False)[['APINumber','OperatorName','JobEndDate']].first()
+          .groupby('discID',as_index=False)[['APINumber','OperatorName',
+                                             'StateName','CountyName',
+                                             'WellName','JobEndDate']].first()
         update_dict['removed_disc'] = gb
     else:
         update_dict['removed_disc'] = pd.DataFrame()
@@ -77,7 +79,9 @@ def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
             onlynew.append(dic)
     if len(onlynew)>0:
         gb = diffdf[(diffdf.df=='new')&(diffdf.discID.isin(onlynew))]\
-          .groupby('discID',as_index=False)[['APINumber','OperatorName','JobEndDate']].first()
+          .groupby('discID',as_index=False)[['APINumber','OperatorName',
+                                             'StateName','CountyName',
+                                             'WellName','JobEndDate']].first()
         update_dict['added_disc'] = gb
         # print(gb.head())
     else:
@@ -94,7 +98,9 @@ def get_difference_set(early_arch_fn,late_arch_fn,df_ver=4,verbose=True):
             inboth.append(dic)
     if len(inboth)>0:
         gb = diffdf[(diffdf.df=='new')&(diffdf.discID.isin(inboth))]\
-          .groupby('discID',as_index=False)[['APINumber','OperatorName','JobEndDate']].first()
+          .groupby('discID',as_index=False)[['APINumber','OperatorName',
+                                             'StateName','CountyName',
+                                             'WellName','JobEndDate']].first()
         update_dict['changed_disc'] = gb
     else:
         update_dict['changed_disc'] = pd.DataFrame()
@@ -157,7 +163,7 @@ def make_multiple_sets(raw_dir,early_tup=(2024,3,1),late_tup=(),
     if len(late_tup)==3:
         ldate = datetime.datetime(late_tup[0],late_tup[1],late_tup[2])
     else:
-        ldate = datetime.today()
+        ldate = datetime.datetime.today()
         
     # first make list of files to use
     lst = os.listdir(raw_dir)
@@ -165,13 +171,14 @@ def make_multiple_sets(raw_dir,early_tup=(2024,3,1),late_tup=(),
     sel_fn = []
     print('Making file list')
     for fn in lst:
-        tdate = datetime.datetime(int(fn[7:11]),int(fn[12:14]),int(fn[15:16]))
+        # print (int(fn[7:11]),int(fn[12:14]),int(fn[15:17]))
+        tdate = datetime.datetime(int(fn[7:11]),int(fn[12:14]),int(fn[15:17]))
         if (tdate>=edate)&(tdate<=ldate):
             sel_fn.append(fn)
 
     efn = os.path.join(raw_dir,sel_fn[0])
     for fn in sel_fn[1:]:
-        print(fn)
+        print('**************\n',fn)
         lfn = os.path.join(raw_dir,fn)
         outdict = get_difference_set(efn,lfn,df_ver=df_ver)        
         outfn = os.path.join(out_dir,f'diff_dict_{fn[7:17]}.pkl')
@@ -186,10 +193,11 @@ def make_multiple_sets(raw_dir,early_tup=(2024,3,1),late_tup=(),
 if __name__ == '__main__':
     # scan_for_col_incompatibility(raw_dir=r"D:\openFF_archive\raw_dataframes")
     make_multiple_sets(raw_dir=r"D:\openFF_archive\raw_dataframes",
-                       early_tup=(2018,1,1),late_tup=(2023,12,2),
-                       out_dir = r"D:\openFF_archive\diff_dicts",
-                       df_ver=3)
+                        early_tup=(2018,1,1),late_tup=(2023,12,2),
+                        out_dir = r"D:\openFF_archive\diff_dicts",
+                        df_ver=3)
     make_multiple_sets(raw_dir=r"D:\openFF_archive\raw_dataframes",
-                       early_tup=(2023,12,3),late_tup=(),
-                       out_dir = r"D:\openFF_archive\diff_dicts",
-                       df_ver=4)
+                        early_tup=(2023,12,3),late_tup=(),
+                        out_dir = r"D:\openFF_archive\diff_dicts",
+                        df_ver=4)
+    

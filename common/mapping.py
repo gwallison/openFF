@@ -350,6 +350,7 @@ def create_state_choropleth(data,
                             aliases = ['State: ','data: '],
                             width=600,height=400):
     import folium
+    from IPython.display import display, HTML
     fn = r"C:\MyDocs\OpenFF\data\non-FF\georef-united-states-of-america-state.geojson"
     geojson = gpd.read_file(fn)
     data['orig_value'] = data.value
@@ -419,6 +420,7 @@ def create_county_choropleth(data,
                              fields = ['CountyName','orig_value'],
                              aliases = ['County: ','data: ']):
     import folium
+    from IPython.display import display, HTML
     fn = r"C:\MyDocs\OpenFF\data\non-FF\georef-united-states-of-america-county.geojson"
     if len(data)<1:
         print('No mappable data')

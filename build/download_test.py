@@ -116,7 +116,7 @@ def get_new_df_fn(lg=lg):
     newraw.to_parquet(newraw_fn)
     return newraw_fn
 
-def compare_raw(newraw,oldraw):
+def compare_raw(new_raw_fn,old_raw_fn):
     print('Performing old vs. new comparison')
     return fads.get_difference_set(old_raw_fn,new_raw_fn,df_ver=4)
 
@@ -137,17 +137,17 @@ def update_pub_delay():
     _ = obj.update_pub_delay_df(archive_dirs=[r"C:\MyDocs\integrated\archive\daily"],
                                 verbose=False)
     
-def eval_gsutil_command(command):
-  """Evaluates a gsutil command and returns the output.
-  Args:
-    command: The gsutil command to evaluate.
-  Returns:
-    The output of the gsutil command.
-  """
-  import subprocess
-  process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-  output, _ = process.communicate()
-  return output.decode('utf-8')
+# def eval_gsutil_command(command):
+#   """Evaluates a gsutil command and returns the output.
+#   Args:
+#     command: The gsutil command to evaluate.
+#   Returns:
+#     The output of the gsutil command.
+#   """
+#   import subprocess
+#   process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+#   output, _ = process.communicate()
+#   return output.decode('utf-8')
 
 def notebook_to_google_storage():
     import openFF.common.nb_helper as nbh
@@ -165,21 +165,21 @@ def notebook_to_google_storage():
 
 
 if __name__ == '__main__':
-    # old_raw_fn = get_old_df_fn()
-    # fetch_new_archive()
-    # new_raw_fn = get_new_df_fn()
-    # lg.logline(f'OLD: {old_raw_fn}')
-    # lg.logline(f'NEW: {new_raw_fn}')
+    old_raw_fn = get_old_df_fn()
+    fetch_new_archive()
+    new_raw_fn = get_new_df_fn()
+    lg.logline(f'OLD: {old_raw_fn}')
+    lg.logline(f'NEW: {new_raw_fn}')
 
-    # out = compare_raw (new_raw_fn,old_raw_fn)
-    # lg.logline(f'  Column status: {out["columns"]}')
-    # lg.logline(f'  Number of differing records: {out["num_diff_records"]}')
-    # lg.logline(f'  New disclosures:     {len(out["added_disc"])}')
-    # lg.logline(f'  Changed disclosures: {len(out["changed_disc"])}')
-    # lg.logline(f'  Removed disclosures: {len(out["removed_disc"])}')
-    # archive_test_files(out, old_raw_fn,new_raw_fn)
-    # update_pub_delay()
-    # lg.logline('  Updated pub_delay dataframe')
+    out = compare_raw(new_raw_fn,old_raw_fn)
+    lg.logline(f'  Column status: {out["columns"]}')
+    lg.logline(f'  Number of differing records: {out["num_diff_records"]}')
+    lg.logline(f'  New disclosures:     {len(out["added_disc"])}')
+    lg.logline(f'  Changed disclosures: {len(out["changed_disc"])}')
+    lg.logline(f'  Removed disclosures: {len(out["removed_disc"])}')
+    archive_test_files(out, old_raw_fn,new_raw_fn)
+    update_pub_delay()
+    lg.logline('  Updated pub_delay dataframe')
     
     # make Raw_disclosures html
     notebook_to_google_storage()

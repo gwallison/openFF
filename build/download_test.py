@@ -40,17 +40,17 @@ st = datetime.now() # start timer
 
 
 # define    
-data_dir = r"C:\MyDocs\integrated\archive"
-daily_dir = os.path.join(data_dir,'daily')
-raw_dir = os.path.join(data_dir,'raw')
-out_dir = os.path.join(data_dir,'out')
+data_dir = r"C:\MyDocs\integrated\openFF_archive"
+bulk_dir = os.path.join(data_dir,'FF_bulk_data')
+raw_dir = os.path.join(data_dir,'raw_dataframes')
+out_dir = os.path.join(data_dir,'diff_dicts')
 test_dir = os.path.join(data_dir,'test')
 
 test_zip_fn = 'test_zip.zip'
 test_raw_fn = 'test.parquet'
 
 afile = f'ff_archive_{today.strftime("%Y-%m-%d")}.zip'
-rawfn = f'raw_{today.strftime("%Y-%m-%d")}.parquet'
+rawfn = f'raw_df_{today.strftime("%Y-%m-%d")}.parquet'
 outfn = f'diff_dict_{today.strftime("%Y-%m-%d")}.pkl'
 
 
@@ -97,8 +97,8 @@ def get_old_df_fn(lg=lg):
         # oldraw = pd.read_parquet(last_fn)  
         return last_fn
     except: 
-        last_archive = os.listdir(daily_dir)[-1]
-        rdr = dreader.Make_DF_From_Archive(in_name=last_archive, zipdir=daily_dir,outset_dir=raw_dir)
+        last_archive = os.listdir(bulk_dir)[-1]
+        rdr = dreader.Make_DF_From_Archive(in_name=last_archive, zipdir=bulk_dir,outset_dir=raw_dir)
         oldraw = rdr.import_raw_FFV4(verbose=True)
         or_fn = 'raw_'+ last_archive[11:-4] + '.parquet'  
         oldraw.to_parquet(os.path.join(raw_dir,or_fn))
@@ -131,13 +131,13 @@ def archive_test_files(outdict,oldfn,newfn,lg=lg):
     shutil.move(os.path.join(test_dir,test_raw_fn),
                 os.path.join(raw_dir,rawfn))
     shutil.move(os.path.join(test_dir,test_zip_fn),
-                os.path.join(daily_dir,afile))
+                os.path.join(bulk_dir,afile))
     with open(os.path.join(out_dir,outfn),'wb') as f:
         pickle.dump(outdict,f)
 
 def update_pub_delay():
-    obj = mreader.Make_Meta_From_Archive(zipdir = r"C:\MyDocs\integrated\archive\daily")
-    _ = obj.update_pub_delay_df(archive_dirs=[r"C:\MyDocs\integrated\archive\daily"],
+    obj = mreader.Make_Meta_From_Archive(zipdir = bulk_dir)
+    _ = obj.update_pub_delay_df(archive_dirs=[bulk_dir],
                                 verbose=False)
     
 # def eval_gsutil_command(command):

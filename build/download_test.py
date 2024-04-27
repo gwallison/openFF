@@ -31,6 +31,8 @@ import ff_archive_tools.Meta_reader as mreader
 
 import openFF.build.core.fetch_archive_difference_set as fads
 
+production_computer = 'M2'  # set to the computer name performing production tasks
+
 
 today = datetime.today()
 
@@ -55,8 +57,9 @@ outfn = f'diff_dict_{today.strftime("%Y-%m-%d")}.pkl'
 
 class Log_it():
     def __init__(self):
+        import platform
         self.log_fn = r"G:\My Drive\webshare\daily_status\current_status.txt"
-        self.buffer = ''
+        self.buffer = f'Logging from {platform.node()}\n'
 
     def logline(self,txt):
         self.buffer += txt + '\n'
@@ -149,18 +152,23 @@ def update_pub_delay():
 #   output, _ = process.communicate()
 #   return output.decode('utf-8')
 
-def notebook_to_google_storage():
+def notebook_to_google_drive():
     import openFF.common.nb_helper as nbh
     import openFF.common.handles as hndl 
     import os
-    print('in notebook generation...')
-    fn = 'Raw_disclosures.html'
-    fulloutfn = os.path.join(hndl.sandbox_dir,fn)
-    nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'Raw_disclosures.ipynb'),
-                                output_fn=fulloutfn)
-    googleloc = 'gs://open-ff-browser'
-    command = f'gsutil cp {fulloutfn} {googleloc}'
-    print(os.system(command))
+    import platform
+    
+    if platform.node() == production_computer:           
+        print('in notebook generation...')
+        fn = 'Raw_disclosures.html'
+        fulloutfn = os.path.join(r"G:\My Drive\webshare\daily_status",fn)
+        nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'Raw_disclosures.ipynb'),
+                                    output_fn=fulloutfn)
+    else:
+        print(f'No notebook generation for computer: {platform.node()}')
+    # googleloc = 'gs://open-ff-browser'
+    # command = f'gsutil cp {fulloutfn} {googleloc}'
+    # print(os.system(command))
     # print(eval_gsutil_command(command))
 
 
@@ -182,7 +190,7 @@ if __name__ == '__main__':
     lg.logline('  Updated pub_delay dataframe')
     
     # make Raw_disclosures html
-    notebook_to_google_storage()
+    notebook_to_google_drive()
     
     endit = datetime.now()
     lg.logline(f'\nProcess completed in {endit-st}\n')

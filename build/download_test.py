@@ -135,10 +135,11 @@ def archive_test_files(outdict,oldfn,newfn,lg=lg):
     with open(os.path.join(out_dir,outfn),'wb') as f:
         pickle.dump(outdict,f)
 
-def update_pub_delay():
+def update_pub_delay(lg=lg):
     obj = mreader.Make_Meta_From_Archive(zipdir = bulk_dir)
     _ = obj.update_pub_delay_df(archive_dirs=[bulk_dir],
                                 verbose=False)
+    lg.logline('Completed update of publication date dataframe')
     
 # def eval_gsutil_command(command):
 #   """Evaluates a gsutil command and returns the output.
@@ -152,45 +153,43 @@ def update_pub_delay():
 #   output, _ = process.communicate()
 #   return output.decode('utf-8')
 
-def notebook_to_google_drive():
+def notebook_to_google_drive(lg=lg):
     import openFF.common.nb_helper as nbh
     import openFF.common.handles as hndl 
     import os
     import platform
     
     if platform.node() == production_computer:           
-        print('in notebook generation...')
+        lg.logline('Performing generation of Raw_disclosures.html')
         fn = 'Raw_disclosures.html'
         fulloutfn = os.path.join(r"G:\My Drive\webshare\daily_status",fn)
         nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'Raw_disclosures.ipynb'),
                                     output_fn=fulloutfn)
     else:
         print(f'No notebook generation for computer: {platform.node()}')
-    # googleloc = 'gs://open-ff-browser'
-    # command = f'gsutil cp {fulloutfn} {googleloc}'
-    # print(os.system(command))
-    # print(eval_gsutil_command(command))
 
 
 if __name__ == '__main__':
-    old_raw_fn = get_old_df_fn()
-    fetch_new_archive()
-    new_raw_fn = get_new_df_fn()
-    lg.logline(f'OLD: {old_raw_fn}')
-    lg.logline(f'NEW: {new_raw_fn}')
-
-    out = compare_raw(new_raw_fn,old_raw_fn)
-    lg.logline(f'  Column status: {out["columns"]}')
-    lg.logline(f'  Number of differing records: {out["num_diff_records"]}')
-    lg.logline(f'  New disclosures:     {len(out["added_disc"])}')
-    lg.logline(f'  Changed disclosures: {len(out["changed_disc"])}')
-    lg.logline(f'  Removed disclosures: {len(out["removed_disc"])}')
-    archive_test_files(out, old_raw_fn,new_raw_fn)
-    update_pub_delay()
-    lg.logline('  Updated pub_delay dataframe')
+    try:
+        old_raw_fn = get_old_df_fn()
+        fetch_new_archive()
+        new_raw_fn = get_new_df_fn()
+        lg.logline(f'OLD: {old_raw_fn}')
+        lg.logline(f'NEW: {new_raw_fn}')
     
-    # make Raw_disclosures html
-    notebook_to_google_drive()
+        out = compare_raw(new_raw_fn,old_raw_fn)
+        lg.logline(f'  Column status: {out["columns"]}')
+        lg.logline(f'  Number of differing records: {out["num_diff_records"]}')
+        lg.logline(f'  New disclosures:     {len(out["added_disc"])}')
+        lg.logline(f'  Changed disclosures: {len(out["changed_disc"])}')
+        lg.logline(f'  Removed disclosures: {len(out["removed_disc"])}')
+        archive_test_files(out, old_raw_fn,new_raw_fn)
+        update_pub_delay()
+        
+        # make Raw_disclosures html
+        notebook_to_google_drive()
+    except:
+        lg.logline('***EXCEPTION THROWN***')
     
     endit = datetime.now()
     lg.logline(f'\nProcess completed in {endit-st}\n')

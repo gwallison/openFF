@@ -94,7 +94,9 @@ def getFFLink(row, txt=''):
     return wrap_URL_in_html(lnk,txt)
 
 def getDisclosureLink(APINumber,disclosureid,text_to_show='disclosure',
-                      use_remote=False,up_level=True):
+                      use_remote=False,up_level=True,
+                      check_if_exists=False):  
+    import requests      
     preamble = ''
     if up_level:
         preamble = '../'
@@ -103,6 +105,10 @@ def getDisclosureLink(APINumber,disclosureid,text_to_show='disclosure',
     APINumber = str(APINumber)
     api5 = APINumber.replace('-','')[:5]
     s =  f'{preamble}disclosures/{api5}/{disclosureid}.html'
+    if check_if_exists:
+        r = requests.head(s)
+        if r.status_code != 200:
+            return ' ' # doesn't exist so return empty
     return wrap_URL_in_html(s,text_to_show)    
 
 # def getMapLink(lat=51.477222,lon=0):

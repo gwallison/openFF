@@ -105,5 +105,10 @@ With all of the recent flux in the FracFocus data due to the recent version chan
 ## FracFocus Issues/Flaws flags
 **March 28, 2024**
 We have been developing code to not only detect errors and other issues in the FracFocus data, but to classify and flag it so that users of the Open-FF system can be aware of specific problems that other people have found.  The current set of issues flagged is still small (but we have a growing todo list!).  Today we added code so the full_df data set now has summary flags.  The are disclosure and record level flags, depending on what organizational level is affected.  Further, we added preliminary hooks to the Open-FF disclosures so that users can ee them directly.
-  
+
+## MassIngredient issues
+**May 8, 2024**
+Before FFV4, Open-FF used the FracFocus field `MassIngredient` only to confirm the calculated mass values.  With the new FFV4, FracFocus included the field in their data dictionary and so we began to include it directly in Open-FF's `mass` field.  (see [the calculating mass page](Calculating_mass.md)). While that change gives us access to the mass of many more records, we are finding that some of those values of `MassIngredient` are suspect, even the disclosures that pass the MI_inconsistent test.  For example, there are a substantial number of disclosures for which no water carrier record is provided and the sand record takes on a large percentage, often over 90%. In many of these disclosures, the `MassIngredient` value for sand is clearly out of whack.    Today I am finding other chemicals that are similarly affected.  We will need to find a way to systematically identify these crazy numbers and alert the reader.
+
+
 [Return to Index](Top.md)

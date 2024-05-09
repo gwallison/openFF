@@ -147,6 +147,15 @@ def get_cas_list():
             print(f'CAS list error: <<{cas}>>')
     return lst
 
+def get_casing_df():
+    """return casing pickle from current repository; just CASNumber and IngName"""
+    pkl = pd.read_parquet(os.path.join(hndl.curr_repo_pkl_dir,'cas_ing.parquet'))
+    return pkl[['CASNumber','IngredientName']]
+
+def get_company_df():
+    """return company pickle from current repository"""
+    return pd.read_parquet(os.path.join(hndl.curr_repo_pkl_dir,'companies.parquet'))
+
 
 def get_comptox_df():
     """returns df of bgCAS with DTXSID ids as well as bgCAS"""

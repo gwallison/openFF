@@ -245,8 +245,10 @@ class Read_FF():
                                     )
                     
                     t['raw_ws_filename'] = fn # helpful for manual searches of raw files
-                    for col in fill_lst:
-                        t[col] = t[col].fillna('MISSING')
+                    # FOLLOWING CODE IS failing. Not sure why or if we even need it.
+                    # for col in fill_lst:
+                    #     print(f'{col}: {t[col].isna().sum()}')
+                    #     t[col] = t[col].fillna('MISSING')
 
                     dflist.append(t)
         final = pd.concat(dflist,sort=True)

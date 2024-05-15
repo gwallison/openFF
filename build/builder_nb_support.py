@@ -159,7 +159,7 @@ def create_and_fill_folders(download_repo=True,
         url = repo_root+'/repo_info.csv'
         out_fn = os.path.join(orig_dir,'old_repo_info.csv')
         urllib.request.urlretrieve(url, out_fn)
-        print(f'\nDate of downloaded (last) repo: {get_old_repo_info(variable="bulk_download_date")}')
+        print(f'\nLast downloaded bulk data: {get_old_repo_info(variable="FF_archive_filename")}')
          
     
     init_repo_info()
@@ -259,7 +259,7 @@ def update_upload_date_file(work_dir=work_dir,orig_dir=orig_dir):
     ndf = df[c].copy() # just the new ones
     
     gb = ndf.groupby('DisclosureId',as_index=False)['OperatorName'].count()
-    gb['build_date_when_added'] = today.strftime("%Y-%m-%d")  # note that date_added is no longer used in pub_delay
+    gb['date_added'] = today.strftime("%Y-%m-%d")  # note that date_added is no longer used in pub_delay
     gb.rename({'OperatorName':'num_records'}, inplace=True,axis=1)
     print(f'Number of new disclosures added to list: {len(gb)}')
     
@@ -271,7 +271,7 @@ def update_upload_date_file(work_dir=work_dir,orig_dir=orig_dir):
     
 def create_difference_pickle(work_dir=work_dir, orig_dir=orig_dir):
     import pickle
-    output = fads.get_difference_set_FFV4(os.path.join(orig_dir,
+    output = fads.get_difference_set(os.path.join(orig_dir,
                                                        'curation_files',
                                                        'raw_flat.parquet'),
                                           os.path.join(work_dir,

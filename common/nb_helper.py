@@ -71,7 +71,7 @@ def make_notebook_output(nb_fn,output_fn, basic_output=False):
 
 def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
               incl_links=True,link_up_level=0,repo_name='',cat_creation_date='',
-              show_source=True,use_remote=False):
+              show_source=True,use_remote=False,includeFT=True):
     #print(f'{cat_creation_date:%B %d, %Y}')
     local_prefix = ''
     if link_up_level>0:
@@ -111,7 +111,9 @@ def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
     alert = """<a href="alert.html">
   <img src="alert.png" onerror="this.onerror=null; this.remove();" >
 </a>"""
-    
+    second_logo = logoFT
+    if not includeFT:
+        second_logo = ''
     table = f"""{alert}
                 <style>
                 </style>{cat_txt}<hr>
@@ -124,7 +126,7 @@ def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
                     {image_alt}
                     <p style="text-align: center; font-size:100%">{source}
                 </td>
-                <td width=15%>{logoFT}</td>
+                <td width=15%>{second_logo}</td>
                 </tr>
             </table><hr>"""
     return table

@@ -153,6 +153,20 @@ def update_pub_delay(lg=lg):
 #   output, _ = process.communicate()
 #   return output.decode('utf-8')
 
+def upload_file_to_bucket(bucket_name, blob_name, file_path,lg=lg):
+  """Uploads a file to the specified bucket."""
+  from google.cloud import storage
+
+  # Set the project ID as an environment variable
+  os.environ["GOOGLE_CLOUD_PROJECT"] = "open-FF-catalog"
+
+  storage_client = storage.Client()
+  bucket = storage_client.bucket(bucket_name)
+  blob = bucket.blob(blob_name)
+  blob.upload_from_filename(file_path)
+
+  lg.logline(f"File {file_path} uploaded to {bucket_name}/{blob_name}")
+
 def notebook_to_google_drive(lg=lg):
     import openFF.common.nb_helper as nbh
     import openFF.common.handles as hndl 
@@ -167,6 +181,11 @@ def notebook_to_google_drive(lg=lg):
                                     output_fn=fulloutfn)
     else:
         print(f'No notebook generation for computer: {platform.node()}')
+
+    # Now let's move that same file to the google storage spot
+    upload_file_to_bucket(bucket_name='open-FF-browser', 
+                          blob_name='Raw_disclosures.html', 
+                          file_path=fulloutfn)
 
 
 if __name__ == '__main__':

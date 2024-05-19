@@ -54,9 +54,9 @@ class Disc_gen():
         self.tmp = hndl.sandbox_dir
         self.disclosure_fn = r"C:\MyDocs\integrated\openFF\browser\notebooks\disclosure_report.html"
         self.make_api_list()
-        self.make_outdirs()
-        self.move_css_and_script_files()
-        self.make_all_files()
+        # self.make_outdirs()
+        # self.move_css_and_script_files()
+        # self.make_all_files()
         self.make_disc_index_page()
         # self.move_include_files()
 

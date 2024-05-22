@@ -5,9 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def proprietary_bars(df,plot_title='TEST_title'):
+    """df is a groupby at the disclosure level and the value `perc_proprietary'
+    is pre-calculated"""
     import seaborn as sns
     df = df.copy()
-    df['year'] = df.date.dt.year
+    # df['year'] = df.date.dt.year
     df['propCut'] = pd.cut(df.perc_proprietary,right=False,bins=[0,0.0001,10,25,50,101],
                           labels=['no proprietary designations','up to 10% of records\nare proprietary designations',
                                   'between 10 and 25% of records\nare proprietary designations',

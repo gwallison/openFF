@@ -73,6 +73,7 @@ class Process_SDF():
         self.df = pd.DataFrame(self.allrecs)
     
 
+
 def sdf_extract(ci_source,out_dir):
     # pull scores and authority from the .sdf text files from the
     # Hazard module.  
@@ -87,6 +88,7 @@ def sdf_extract(ci_source,out_dir):
         assert 0==1,'Code only setup for exactly one file'
     pSDF = Process_SDF(to_process[0])
     pSDF.process_all_lines()
+    
     fh.save_df(pSDF.df,os.path.join(out_dir,hndl.ci_summ_fn))
     
 ######################  Used in catalog routines ############

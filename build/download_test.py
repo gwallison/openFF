@@ -167,7 +167,7 @@ def upload_file_to_bucket(bucket_name, blob_name, file_path,lg=lg):
 
   lg.logline(f"File {file_path} uploaded to {bucket_name}/{blob_name}")
 
-def notebook_to_google_drive(lg=lg):
+def notebook_to_google_drive(lg=lg,move_to_storage=False):
     import openFF.common.nb_helper as nbh
     import openFF.common.handles as hndl 
     import os
@@ -183,13 +183,12 @@ def notebook_to_google_drive(lg=lg):
         print(f'No notebook generation for computer: {platform.node()}')
 
     # Now let's move that same file to the google storage spot
-    upload_file_to_bucket(bucket_name='open-ff-browser', 
-                          blob_name='Raw_disclosures.html', 
-                          file_path=fulloutfn)
+    if move_to_storage:
+        upload_file_to_bucket(bucket_name='open-ff-browser', 
+                              blob_name='Raw_disclosures.html', 
+                              file_path=fulloutfn)
 
-
-if __name__ == '__main__':
-    try:
+def main_run():
         old_raw_fn = get_old_df_fn()
         fetch_new_archive()
         new_raw_fn = get_new_df_fn()
@@ -207,9 +206,19 @@ if __name__ == '__main__':
         
         # make Raw_disclosures html
         notebook_to_google_drive()
-    except:
-        lg.logline('***EXCEPTION THROWN***')
+
     
+
+if __name__ == '__main__':
+    use_exception = False
+    if use_exception:
+        try:
+            main_run()
+        except:
+            lg.logline('***EXCEPTION THROWN***')
+    else:
+        main_run()
+        
     endit = datetime.now()
     lg.logline(f'\nProcess completed in {endit-st}\n')
     lg.update_log()

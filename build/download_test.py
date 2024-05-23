@@ -167,7 +167,7 @@ def upload_file_to_bucket(bucket_name, blob_name, file_path,lg=lg):
 
   lg.logline(f"File {file_path} uploaded to {bucket_name}/{blob_name}")
 
-def notebook_to_google_drive(lg=lg,move_to_storage=False):
+def notebook_to_google_drive(lg=lg,move_to_storage=True):
     import openFF.common.nb_helper as nbh
     import openFF.common.handles as hndl 
     import os
@@ -196,7 +196,7 @@ def main_run():
         lg.logline(f'NEW: {new_raw_fn}')
     
         out = compare_raw(new_raw_fn,old_raw_fn)
-        lg.logline(f'  Column status: {out["columns"]}')
+        lg.logline(f'\n\n  Column status: {out["columns"]}')
         lg.logline(f'  Number of differing records: {out["num_diff_records"]}')
         lg.logline(f'  New disclosures:     {len(out["added_disc"])}')
         lg.logline(f'  Changed disclosures: {len(out["changed_disc"])}')
@@ -210,7 +210,7 @@ def main_run():
     
 
 if __name__ == '__main__':
-    use_exception = False
+    use_exception = True
     if use_exception:
         try:
             main_run()

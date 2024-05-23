@@ -183,7 +183,7 @@ def notebook_to_google_drive(lg=lg):
         print(f'No notebook generation for computer: {platform.node()}')
 
     # Now let's move that same file to the google storage spot
-    upload_file_to_bucket(bucket_name='open-FF-browser', 
+    upload_file_to_bucket(bucket_name='open-ff-browser', 
                           blob_name='Raw_disclosures.html', 
                           file_path=fulloutfn)
 

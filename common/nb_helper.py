@@ -41,7 +41,6 @@ def hide_map_warning(fn):
 </div>"""
     # text2 is the warning produced by the calplot routine
     text2 = """<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
 <pre>findfont: Font family 'Helvetica' not found.
 findfont: Font family 'Helvetica' not found.

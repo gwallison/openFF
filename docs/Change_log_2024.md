@@ -110,5 +110,10 @@ We have been developing code to not only detect errors and other issues in the F
 **May 8, 2024**
 Before FFV4, Open-FF used the FracFocus field `MassIngredient` only to confirm the calculated mass values.  With the new FFV4, FracFocus included the field in their data dictionary and so we began to include it directly in Open-FF's `mass` field.  (see [the calculating mass page](Calculating_mass.md)). While that change gives us access to the mass of many more records, we are finding that some of those values of `MassIngredient` are suspect, even the disclosures that pass the MI_inconsistent test.  For example, there are a substantial number of disclosures for which no water carrier record is provided and the sand record takes on a large percentage, often over 90%. In many of these disclosures, the `MassIngredient` value for sand is clearly out of whack.    Today I am finding other chemicals that are similarly affected.  We will need to find a way to systematically identify these crazy numbers and alert the reader.
 
+**May 24, 2024**
+I am finding more situations where `mass` is sourced only by `MassIngredient` and the values are clearly wrong.  Because users of the Open-FF data may not know to check for conditions that imply outlier masses, I have decided to fall back to the previous, more conservative, method of using just `calcMass' as the source of `mass`.  The addition of the field `mass` is relatively new with the usage of `MassIngredient`; I will keep `mass` because it is now embedded in a lot of downstream code.  This means that roughly 250,000 records for which `MassIndgreient` was the only souce of mass, will no longer be directly included in `mass`.  I am sure than many of those values are completely acceptable, but we currently have no easy way to descriminate good from bad.    My goal is to eventually produce algorithms that detect conditions that make `MassIngredient` unreliable and get back to using the reliable values.
+
+
+
 
 [Return to Index](Top.md)

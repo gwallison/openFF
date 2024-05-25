@@ -180,13 +180,20 @@ def calc_massComp(rec_df,disc_df):
     # construct 'mass' and 'massSource'
     rec_df['massSource'] = 'neither'
 
-    # just MI
-    rec_df.massSource = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),'MI_only',rec_df.massSource)
-    rec_df['mass'] = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),rec_df.cleanMI,np.NaN)
+    ### 5/24/2024 - removing the 'MI_only' type because we cannot be sure of MassIngredient's 
+    ###             reliability at this time.  The commented version of "just calcMass" had to 
+    ###             be adjusted too.
+    # # just MI
+    # rec_df.massSource = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),'MI_only',rec_df.massSource)
+    # rec_df['mass'] = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),rec_df.cleanMI,np.NaN)
+
+    # # just calcMass
+    # rec_df.massSource = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),'calcMass_only',rec_df.massSource)
+    # rec_df['mass'] = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),rec_df.calcMass,rec_df.mass)
 
     # just calcMass
     rec_df.massSource = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),'calcMass_only',rec_df.massSource)
-    rec_df.mass = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),rec_df.calcMass,rec_df.mass)
+    rec_df['mass'] = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),rec_df.calcMass,np.NaN)
 
     # both, use the MI value over the calcMass value
     rec_df.massSource = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.notna()),'MI_and_calcMass',rec_df.massSource)

@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-def proprietary_bars(df,plot_title='TEST_title'):
+def proprietary_bars(df,plot_title='TEST_title',
+                     save_file=None):
     """df is a groupby at the disclosure level and the value `perc_proprietary'
     is pre-calculated"""
     import seaborn as sns
@@ -42,4 +43,7 @@ def proprietary_bars(df,plot_title='TEST_title'):
         plt.text(p.get_width(), p.get_y()+0.55*p.get_height(),
                  nw,
                  ha='left', va='center',fontsize=12)
+    if save_file:
+        plt.tight_layout()
+        plt.savefig(save_file)
         

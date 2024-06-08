@@ -34,6 +34,8 @@ def proprietary_bars(df,plot_title='TEST_title',
     ax.set_title(plot_title)
     # ax.set_xlim(right=58000)
     ax.invert_yaxis()
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
     
     perc_lst = t.prop_perc.tolist()
     for i,p in enumerate(ax.patches):

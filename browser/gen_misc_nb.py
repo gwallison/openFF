@@ -25,15 +25,15 @@ class MiscNbGen():
         # the following list is in tuples of (file basenane,page title)
         self.fulllist = [('Open-FF_Catalog','Data Browser'),
                         ('Open-FF_Scope_and_Aggregate_Stats','Big Picture Analysis'),
-                        ('Ohio_Drilling_Chemicals','Ohio Drilling Chemicals'),
-                        ('Open-FF_Auxillary_Data','Auxillary Data'),
+                        #('Ohio_Drilling_Chemicals','Ohio Drilling Chemicals'),
+                        #('Open-FF_Auxillary_Data','Auxillary Data'),
                         ('Open-FF_CASNumber_and_IngredientName','CASRN & IngredientName pairs'),
                         ('Open-FF_Company_Names','Company Name Table'),
                         ('Open-FF_Data_Dictionary','Data Dictionary'),
                         ('Open-FF_Synonyms','Chemical Name Synonyms'),
-                        ('Open-FF_TradeNames','Trade Names and Composition Data'),
+                        #('Open-FF_TradeNames','Trade Names and Composition Data'),
                         ('Short_description_of_Open-FF','Short description of Open-FF'),
-                        ('FracFocus_Holes','Holes in FracFocus'),
+                        #('FracFocus_Holes','Holes in FracFocus'),
                         ('Make_blog_images','Make data-dependent images')
                         ]
         self.make_all_nb()

@@ -90,6 +90,7 @@ browser_disclosures_dir = os.path.join(browser_out_dir,"disclosures")
 browser_scope_dir = os.path.join(browser_out_dir,"scope")
 browser_image_dir = os.path.join(browser_out_dir,"images")
 
+
 ref_fn = os.path.join(sandbox_dir,'ref.csv')
 
 # wells_in_dist_fn = './work/FFwells_in_school_districts.csv'

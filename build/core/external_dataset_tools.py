@@ -34,12 +34,37 @@ def add_diesel_list(df):
     df['is_on_diesel'] = df.bgCAS.isin(cas)
     return df
 
-def add_UVCB_list(df,sources):
-    print('     -- processing TSCA UVCB list')
-    reffn = ext_fn(ext_dir=sources,handle='uvcb_list')
-    uvcb = pd.read_csv(reffn)
-    cas = uvcb.CASRN.unique().tolist()
+# def add_UVCB_list(df,sources):
+#     print('     -- processing TSCA UVCB list')
+#     reffn = ext_fn(ext_dir=sources,handle='uvcb_list')
+#     uvcb = pd.read_csv(reffn)
+#     cas = uvcb.CASRN.unique().tolist()
+#     df['is_on_UVCB'] = df.bgCAS.isin(cas)
+#     return df
+
+def add_TSCA_list(df,sources):
+    print('     -- processing TSCA list')
+    reffn = ext_fn(ext_dir=sources,handle='tsca_list')
+    tsca = pd.read_csv(reffn)
+    # first get uvcbs
+    cas = tsca[tsca.UVCB=='UVCB'].CASRN.unique().tolist()
     df['is_on_UVCB'] = df.bgCAS.isin(cas)
+    
+    # next get_commercial activity status
+    tsca['bgCAS'] = tsca.CASRN
+    df = df.merge(tsca[['bgCAS','ACTIVITY']],on='bgCAS',how='left')
+    df = df.rename({'ACTIVITY':'commercial_status'},axis=1)
+    df.commercial_status = df.commercial_status.fillna('not on TSCA list')
+
+    # get EPA regulatory flags
+    df = df.merge(tsca[['bgCAS','FLAG']],on='bgCAS',how='left')
+    df = df.rename({'FLAG':'epa_reg_flag'},axis=1)
+    df.epa_reg_flag = df.epa_reg_flag.fillna(' ')
+    
+    # get TSCA DEF (chem subs definition)
+    df = df.merge(tsca[['bgCAS','DEF']],on='bgCAS',how='left')
+    df = df.rename({'DEF':'tsca_chem_definition'},axis=1)
+    
     return df
 
 def add_NPDWR_list(df,sources):
@@ -58,6 +83,23 @@ def add_RQ_list(df,sources):
     rq = pd.read_csv(reffn,quotechar='$',encoding='utf-8')
     df = pd.merge(df,rq,on='bgCAS',how='left')
     return df
+
+def add_PFAS_lists(df,sources):
+    # need to concatenate to lists, PFASDEV and PFASSTRUCT
+    print('     -- processing EPA PFAS lists')
+    # first the STRUCT list
+    reffn = ext_fn(ext_dir=sources,handle='pfasstruct_list')
+    pfasstruct = pd.read_csv(reffn)
+    cas1 = pfasstruct[pfasstruct.CASRN.notna()].CASRN.unique().tolist()
+    
+    # next the DEV list (has non-cas ids)
+    reffn = ext_fn(ext_dir=sources,handle='pfasdev_list')
+    pfasdev = pd.read_csv(reffn)
+    cas2 = pfasdev[pfasdev.CASRN.notna()].CASRN.unique().tolist()
+    allcas = cas1+cas2
+    df['is_on_PFAS_list'] = df.bgCAS.isin(allcas)
+    return df
+    
     
 def add_CompTox_refs(df,sources,ci_source):
     
@@ -66,7 +108,7 @@ def add_CompTox_refs(df,sources,ci_source):
                'AQ_CWA': 'aq_cwa_list',
                'HH_CWA': 'hh_cwa_list',
                'IRIS': 'iris_list',
-               'PFAS_list': 'pfas_list',
+               # 'PFAS_list': 'pfas_list',
                # 'volatile_list': 'Chemical List VOLATILOME-2022-04-01.csv'
                }
     # compreffn = 'comptox_name_list.csv'
@@ -78,6 +120,8 @@ def add_CompTox_refs(df,sources,ci_source):
                            dtype={'CASRN':'str'})
         clst= ctdf.CASRN.unique().tolist()
         df['is_on_'+lst] = df.bgCAS.isin(clst)
+        
+    df = add_PFAS_lists(df, sources)
         
     # now add the epa ref numbers and names
     # refdf = pd.read_csv(os.path.join(sources,compreffn),quotechar='$',encoding='utf-8')
@@ -105,7 +149,7 @@ def add_all_bgCAS_tables(df,sources,ci_source):
     df = add_Prop65_ref(df,sources)
     df = add_TEDX_ref(df,sources)
     df = add_diesel_list(df)
-    df = add_UVCB_list(df,sources)
+    df = add_TSCA_list(df,sources)
     df = add_RQ_list(df,sources)
     df = add_ChemInfo_list(df,ci_source)
     return df

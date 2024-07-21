@@ -113,6 +113,14 @@ Before FFV4, Open-FF used the FracFocus field `MassIngredient` only to confirm t
 **May 24, 2024**
 I am finding more situations where `mass` is sourced only by `MassIngredient` and the values are clearly wrong.  Because users of the Open-FF data may not know to check for conditions that imply outlier masses, I have decided to fall back to the previous, more conservative, method of using just `calcMass' as the source of `mass`.  The addition of the field `mass` is relatively new with the usage of `MassIngredient`; I will keep `mass` because it is now embedded in a lot of downstream code.  This means that roughly 250,000 records for which `MassIndgreient` was the only souce of mass, will no longer be directly included in `mass`.  I am sure than many of those values are completely acceptable, but we currently have no easy way to descriminate good from bad.    My goal is to eventually produce algorithms that detect conditions that make `MassIngredient` unreliable and get back to using the reliable values.
 
+## Updates for the July 18, 2024 repo
+
+**July 19, 2024**
+To identify PFAS chemicals in the FF data, I have been using the EPA list called PFASMASTER.  THey have recently retired that list and replaced it with two lists, PFASDEV and PFASSTRUCT.  These lists will be regularly updated as EPA is actively investigating PFAS materials.  For Open-FF, we will combine the two lists into the list used to flag PFAS. The PFASDEV list includes many chemicals that do not yet have CAS numbers.  Open-FF keeps those in the attempt to find FF matches, but of course they are unlikely to be used in FF.  There are simply  no other standardized ways of identifying those materials in FF besides CASRN. 
+
+I am also integrating the most recent [non-confidential TSCA inventory](https://www.epa.gov/tsca-inventory/how-access-tsca-inventory) into the data set. This will used for the UVCB flag as well as commercial status, EPA regulatory flags and the TSCA chemical definition.
+
+These changes are implemented in `build\core\external_dataset_tools.py`.
 
 
 

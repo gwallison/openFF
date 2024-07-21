@@ -287,7 +287,7 @@ class Carrier_ID():
 
     def auto_set_4(self):
         """ Set4 has four conditions:
-            - CASNumber is 'MISSING'
+            - CASNumber is in ['MISSING','NA']
             - IngredientName has the words "including mix water" (a common identifier)
             - that record is > 60% PercentHFJob
             - the total_percent_valid_job (including the "including mix" record) is <105%
@@ -296,7 +296,8 @@ class Carrier_ID():
             the Purpose (which is often cluttered with multiple purposes) but
             are clearly single record water-based carriers.
         """
-        precond = (self.df.CASNumber=='MISSING')&\
+        # precond = ((self.df.CASNumber=='MISSING')|(self.df.CASNumber.isna()))&\
+        precond = (self.df.bgCAS=='ambiguousID')&\
                 (self.df.IngredientName.str.contains('including mix water'))&\
                 ((self.df.PercentHFJob >= 60)&(self.df.PercentHFJob < 100))
         t = self.df[(self.df.is_valid_CAS)|precond|(self.df.bgCAS=='proprietary')].copy()
@@ -304,7 +305,8 @@ class Carrier_ID():
             .rename({'PercentHFJob':'totPercent'},axis=1)
         t = pd.merge(t,gb,on='DisclosureId',how='left')
         # calc total%
-        cond = (t.CASNumber=='MISSING')&\
+        # cond = (t.CASNumber=='MISSING')&\
+        cond = (t.CASNumber.isin(['MISSING','NA']))&\
                 (t.IngredientName.str.contains('including mix water'))&\
                 ((t.PercentHFJob >= 60)&(t.PercentHFJob < 100))
         c1 = (t.totPercent>95) & (t.totPercent<105)

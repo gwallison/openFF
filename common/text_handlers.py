@@ -127,7 +127,8 @@ def getPubChemLink(cas):
         pass
     return ''
 
-def getMoleculeImg(cas,size=120,use_remote=False,link_up_level=0):
+def getMoleculeImg(cas,size=120,use_remote=False,link_up_level=0,
+                   alt=None):
     # returns an html image link
     prefix = ''
     if link_up_level:
@@ -135,6 +136,10 @@ def getMoleculeImg(cas,size=120,use_remote=False,link_up_level=0):
             prefix += '../'
     if use_remote: # override link_up_level
         prefix = hndl.browser_root
+    if alt:
+        alttext = alt
+    else:
+        alttext = f'Molecular structure of {cas}'
     # if chemical_report: prefix='../'
     ct_path = os.path.join(hndl.pic_dir,cas,'comptoxid.png')
     # print(ct_path)
@@ -143,26 +148,31 @@ def getMoleculeImg(cas,size=120,use_remote=False,link_up_level=0):
         # and is not empty:  # this is the normal return
         if os.path.getsize(ct_path) > 0:
             # print('got it')
-            return f"""<center><img src="{prefix}images/{cas}/comptoxid.png" onerror="this.onerror=null; this.remove();" width="{size}"></center>"""
+            return f"""<center><img src="{prefix}images/{cas}/comptoxid.png" alt="{alttext}" onerror="this.onerror=null; this.remove();" width="{size}"></center>"""
     else: # but if all else fails, try linking ot chemid
         # print('ct_path didt exist')
         ci_path = os.path.join(hndl.pic_dir,cas,'chemid.png')
         if os.path.exists(ci_path):
             if os.path.getsize(ci_path) > 0:
-                return f"""<center><img src="{prefix}images/{cas}/chemid.png" onerror="this.onerror=null; this.remove();" width="{size}"></center>"""
+                return f"""<center><img src="{prefix}images/{cas}/chemid.png" alt="{alttext}" onerror="this.onerror=null; this.remove();" width="{size}"></center>"""
     return "<center>Image not available</center>"
 
-def getFingerprintImg(cas,size=140):
+def getFingerprintImg(cas,size=140,alt=None):
     # returns an html image link when possible
     # check if we have it locally, but link to the cloud version
     fp_path = os.path.join(hndl.pic_dir,cas,'haz_fingerprint.png')
     # take comptox version if it exists
     cas_ignore = ['7732-18-5','proprietary','conflictingID',
                   'ambiguousID','sysAppMeta','cas_not_assigned']
+    if alt:
+        alttext = alt
+    else:
+        alttext = f'EPA Cheminformatics classifications of {cas}'
+
     if cas in cas_ignore:
         return ' <center>---</center> '
     if os.path.exists(fp_path):
-        return f"""<center><img src="https://storage.googleapis.com/open-ff-browser/images/{cas}/haz_fingerprint.png" onerror="this.onerror=null; this.remove();" width={size}></center>"""
+        return f"""<center><img src="https://storage.googleapis.com/open-ff-browser/images/{cas}/haz_fingerprint.png" alt="{alttext}"  onerror="this.onerror=null; this.remove();" width={size}></center>"""
     return "<center>ChemInformatics not available</center>"
     
     

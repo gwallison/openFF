@@ -117,3 +117,7 @@ docs_images = os.path.join(root_code,'docs','images')
 ################### ChemInformatics handles
 ci_source = os.path.join(curr_repo_dir,"ChemInfo_ref_files")
 ci_summ_fn = 'CI_sdf_summary.parquet'
+
+##################  FF_issues handles
+ff_issues_dir = os.path.join(root_data,'FF_issues')
+watchlist_dir = os.path.join(ff_issues_dir,'watchlist_dir')

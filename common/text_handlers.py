@@ -226,7 +226,7 @@ def round_sig(x, sig=2,guarantee_str=''):
             out =  int(round(x, sig-int(floor(log10(abs(x))))-1))
             return f"{out:,d}" # does the right thing with commas
         else: # fractional numbers
-            return str(round(x, sig-int(floor(log10(abs(x))))-1))
+            return round(x, sig-int(floor(log10(abs(x))))-1)
     except: 
         if guarantee_str:
             return guarantee_str

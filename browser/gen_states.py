@@ -67,6 +67,15 @@ class State_gen():
 
     def make_all_files(self):
         statelst = self.workdf.bgStateName.unique().tolist()
+        # first create state dirs in "states" browser_out dir, if needed
+        try:
+            root = hndl.browser_states_dir
+            for state in statelst:
+                state_lab = state.replace(' ','_')
+                os.mkdir(os.path.join(root,state_lab))
+        except:
+            print('Adding individual states to states dir not needed')
+            
         stlst = []
         ctlst = []
         fnlst = []
@@ -76,7 +85,7 @@ class State_gen():
             workdf = self.workdf[self.workdf.bgStateName==state][['date','bgStateName','bgCountyName',
                                               'DisclosureId','OperatorName','WellName',
                                               'TotalBaseWaterVolume',
-                                              'bgCAS', 'is_valid_cas',
+                                              'bgCAS', 'is_valid_cas','perc_proprietary',
                                               'APINumber', 'bgOperatorName',
                                               'bgLatitude','bgLongitude','no_chem_recs',
                                               'is_on_DWSHA','is_on_CWA',
@@ -94,6 +103,7 @@ class State_gen():
                                                                 'bgCountyName','bgStateName','WellName',
                                                                 'bgLatitude','bgLongitude','location_error',
                                                                 'OperatorName','bgOperatorName',
+                                                                'perc_proprietary',
                                                                 'no_chem_recs']].first()
             gb1 = self.count_all_trues(workdf[['DisclosureId','is_on_DWSHA','is_on_CWA',
                                                               'is_on_PFAS_list']])

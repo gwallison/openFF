@@ -24,7 +24,6 @@ class Operator_gen():
         print(f'Starting Operator Browser: using repository: {hndl.curr_data}')
         self.allrec = workingdf
         self.workdf = self.allrec[(self.allrec.in_std_filtered)]
-
         self.make_all_files()
     
     def fix_operator_title(self,fn,operator):
@@ -80,7 +79,14 @@ class Operator_gen():
             gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
             # print(gb.columns)
             gb.to_parquet(os.path.join(hndl.sandbox_dir,'operator.parquet'),index=False)
-            #workdf.to_parquet(os.path.join(hndl.sandbox_dir,'operator.parquet'),index=False)
+            # make unfiltered out file too
+            dupdf = self.allrec[self.allrec.bgOperatorName==op][['bgOperatorName',
+                                                                 'OperatorName',
+                                                                 'date','dup_rec',
+                                                                 'mass',
+                                                                 'DisclosureId']].copy()
+            dupdf.to_parquet(os.path.join(hndl.sandbox_dir,'operator_unfilt.parquet'),index=False)
+            
             print(f'** {op:<40} **  n recs: {len(workdf):>10,}')
             oneword = op.replace(' ','_')
             fulloutfn = os.path.join(hndl.browser_out_dir,'operators',f'{oneword}.html')

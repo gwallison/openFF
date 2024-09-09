@@ -50,6 +50,10 @@ def add_TSCA_list(df,sources):
     cas = tsca[tsca.UVCB=='UVCB'].CASRN.unique().tolist()
     df['is_on_UVCB'] = df.bgCAS.isin(cas)
     
+    # create is_on_TSCA flag
+    cas = tsca.CASRN.unique().tolist()
+    df['is_on_TSCA'] = df.bgCAS.isin(cas)
+    
     # next get_commercial activity status
     tsca['bgCAS'] = tsca.CASRN
     df = df.merge(tsca[['bgCAS','ACTIVITY']],on='bgCAS',how='left')

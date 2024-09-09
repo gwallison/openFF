@@ -83,6 +83,7 @@ browser_nb_dir = os.path.join(root_code,'browser','notebooks')
  # output folder is outside of main code repo
 browser_out_dir = os.path.join(root_data,"browser_out")
 browser_inc_dir = os.path.join(browser_out_dir,"includes")
+# note that within "states" other specific dirs are create in gen_states.py
 browser_states_dir = os.path.join(browser_out_dir,"states")
 browser_operators_dir = os.path.join(browser_out_dir,"operators")
 browser_flaws_dir = os.path.join(browser_out_dir,"flaws")

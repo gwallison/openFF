@@ -62,6 +62,7 @@ class ChemListSummary():
         chem_df.extrnl = np.where(chem_df.is_on_prop65,chem_df.extrnl+'prop65<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_PFAS_list,chem_df.extrnl+'EPA_PFAS<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_UVCB,chem_df.extrnl+'UVCB<br>',chem_df.extrnl)
+        chem_df.extrnl = np.where(~(chem_df.is_on_TSCA),chem_df.extrnl+'non-TSCA<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_diesel,chem_df.extrnl+'diesel<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_IRIS,chem_df.extrnl+'IRIS    ',chem_df.extrnl)
         chem_df['coc_lists'] = chem_df.extrnl.copy()
@@ -117,11 +118,11 @@ class ChemListSummary():
             cdf = cdf.merge(tmp,on='bgCAS',how='left')
 
             tmp = self.df[c1&(self.df.mass>0)].groupby('bgCAS',as_index=False)['mass'].apply(np.percentile,90).rename({'mass':'mass_90_perc'},axis=1)
-            tmp.mass_90_perc = tmp.mass_90_perc.map(lambda x: th.round_sig(x,3))
+            # tmp.mass_90_perc = tmp.mass_90_perc.map(lambda x: th.round_sig(x,3))
             cdf = cdf.merge(tmp,on='bgCAS',how='left')
 
             tmp = self.df[c1&(self.df.mass>0)].groupby('bgCAS',as_index=False)['mass'].median().rename({'mass':'mass_median'},axis=1)
-            tmp.mass_median = tmp.mass_median.map(lambda x: th.round_sig(x,3))
+            # tmp.mass_median = tmp.mass_median.map(lambda x: th.round_sig(x,3))
             cdf = cdf.merge(tmp,on='bgCAS',how='left')
 
             # cdf.fillna('',inplace=True)

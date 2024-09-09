@@ -35,7 +35,8 @@ def erase_output_space(dir = hndl.browser_out_dir):
 
 def init_output_space(dir = hndl.browser_out_dir):
     dirs = [hndl.browser_inc_dir,hndl.browser_states_dir,
-            hndl.browser_operators_dir,hndl.browser_flaws_dir,hndl.browser_disclosures_dir,
+            hndl.browser_operators_dir,hndl.browser_flaws_dir,
+            hndl.browser_disclosures_dir,
             # hndl.browser_image_dir
             ]
     erase_output_space(dir)
@@ -87,7 +88,7 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
 
 
 if __name__ == '__main__':
-    c = input("Type 'erase' if you want to clear the output dir before starting, otherwise <enter> > ")
+    c = input("Enter 'erase' to clear the output dir before starting, otherwise <enter> > ")
     if c == 'erase':
         print(f'Initializing {hndl.browser_out_dir}')
         init_output_space()
@@ -96,9 +97,9 @@ if __name__ == '__main__':
     # print(workingdf.columns)
     # _ = gen_chem.Chem_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_states.State_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_disc.Disc_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_scope.ScopeGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_misc_nb.MiscNbGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_misc_nb.MiscNbGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     print('DONE')

@@ -57,6 +57,10 @@ def getStateLink(state,text_to_show='State details',use_remote=False):
     s = f'{preamble}{state.lower()}.html'
     return wrap_URL_in_html(s,text_to_show)
 
+def getBlogStateLink(state,text_to_show='Link to state summary'):
+    s = f'https://storage.googleapis.com/open-ff-browser/states/{state}.html'
+    return wrap_URL_in_html(s,text_to_show)
+
 def getCountyLink(county,state,text_to_show='County details',use_remote=False):
     preamble = './' # when coming from a state link, don't need preamble
     if use_remote:

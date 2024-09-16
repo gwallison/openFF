@@ -354,6 +354,7 @@ def create_state_choropleth(data,
     fn = r"C:\MyDocs\OpenFF\data\non-FF\georef-united-states-of-america-state.geojson"
     geojson = gpd.read_file(fn)
     data['orig_value'] = data.value
+    # data['state_link'] = f'https://open-FF.org/{data.StateName}.html'
 
     geojson['StateName'] = geojson.ste_name.str.lower()
     geojson = geojson[['StateName','ste_code','geometry']]
@@ -411,8 +412,83 @@ def create_state_choropleth(data,
 
     display(f)
 
+# single layer, with popups and links
+def create_master_state_choropleth(data,
+                            start_loc=[40, -96],start_zoom = 4.5,
+                            custom_scale = [], plotlog = True,
+                            legend_name = 'Test legend',
+                            fields = ['StateName','orig_value'],
+                            aliases = ['State: ','data: '],
+                            width=500,height=400):
+    import folium
+    from IPython.display import display, HTML
+    fn = r"C:\MyDocs\OpenFF\data\non-FF\georef-united-states-of-america-state.geojson"
+    geojson = gpd.read_file(fn)
+    data['orig_value'] = data.value
+    # url = f'https://storage.googleapis.com/open-ff-browser/states/{data.StateName.replace(" ","_")}.html'
+    data['state_link'] = data.StateName.map(lambda x: th.getBlogStateLink(x))
+    # disable links to non-FF states
+    data.state_link = np.where(data.orig_value.isna(),'not available',
+                               data.state_link)
+    geojson['StateName'] = geojson.ste_name.str.lower()
+    geojson = geojson[['StateName','ste_code','geometry']]
+    #     geojson.drop(['ste_name'],axis=1,inplace=True)
+    f = folium.Figure(width=width, height=height)
+    m = folium.Map(location= start_loc, tiles="openstreetmap",
+                    zoom_start=start_zoom).add_to(f)
+#     fg1 = folium.FeatureGroup(name=legend_name,overlay=False).add_to(m)
+    
+    geojson = pd.merge(geojson,data,on=['StateName'],how='left')
+    #geojson.value.fillna(0,inplace=True)
+    if plotlog:
+        geojson.value = np.log10(geojson.value+1)
+        legend_name = legend_name + ' (log transformed)'
+    geojson.orig_value.fillna('no data',inplace=True)
+    #print(geojson[['StateName','value']])
+    
+    if custom_scale==[]:
+        custom_scale = (geojson['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
+    folium.Choropleth(
+                geo_data=fn,
+                data=geojson,
+                columns=['ste_code', 'value'],  #Here we tell folium to get the fips and plot values for each state
+                key_on='feature.properties.ste_code',
+                threshold_scale=custom_scale, #use the custom scale we created for legend
+                fill_color='YlOrRd',
+                nan_fill_color="gainsboro", #Use white color if there is no data available for the area
+                fill_opacity=0.4,
+                line_opacity=0.4,
+                line_weight=0.3,
+                legend_name= legend_name, #title of the legend
+                highlight=True,
+                line_color='black').add_to(m) 
+    
+    folium.features.GeoJson(
+                data=geojson,
+                name='',
+                smooth_factor=2,
+                style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
+                popup=folium.features.GeoJsonPopup(
+                    fields=fields,
+                    aliases=aliases, 
+                    localize=True,
+                    sticky=False,
+                    labels=True,
+                    style="""
+                        background-color: #F0EFEF;
+                        border: 2px solid black;
+                        border-radius: 3px;
+                        box-shadow: 3px;
+                    """,
+                    max_width=800,),
+                        highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
+                    ).add_to(m)   
+
+    return f
+
 def create_county_choropleth(data,
                              start_loc=[40, -96],start_zoom = 6,
+                             include_shape=False,area_df=None,
                              custom_scale = [], plotlog = True,
                              legend_name = 'Test legend',
                              show_only_data_states=True,
@@ -438,8 +514,28 @@ def create_county_choropleth(data,
     if start_loc==[]:
         start_loc = [geojson.geometry.centroid.x.mean(),geojson.geometry.centroid.y.mean()]
     f = folium.Figure(width=600, height=400)
-    m = folium.Map(location= start_loc, tiles="openstreetmap",
-                   zoom_start=start_zoom).add_to(f)
+
+    if include_shape:
+        #print('including shape!')
+        area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
+        m = folium.Map(tiles="openstreetmap",location=area, 
+                       zoom_start=start_zoom).add_to(f)
+        
+        # show area
+        style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
+        folium.GeoJson(area_df,
+                       style_function=lambda x: style,
+                       smooth_factor=.2,
+                       name= 'target area'
+                       ).add_to(m)
+
+
+    else:
+        m = folium.Map(location= start_loc,tiles="openstreetmap",
+                       zoom_start=start_zoom).add_to(f)
+    
+    # m = folium.Map(location= start_loc, tiles="openstreetmap",
+    #                zoom_start=start_zoom).add_to(f)
     if plotlog:
         working.value = np.log10(working.value+1)
         legend_name = legend_name + ' (log transformed)'

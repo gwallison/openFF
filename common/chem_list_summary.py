@@ -62,7 +62,7 @@ class ChemListSummary():
         chem_df.extrnl = np.where(chem_df.is_on_prop65,chem_df.extrnl+'prop65<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_PFAS_list,chem_df.extrnl+'EPA_PFAS<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_UVCB,chem_df.extrnl+'UVCB<br>',chem_df.extrnl)
-        # chem_df.extrnl = np.where(~(chem_df.is_on_TSCA),chem_df.extrnl+'non-TSCA<br>',chem_df.extrnl)
+        chem_df.extrnl = np.where(~(chem_df.is_on_TSCA),chem_df.extrnl+'non-TSCA<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_diesel,chem_df.extrnl+'diesel<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_IRIS,chem_df.extrnl+'IRIS    ',chem_df.extrnl)
         chem_df['coc_lists'] = chem_df.extrnl.copy()

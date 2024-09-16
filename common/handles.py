@@ -18,9 +18,9 @@ import platform
 locals = ['Dell_2023_Gary','M2','NucBoxM4']
 
 # repo_name = 'openFF_data_2024_03_21'
-repo_name = 'openFF_data_2024_08_17'
+repo_name = 'openFF_data_2024_09_12'
 # repo_name = 'current_repo'
-bulkdata_date = 'August 17, 2024'
+bulkdata_date = 'September 12, 2024'
 
 curr_platform = ''
 if not platform.node() in locals:
@@ -83,7 +83,7 @@ browser_nb_dir = os.path.join(root_code,'browser','notebooks')
  # output folder is outside of main code repo
 browser_out_dir = os.path.join(root_data,"browser_out")
 browser_inc_dir = os.path.join(browser_out_dir,"includes")
-# note that within "states" other specific dirs are create in gen_states.py
+# note that within "states" other specific dirs are created in gen_states.py
 browser_states_dir = os.path.join(browser_out_dir,"states")
 browser_operators_dir = os.path.join(browser_out_dir,"operators")
 browser_flaws_dir = os.path.join(browser_out_dir,"flaws")

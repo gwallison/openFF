@@ -56,12 +56,16 @@ class Operator_gen():
 
 
         print(f'Number of operators to be processed: {len(oplst)}')
+        # oplst = ['ascent']
         for op in oplst:
             workdf = t[t.bgOperatorName==op].copy()
             workdf['location_error'] = workdf.loc_name_mismatch|\
                                        (workdf.loc_within_county=='NO')|\
                                        (workdf.loc_within_state=='NO')|\
                                        workdf.latlon_too_coarse
+                                       
+            # dupgb = workdf[workdf.dup_rec].groupby('DisclosureId',as_index=False).size().rename({'size':'num_dup_recs'},axis=1)
+            
             
 
             gb = workdf.groupby('DisclosureId',as_index=False)[['date','APINumber','TotalBaseWaterVolume',
@@ -77,13 +81,15 @@ class Operator_gen():
             #                                                      'is_on_UVCB','is_on_diesel','is_on_PFAS_list',
             #                                                      'is_proprietary']].count()
             gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
+            # gb = gb.merge(dupgb,on='DisclosureId',how='left')
             # print(gb.columns)
             gb.to_parquet(os.path.join(hndl.sandbox_dir,'operator.parquet'),index=False)
             # make unfiltered out file too
             dupdf = self.allrec[self.allrec.bgOperatorName==op][['bgOperatorName',
                                                                  'OperatorName',
                                                                  'date','dup_rec',
-                                                                 'mass',
+                                                                 'mass','APINumber',
+                                                                 'bgStateName','bgCountyName',
                                                                  'DisclosureId']].copy()
             dupdf.to_parquet(os.path.join(hndl.sandbox_dir,'operator_unfilt.parquet'),index=False)
             

@@ -599,3 +599,4 @@ def create_county_choropleth(data,
                         highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
                     ).add_to(m)   
     display(f)
+    return f

@@ -14,6 +14,7 @@ import openFF.common.text_handlers as th
 import openFF.common.nb_helper as nbh
 
 import openFF.browser.gen_disclosures as gen_disc
+import openFF.browser.gen_disc_links as gen_disc_links
 import openFF.browser.gen_chemicals as gen_chem
 import openFF.browser.gen_states as gen_states
 import openFF.browser.gen_operators as gen_operators
@@ -23,7 +24,7 @@ import openFF.browser.gen_scope as gen_scope
 
 ####
 testing_mode = False
-remake_workingdf = True
+remake_workingdf = False
 use_archive_diff = False # when True, only builds pages that have changed since last build
 arc_diff = {}
 ####
@@ -36,7 +37,7 @@ def erase_output_space(dir = hndl.browser_out_dir):
 def init_output_space(dir = hndl.browser_out_dir):
     dirs = [hndl.browser_inc_dir,hndl.browser_states_dir,
             hndl.browser_operators_dir,hndl.browser_flaws_dir,
-            hndl.browser_disclosures_dir,
+            hndl.browser_disclosures_dir,hndl.browser_api_links_dir,
             # hndl.browser_image_dir
             ]
     erase_output_space(dir)
@@ -88,18 +89,19 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
 
 
 if __name__ == '__main__':
-    c = input("Enter 'erase' to clear the output dir before starting, otherwise <enter> > ")
-    if c == 'erase':
-        print(f'Initializing {hndl.browser_out_dir}')
-        init_output_space()
+    # c = input("Enter 'erase' to clear the output dir before starting, otherwise <enter> > ")
+    # if c == 'erase':
+    #     print(f'Initializing {hndl.browser_out_dir}')
+    #     init_output_space()
     nbh.make_sandbox()
     workingdf = prep_working_df()
     # print(workingdf.columns)
     # _ = gen_chem.Chem_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_states.State_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_disc.Disc_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_disc_links.Disc_link_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_scope.ScopeGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_misc_nb.MiscNbGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     print('DONE')

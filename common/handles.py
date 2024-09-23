@@ -88,6 +88,8 @@ browser_states_dir = os.path.join(browser_out_dir,"states")
 browser_operators_dir = os.path.join(browser_out_dir,"operators")
 browser_flaws_dir = os.path.join(browser_out_dir,"flaws")
 browser_disclosures_dir = os.path.join(browser_out_dir,"disclosures")
+browser_api_links_dir = os.path.join(browser_out_dir,"api_links")
+#browser_api_links_dir = r"D:\tmp\api_links"
 browser_scope_dir = os.path.join(browser_out_dir,"scope")
 browser_image_dir = os.path.join(browser_out_dir,"images")
 

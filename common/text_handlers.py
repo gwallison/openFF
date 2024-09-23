@@ -103,6 +103,10 @@ def getFFLink(row, txt='',fmt=''):
             
     return wrap_URL_in_html(lnk,txt)
 
+def getAPIListLink(api10,txt='Link to disclosure list'):
+    url = f'{hndl.browser_api_links_dir}{api10}'
+    return wrap_URL_in_html(url,txt)
+
 def getDisclosureLink(APINumber,disclosureid,text_to_show='disclosure',
                       use_remote=False,up_level=True,
                       check_if_exists=False):  

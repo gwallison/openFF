@@ -33,8 +33,10 @@ class Disc_link_gen():
         <!DOCTYPE html>
         <html>
         <head>
-        <title>{api}: Disclosure links</title>"""
-        
+        <title>{api}: Disclosure links</title>
+        <link rel="icon" href="https://storage.googleapis.com/open-ff-common/favicon.ico">
+        """
+
         html_content += """
         <style>
             table {

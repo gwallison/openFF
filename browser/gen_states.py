@@ -28,6 +28,10 @@ class State_gen():
                                    &(self.allrec.loc_within_state=='YES')]
         self.state_fn = './work/state_report.html'
         self.county_fn = './work/county_report.html'
+        
+        # make files that FracTracker will use to link to state and county pages
+        self.state_FT_index_fn = os.path.join(hndl.browser_out_dir,'state_link_index.parquet')
+        self.county_FT_index_fn = os.path.join(hndl.browser_out_dir,'county_link_index.parquet')
 
 
         # Next few lines are for testing mode; runs much faster!
@@ -67,6 +71,11 @@ class State_gen():
 
     def make_all_files(self):
         statelst = self.workdf.bgStateName.unique().tolist()
+        
+        ##########
+        statelst = ['colorado']
+        ##########
+        
         # first create state dirs in "states" browser_out dir, if needed
         try:
             root = hndl.browser_states_dir
@@ -141,13 +150,15 @@ class State_gen():
                                                                                                
                 stlst.append(state)
                 ctlst.append(county)
-                fnlst.append(cnty_state_name+'.html')
+                fnlst.append(cnty_state_name+'.html')  # used to make FT link table
                 gb.to_parquet(os.path.join(hndl.sandbox_dir,'county.parquet'),index=False)
                 # gb.to_csv('./work/county.csv')
                 # self.make_county_output()
+
                 nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'county_report.ipynb'),
                                     output_fn=fn)
                 self.fix_county_title(fn,cnty_state_name)
+
                 # cn_fn = f'{cnty_state_name}.html'
                 # shutil.copyfile(self.county_fn,
                 #                 os.path.join(self.outdir,'states',cn_fn))
@@ -156,7 +167,6 @@ class State_gen():
             fulloutfn = os.path.join(hndl.browser_out_dir,'states',f'{state}.html')
             nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'state_report.ipynb'),
                                     output_fn=fulloutfn)
-            # self.make_state_output()
             self.fix_state_title(fulloutfn,state)
         #  pd.DataFrame({'state':stlst,'county':ctlst})\
         #      .to_csv(os.path.join(self.outdir,'states/state_county_df.csv'))
@@ -166,4 +176,14 @@ class State_gen():
         nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'Open-FF_States_and_Counties.ipynb'),
                                 output_fn=fulloutfn)
         nbh.fix_nb_title(fulloutfn,'State Index')
-         
+        
+        # now make tables for FracTracker links
+        clinkdf = pd.DataFrame({'state':stlst, 'county':ctlst,'cntyfn':fnlst})
+        clinkdf['county_page_link'] = hndl.browser_root+'state/'+clinkdf.cntyfn
+        clinkdf.to_parquet(self.county_FT_index_fn)
+        stset = list(set(stlst))
+        slinkdf = pd.DataFrame({'state':stset})
+        slinkdf['state_page_link'] = hndl.browser_root+'state/'+slinkdf.state+'.html'
+        slinkdf.to_parquet(self.state_FT_index_fn)
+        
+             

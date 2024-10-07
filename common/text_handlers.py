@@ -69,6 +69,13 @@ def getCountyLink(county,state,text_to_show='County details',use_remote=False):
     s = f'{preamble}{name}.html'    
     return wrap_URL_in_html(s,text_to_show)
 
+def getBlogCountyLink(row,text_to_show='Link to county summary'):
+    name = row.CountyName.lower().replace(' ','_') + '-' 
+    name += row.StateName.lower().replace(' ','_')
+    s = f'https://storage.googleapis.com/open-ff-browser/states/{name}.html'
+    return wrap_URL_in_html(s,text_to_show)
+
+
 def getFlawLink(flaw_id,text_to_show='',use_remote=False):
     if text_to_show=='':
         text_to_show = flaw_id

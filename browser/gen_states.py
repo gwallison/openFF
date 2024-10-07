@@ -73,7 +73,7 @@ class State_gen():
         statelst = self.workdf.bgStateName.unique().tolist()
         
         ##########
-        statelst = ['colorado']
+        # statelst = ['colorado']
         ##########
         
         # first create state dirs in "states" browser_out dir, if needed

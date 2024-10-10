@@ -183,7 +183,9 @@ class State_gen():
         clinkdf.to_parquet(self.county_FT_index_fn)
         stset = list(set(stlst))
         slinkdf = pd.DataFrame({'state':stset})
-        slinkdf['state_page_link'] = hndl.browser_root+'state/'+slinkdf.state+'.html'
+        # slinkdf['state_page_link'] = hndl.browser_root+'state/'+slinkdf.state+'.html'
+        slinkdf['statename'] = slinkdf.state.str.replace(' ','-')
+        slinkdf['state_page_link'] = f'https://open-ff.org/{slinkdf.statename}-fracfocus/'
         slinkdf.to_parquet(self.state_FT_index_fn)
         
              

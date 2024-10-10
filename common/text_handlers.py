@@ -58,7 +58,10 @@ def getStateLink(state,text_to_show='State details',use_remote=False):
     return wrap_URL_in_html(s,text_to_show)
 
 def getBlogStateLink(state,text_to_show='Link to state summary'):
+    state = state.replace(' ','-')
+    state = state.replace('_','-')
     s = f'https://storage.googleapis.com/open-ff-browser/states/{state}.html'
+    s = f'https://open-ff.org/{state}-fracfocus/'
     return wrap_URL_in_html(s,text_to_show)
 
 def getCountyLink(county,state,text_to_show='County details',use_remote=False):

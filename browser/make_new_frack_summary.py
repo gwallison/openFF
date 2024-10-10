@@ -17,7 +17,7 @@ from openFF.common.nb_helper import add_favicon
 
 # update_fn = 'c:/MyDocs/OpenFF/data/transformed/upload_dates.csv'
 
-today_str = '2024-09-12' # used as file name when finalizing and uploading
+today_str = '2024-10-08' # used as file name when finalizing and uploading
 make_final = True
 today = datetime.date.today()
 nb_fn = 'browser/notebooks/Recent_Disclosures.ipynb'

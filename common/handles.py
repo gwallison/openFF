@@ -18,9 +18,9 @@ import platform
 locals = ['Dell_2023_Gary','M2','NucBoxM4']
 
 # repo_name = 'openFF_data_2024_03_21'
-repo_name = 'openFF_data_2024_09_12'
+repo_name = 'openFF_data_2024_10_08'
 # repo_name = 'current_repo'
-bulkdata_date = 'September 12, 2024'
+bulkdata_date = 'October 8, 2024'
 
 curr_platform = ''
 if not platform.node() in locals:

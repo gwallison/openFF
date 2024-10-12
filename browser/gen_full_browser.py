@@ -24,7 +24,7 @@ import openFF.browser.gen_scope as gen_scope
 
 ####
 testing_mode = False
-remake_workingdf = False
+remake_workingdf = True
 use_archive_diff = False # when True, only builds pages that have changed since last build
 arc_diff = {}
 ####

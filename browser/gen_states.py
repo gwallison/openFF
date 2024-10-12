@@ -129,7 +129,16 @@ class State_gen():
             #     z.write(tmpfn,compress_type=zipfile.ZIP_DEFLATED)
 
             # workdf.to_csv('work/state.csv',index=False)
-
+            
+            # make unfiltered out file too
+            dupdf = self.allrec[self.allrec.bgStateName==state][['bgOperatorName',
+                                                                 'OperatorName',
+                                                                 'date','dup_rec',
+                                                                 'mass','APINumber',
+                                                                 'bgStateName','bgCountyName',
+                                                                 'DisclosureId']].copy()
+            dupdf.to_parquet(os.path.join(hndl.sandbox_dir,'state_unfilt.parquet'),index=False)
+ 
             for county in workdf.bgCountyName.unique().tolist():
                 print(f'  -{county}')
                 cnty_state_name = county.lower().replace(' ','_')+'-'+state.lower().replace(' ','_')

@@ -188,6 +188,41 @@ def notebook_to_google_drive(lg=lg,move_to_storage=True):
                               blob_name='Raw_disclosures.html', 
                               file_path=fulloutfn)
 
+def difflib_to_google_drive(lg=lg):
+    """This routine moves all files from google drive location to browser space
+    It is presumed that each file is a new file, so that we don't upload the
+    whole set every day."""
+    import openFF.common.handles as hndl 
+    import os
+    import shutil
+    import platform
+    
+    drive_dir = r"G:\My Drive\webshare\daily_status\diff_files"
+    drive_bu = r"G:\My Drive\webshare\daily_status\diff_files_backup"
+    storage_prefix = 'difflib/'
+    
+    if platform.node() == production_computer:           
+        lg.logline('Performing move of difflib files to google storage')
+        flst = os.listdir(drive_dir)
+        cntr = 0
+        for f in flst:
+            if (f[-5:] == '.html'):
+                fn = os.path.join(drive_dir,f)
+                bname = storage_prefix+f
+                upload_file_to_bucket(bucket_name='open-ff-browser', 
+                                      blob_name=bname, 
+                                      file_path=fn)
+                # now move drive file to the backup drive dir to clear out diff dir
+                shutil.move(fn,
+                            os.path.join(drive_bu,f))
+                cntr += 1
+
+        lg.logline(f'  -- number of files uploaded: {cntr}')
+    else:
+        print(f'No moving difflib files for computer: {platform.node()}')
+
+    
+    
 def main_run():
         old_raw_fn = get_old_df_fn()
         fetch_new_archive()
@@ -206,6 +241,9 @@ def main_run():
         
         # make Raw_disclosures html
         notebook_to_google_drive()
+        
+        # move new difflib files to google storage
+        difflib_to_google_drive()
 
     
 

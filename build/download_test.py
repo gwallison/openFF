@@ -154,19 +154,31 @@ def update_pub_delay(lg=lg):
 #   return output.decode('utf-8')
 
 def upload_file_to_bucket(bucket_name, blob_name, file_path,lg=lg):
-  """Uploads a file to the specified bucket."""
-  from google.cloud import storage
-
-  # Set the project ID as an environment variable
-  os.environ["GOOGLE_CLOUD_PROJECT"] = "open-FF-catalog"
-
-  storage_client = storage.Client()
-  bucket = storage_client.bucket(bucket_name)
-  blob = bucket.blob(blob_name)
-  blob.upload_from_filename(file_path)
-
-  lg.logline(f"File {file_path} uploaded to {bucket_name}/{blob_name}")
-
+    """Uploads a file to the specified bucket."""
+    from google.cloud import storage
+    from time import sleep  
+    # Set the project ID as an environment variable
+    os.environ["GOOGLE_CLOUD_PROJECT"] = "open-FF-catalog"
+    try:      
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+        blob.upload_from_filename(file_path)
+          
+        lg.logline(f"File {file_path} uploaded to {bucket_name}/{blob_name}")
+    except:
+        lg.logline(f"Upload problem with {file_path}, trying again:")
+        try:      
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(blob_name)
+            blob.upload_from_filename(file_path)
+              
+            lg.logline(f"File {file_path} uploaded to {bucket_name}/{blob_name}")
+        except:
+            lg.logline("Didn't work again.  Moving on after pause...")
+            sleep(3)
+    
 def notebook_to_google_drive(lg=lg,move_to_storage=True):
     import openFF.common.nb_helper as nbh
     import openFF.common.handles as hndl 

@@ -102,7 +102,11 @@ class State_gen():
                                               "loc_name_mismatch",
                                               "loc_within_county", 
                                               "loc_within_state",
-                                              'latlon_too_coarse',]].copy()
+                                              'latlon_too_coarse',
+                                              'ws_perc_total',
+                                              'perc_pw','perc_gw_high_TDS','perc_gw_low_TDS',
+                                              'perc_sw_high_TDS','perc_sw_low_TDS',
+                                              'perc_other_high_TDS','perc_other_low_TDS']].copy()
             workdf['location_error'] = workdf.loc_name_mismatch|\
                                        (workdf.loc_within_county=='NO')|\
                                        (workdf.loc_within_state=='NO')|\
@@ -113,7 +117,11 @@ class State_gen():
                                                                 'bgLatitude','bgLongitude','location_error',
                                                                 'OperatorName','bgOperatorName',
                                                                 'perc_proprietary',
-                                                                'no_chem_recs']].first()
+                                                                'no_chem_recs',
+                                                                'ws_perc_total',
+                                                                'perc_pw','perc_gw_high_TDS','perc_gw_low_TDS',
+                                                                'perc_sw_high_TDS','perc_sw_low_TDS',
+                                                                'perc_other_high_TDS','perc_other_low_TDS']].first()
             gb1 = self.count_all_trues(workdf[['DisclosureId','is_on_DWSHA','is_on_CWA',
                                                               'is_on_PFAS_list']])
             # gb1 = workdf.groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',

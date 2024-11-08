@@ -23,6 +23,7 @@ def make_full_set_file(sources,outdir):
     df = pd.merge(df,fh.get_df(casfn),on='bgCAS',how='left',validate='m:1')
     
     df['in_std_filtered'] = ~(df.is_duplicate)&~(df.dup_rec)
+    df = df.set_index('reckey',drop=False,verify_integrity=True) # added to make pulling out subsets more robust (Nov 2024)
     fh.save_df(df,outfn)
 
     wdf = df[hndl.working_df_cols].copy()

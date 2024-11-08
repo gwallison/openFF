@@ -31,12 +31,24 @@ def make_as_well_gdf(in_df,latName='bgLatitude',lonName='bgLongitude',
     # produce a gdf grouped by api10 (that is, by wells)
     # in_df['api10'] = in_df.APINumber.str[:10]
 
-    gb = in_df.groupby('api10',as_index=False)[[latName,lonName]].first()
+    gb = in_df.groupby('api10',as_index=False)[[latName,lonName,'DisclosureId']].first()
     gdf =  gpd.GeoDataFrame(gb, geometry= gpd.points_from_xy(gb[lonName], 
                                                              gb[latName],
                                                              crs=final_crs))
     return gdf
     
+
+def find_disclosures_near_point(lat,lon,wellgdf,crs=final_crs,name='test',
+                          buffer_m=def_buffer, bbnum=0.25):
+    # use bounding box to shrink number of wells to check
+    t = wellgdf.cx[lon-bbnum:lon+bbnum, lat-bbnum:lat+bbnum]
+    t = t.to_crs(proj_crs)
+    s = gpd.GeoSeries([Point(lon,lat)],crs=crs)
+    s = s.to_crs(proj_crs)
+    s = gpd.GeoDataFrame(geometry=s.geometry.buffer(buffer_m))
+    s['name'] = name
+    tmp = gpd.sjoin(t,s,how='inner')#,predicate='within')
+    return tmp.DisclosureId.tolist()
 
 def find_wells_near_point(lat,lon,wellgdf,crs=final_crs,name='test',
                           buffer_m=def_buffer, bbnum=0.25):
@@ -106,6 +118,46 @@ def showWells(fulldf,flat,flon,apilst,def_buffer=def_buffer):
         #print(api,t)
         locs = t.iloc[0].tolist()
         mlst.append({'location': locs, 'color':'blue', 'popup':f'APINumber: {api}'})
+    m = folium.Map(location=[flat, flon], zoom_start=12)
+
+    markers = mlst
+    # Add the markers to the map
+    for marker in markers:
+        folium.Marker(
+            location=marker['location'],
+            icon=folium.Icon(color=marker['color']),
+            popup=marker['popup']
+        ).add_to(m)
+        # Display the map
+        
+    # add circle around focal point
+    folium.Circle(radius=def_buffer,location=[flat,flon],
+                  color='crimson',fill=True).add_to(m)
+    
+    # Add a tile layer with satellite imagery
+    folium.TileLayer(
+        tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+        attr='Google',
+        name='Google Satellite',
+        overlay=False,
+        control=True,
+        subdomains=['mt0', 'mt1', 'mt2', 'mt3']
+    ).add_to(m)
+
+    # Add layer control to switch between base maps
+    folium.LayerControl().add_to(m)
+
+    return m
+
+def showDisclosures(fulldf,flat,flon,disclst,def_buffer=def_buffer):
+    """This shows a map with a focal point (flat,flon) and the wells in disclist."""
+    import folium
+    mlst = [{'location': [flat,flon], 'color':'red', 'popup':'Focal point'}]
+    for disc in disclst:
+        t = fulldf[fulldf.DisclosureId==disc].groupby('APINumber')[['bgLatitude','bgLongitude']].first()
+        #print(api,t)
+        locs = t.iloc[0].tolist()
+        mlst.append({'location': locs, 'color':'blue', 'popup':f'DisclosureId: {disc}'})
     m = folium.Map(location=[flat, flon], zoom_start=12)
 
     markers = mlst

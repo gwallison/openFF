@@ -89,19 +89,19 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
 
 
 if __name__ == '__main__':
-    # c = input("Enter 'erase' to clear the output dir before starting, otherwise <enter> > ")
-    # if c == 'erase':
-    #     print(f'Initializing {hndl.browser_out_dir}')
-    #     init_output_space()
+    c = input("Enter 'erase' to clear the output dir before starting, otherwise <enter> > ")
+    if c == 'erase':
+        print(f'Initializing {hndl.browser_out_dir}')
+        init_output_space()
     nbh.make_sandbox()
     workingdf = prep_working_df()
-    # print(workingdf.columns)
-    # _ = gen_chem.Chem_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    print(workingdf.columns)
+    _ = gen_chem.Chem_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     _ = gen_states.State_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_disc.Disc_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    #_ = gen_disc_links.Disc_link_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_scope.ScopeGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_misc_nb.MiscNbGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_disc.Disc_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_disc_links.Disc_link_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_scope.ScopeGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_misc_nb.MiscNbGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     print('DONE')

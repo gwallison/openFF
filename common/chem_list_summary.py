@@ -28,7 +28,7 @@ class ChemListSummary():
                             'single_disc': [],
                             'pdf_report1': ['ambiguousID','non_chem_report']}
         # sets of fields to include under different circumstances
-        self.colsets = {'chem_index': ['composite_id','refs','img','Number_records',# 'tot_records','num_w_mass',
+        self.colsets = {'chem_index': ['composite_id','refs','img','tot_records','num_w_mass',
                                        'mass_median','mass_90_perc',
                                        'rq_lbs','func_groups',
                                        'fingerprint','extrnl','earliest_date'],
@@ -112,6 +112,7 @@ class ChemListSummary():
             cdf.num_w_mass = cdf.num_w_mass.fillna(0)
             # print(cdf.columns)
             
+            # Number_records is a string and therefore not numerically sortable.
             cdf['Number_records'] = cdf.tot_records.astype('str') + '<br>(' + cdf.num_w_mass.astype('str') + ')'
 
             tmp = self.df[c1].groupby('bgCAS',as_index=False)['date'].min().rename({'date':'earliest_date'},axis=1)

@@ -34,6 +34,24 @@ def add_diesel_list(df):
     df['is_on_diesel'] = df.bgCAS.isin(cas)
     return df
 
+def add_Elsner_list(df,sources):
+    print('     -- processing Elsner and Hoelzer list')
+    reffn = ext_fn(ext_dir=sources,handle='eh_master_list')
+    ehdf = pd.read_csv(reffn,quotechar='$')
+    ehdf = ehdf[['eh_Class_L1', 'eh_Class_L2','eh_CAS',
+                 'eh_subs_class','eh_function']]
+    ehdf = ehdf.rename({'eh_CAS':'bgCAS'},axis=1)
+    
+    df = pd.merge(df,ehdf,on='bgCAS',how='left')
+    df[['eh_Class_L1', 'eh_Class_L2',
+       'eh_subs_class','eh_function']] = df[['eh_Class_L1', 
+                                             'eh_Class_L2',
+                                             'eh_subs_class',
+                                             'eh_function']].fillna('') 
+
+    return df
+    
+    
 # def add_UVCB_list(df,sources):
 #     print('     -- processing TSCA UVCB list')
 #     reffn = ext_fn(ext_dir=sources,handle='uvcb_list')
@@ -156,6 +174,7 @@ def add_all_bgCAS_tables(df,sources,ci_source):
     df = add_TSCA_list(df,sources)
     df = add_RQ_list(df,sources)
     df = add_ChemInfo_list(df,ci_source)
+    df = add_Elsner_list(df, sources)
     return df
 
 #################  PADUS shape files ############################

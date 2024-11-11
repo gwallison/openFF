@@ -7,6 +7,10 @@ Created on Fri Oct 13 19:40:01 2023
 This is a collection of tools used to parse, summarize, store and display
 the results from the ChemInformatics modules.
 """
+
+import sys
+sys.path.insert(0,'c:/MyDocs/integrated/') # adjust to your setup
+
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -92,7 +96,8 @@ def sdf_extract(ci_source,out_dir):
     fh.save_df(pSDF.df,os.path.join(out_dir,hndl.ci_summ_fn))
     
 ######################  Used in catalog routines ############
-ci_dir = r"C:\MyDocs\OpenFF\src\testing\chemInfo"
+# ci_dir = r"C:\MyDocs\OpenFF\src\testing\chemInfo"
+ci_dir = os.path.join(hndl.curr_repo_dir,'ChemInfo_ref_files')
 # report_dir = r"C:\MyDocs\OpenFF\data\external_refs\ChemInformatics"
 # im_dir = r"C:\MyDocs\OpenFF\src\openFF-catalog\pic_dir"
 
@@ -133,7 +138,7 @@ def getImage(path, zoom=.5):
     return OffsetImage(plt.imread(path), zoom=zoom)
 
 def make_fingerprint(df,casrn = '107-19-7'):
-    #print(casrn)
+    # print(casrn)
     t = df[df.CASRN==casrn].drop(['DTXSID','CASRN','Name'],axis=1)
     t = t.fillna('ND')
     #categ = ['VH','H','M','L','I','ND']
@@ -169,11 +174,15 @@ def make_fingerprint(df,casrn = '107-19-7'):
     plt.savefig(os.path.join(hndl.pic_dir,casrn,'haz_fingerprint.png'))    
 
 def make_all_fingerprints(caslst,hazdf):
-    cas_ignore = ['proprietary','ambiguousID','sysAppMeta','conflictingID']
+    cas_ignore = ['proprietary','ambiguousID','sysAppMeta','conflictingID',
+                  '7732-18-5']
     for i,cas in enumerate(caslst):
         print(f'{i}: {cas}')
         if not cas in cas_ignore:            
-            make_fingerprint(hazdf,cas)
+            try:
+                make_fingerprint(hazdf,cas)
+            except:
+                print(f'Error making {cas}; ignoring...')
         
 # def remove_all(caslst):
 #     for cas in caslst:
@@ -182,5 +191,11 @@ def make_all_fingerprints(caslst,hazdf):
 #         except:
 #             print(f'Not there: {cas}')
             
+if __name__ == '__main__':
+    df = get_all_excel()
+    caslst = df.CASRN.tolist()
+    print(caslst)
+    make_all_fingerprints(caslst, df)
+
                     
                 

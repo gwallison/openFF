@@ -28,9 +28,10 @@ class ChemListSummary():
                             'single_disc': [],
                             'pdf_report1': ['ambiguousID','non_chem_report']}
         # sets of fields to include under different circumstances
-        self.colsets = {'chem_index': ['composite_id','refs','img','tot_records','num_w_mass',
+        self.colsets = {'chem_index': ['composite_id','refs','img','Number_records',# 'tot_records','num_w_mass',
                                        'mass_median','mass_90_perc',
-                                       'rq_lbs','fingerprint','extrnl','earliest_date'],
+                                       'rq_lbs','func_groups',
+                                       'fingerprint','extrnl','earliest_date'],
                         'colab_v1':   ['composite_id','refs','img','tot_records','num_w_mass',
                                        'tot_mass',
                                        'rq_lbs','fingerprint','extrnl'],
@@ -96,6 +97,7 @@ class ChemListSummary():
         cdf.epa_pref_name = np.where(cdf.epa_pref_name.isna(),' -- ',cdf.epa_pref_name)
         cdf['names'] = cdf.epa_pref_name +'<br>----------<br>' + cdf.ingredCommonName
         cdf['composite_id'] = '<center><h3>'+cdf.chem_detail+'</h3>'+cdf.names+'</center>'
+        cdf['func_groups'] = '<center>'+cdf.eh_Class_L1 +'<br>----------<br>' +cdf.eh_Class_L2 + '</center>'
         cdf = self.make_extrnl_column(cdf)
 
         if self.summarize_by_chem:
@@ -109,6 +111,8 @@ class ChemListSummary():
             cdf = cdf.merge(tmp,on='bgCAS',how='left')
             cdf.num_w_mass = cdf.num_w_mass.fillna(0)
             # print(cdf.columns)
+            
+            cdf['Number_records'] = cdf.tot_records.astype('str') + '<br>(' + cdf.num_w_mass.astype('str') + ')'
 
             tmp = self.df[c1].groupby('bgCAS',as_index=False)['date'].min().rename({'date':'earliest_date'},axis=1)
             cdf = cdf.merge(tmp,on='bgCAS',how='left')

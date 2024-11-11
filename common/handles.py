@@ -18,9 +18,9 @@ import platform
 locals = ['Dell_2023_Gary','M2','NucBoxM4']
 
 # repo_name = 'openFF_data_2024_03_21'
-repo_name = 'openFF_data_2024_10_08'
+repo_name = 'openFF_data_2024_11_07'
 # repo_name = 'current_repo'
-bulkdata_date = 'October 8, 2024'
+bulkdata_date = 'November 7, 2024'
 
 curr_platform = ''
 if not platform.node() in locals:
@@ -66,6 +66,7 @@ working_df_cols = ['DisclosureId', 'JobEndDate', 'JobStartDate', 'OperatorName',
                     'TradeName', 'PercentHighAdditive', 'MassIngredient', 'ingKeyPresent', 'reckey',
                     'bgCAS', 'ingredCommonName', 'bgSupplier', 'dup_rec', 'cleanMI', 'calcMass', 'massComp', 'massCompFlag',
                     'massSource', 'mass', 'bgIngredientName', 'is_on_CWA', 'is_on_DWSHA', 'is_on_AQ_CWA', 'is_on_HH_CWA', 
+                    'eh_Class_L1','eh_Class_L2',
                     'is_on_IRIS', 'is_on_PFAS_list', 'epa_pref_name', 'is_on_NPDWR', 'is_on_prop65', 'is_on_TEDX', 'is_on_diesel', 
                     'is_on_UVCB', 'rq_lbs', 'in_std_filtered']
 

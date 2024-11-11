@@ -8,6 +8,7 @@ import sys
 sys.path.insert(0,'c:/MyDocs/integrated/') # adjust to your setup
 import openFF.common.file_handlers as fh 
 import openFF.common.handles as hndl 
+import openFF.common.chem_info_tools as cit
 
 import os
 import time

@@ -147,38 +147,38 @@ class State_gen():
                                                                  'DisclosureId']].copy()
             dupdf.to_parquet(os.path.join(hndl.sandbox_dir,'state_unfilt.parquet'),index=False)
  
-            # for county in workdf.bgCountyName.unique().tolist():
-            #     print(f'  -{county}')
-            #     cnty_state_name = county.lower().replace(' ','_')+'-'+state.lower().replace(' ','_')
-            #     fn = os.path.join(hndl.browser_states_dir,cnty_state_name+'.html')
-            #     gb = workdf[workdf.bgCountyName==county].groupby('DisclosureId',as_index=False)[['date','APINumber','TotalBaseWaterVolume',
-            #                                                                                   'bgCountyName','bgStateName','WellName',
-            #                                                                                   'bgLatitude','bgLongitude',
-            #                                                                                   'OperatorName','no_chem_recs']].first()
-            #     gb1 = self.count_all_trues(workdf[workdf.bgCountyName==county][['DisclosureId','is_on_DWSHA',
-            #                                                                     'is_on_CWA','is_on_PFAS_list']])
-            #     # gb1 = workdf[workdf.bgCountyName==county].groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
-            #     #                                                                                 'is_on_PFAS_list']].count()
-            #     gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
-            #     gb['TBWV'] = gb.TotalBaseWaterVolume.map(lambda x: th.round_sig(x,3,guarantee_str='??')) + ' gallons'
-            #     # gb.APINumber = gb.APINumber.map(lambda x: self.text_APINumber(x))
-            #     gb['year'] = gb.date.astype('str')
-            #     gb['has_chem'] = np.where(gb.no_chem_recs,'No','Yes')
+            for county in workdf.bgCountyName.unique().tolist():
+                print(f'  -{county}')
+                cnty_state_name = county.lower().replace(' ','_')+'-'+state.lower().replace(' ','_')
+                fn = os.path.join(hndl.browser_states_dir,cnty_state_name+'.html')
+                gb = workdf[workdf.bgCountyName==county].groupby('DisclosureId',as_index=False)[['date','APINumber','TotalBaseWaterVolume',
+                                                                                              'bgCountyName','bgStateName','WellName',
+                                                                                              'bgLatitude','bgLongitude',
+                                                                                              'OperatorName','no_chem_recs']].first()
+                gb1 = self.count_all_trues(workdf[workdf.bgCountyName==county][['DisclosureId','is_on_DWSHA',
+                                                                                'is_on_CWA','is_on_PFAS_list']])
+                # gb1 = workdf[workdf.bgCountyName==county].groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
+                #                                                                                 'is_on_PFAS_list']].count()
+                gb=pd.merge(gb,gb1,on='DisclosureId',how='left')
+                gb['TBWV'] = gb.TotalBaseWaterVolume.map(lambda x: th.round_sig(x,3,guarantee_str='??')) + ' gallons'
+                # gb.APINumber = gb.APINumber.map(lambda x: self.text_APINumber(x))
+                gb['year'] = gb.date.astype('str')
+                gb['has_chem'] = np.where(gb.no_chem_recs,'No','Yes')
                                                                                                
-            #     stlst.append(state)
-            #     ctlst.append(county)
-            #     fnlst.append(cnty_state_name+'.html')  # used to make FT link table
-            #     gb.to_parquet(os.path.join(hndl.sandbox_dir,'county.parquet'),index=False)
-            #     # gb.to_csv('./work/county.csv')
-            #     # self.make_county_output()
+                stlst.append(state)
+                ctlst.append(county)
+                fnlst.append(cnty_state_name+'.html')  # used to make FT link table
+                gb.to_parquet(os.path.join(hndl.sandbox_dir,'county.parquet'),index=False)
+                # gb.to_csv('./work/county.csv')
+                # self.make_county_output()
 
-            #     nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'county_report.ipynb'),
-            #                         output_fn=fn)
-            #     self.fix_county_title(fn,cnty_state_name)
+                nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'county_report.ipynb'),
+                                    output_fn=fn)
+                self.fix_county_title(fn,cnty_state_name)
 
-            #     # cn_fn = f'{cnty_state_name}.html'
-            #     # shutil.copyfile(self.county_fn,
-            #     #                 os.path.join(self.outdir,'states',cn_fn))
+                # cn_fn = f'{cnty_state_name}.html'
+                # shutil.copyfile(self.county_fn,
+                #                 os.path.join(self.outdir,'states',cn_fn))
                 
             print(f'** {state.title():<16} **  n recs: {len(workdf):>10,}')
             fulloutfn = os.path.join(hndl.browser_out_dir,'states',f'{state}.html')
@@ -195,14 +195,14 @@ class State_gen():
         nbh.fix_nb_title(fulloutfn,'State Index')
         
         # now make tables for FracTracker links
-        # clinkdf = pd.DataFrame({'state':stlst, 'county':ctlst,'cntyfn':fnlst})
-        # clinkdf['county_page_link'] = hndl.browser_root+'state/'+clinkdf.cntyfn
-        # clinkdf.to_parquet(self.county_FT_index_fn)
-        # stset = list(set(stlst))
-        # slinkdf = pd.DataFrame({'state':stset})
-        # # slinkdf['state_page_link'] = hndl.browser_root+'state/'+slinkdf.state+'.html'
-        # slinkdf['statename'] = slinkdf.state.str.replace(' ','-')
-        # slinkdf['state_page_link'] = f'https://open-ff.org/{slinkdf.statename}-fracfocus/'
-        # slinkdf.to_parquet(self.state_FT_index_fn)
+        clinkdf = pd.DataFrame({'state':stlst, 'county':ctlst,'cntyfn':fnlst})
+        clinkdf['county_page_link'] = hndl.browser_root+'state/'+clinkdf.cntyfn
+        clinkdf.to_parquet(self.county_FT_index_fn)
+        stset = list(set(stlst))
+        slinkdf = pd.DataFrame({'state':stset})
+        # slinkdf['state_page_link'] = hndl.browser_root+'state/'+slinkdf.state+'.html'
+        slinkdf['statename'] = slinkdf.state.str.replace(' ','-')
+        slinkdf['state_page_link'] = f'https://open-ff.org/{slinkdf.statename}-fracfocus/'
+        slinkdf.to_parquet(self.state_FT_index_fn)
         
              

@@ -26,14 +26,27 @@ class Disc_gen():
                                 tname='disclosures').columns.tolist()
         for field in ['d_flags','max_d_warning']:# because they are created outside of the table manager
             self.discl_fields.append(field) 
+            
+        # get disclosure-level fields
+        self.alldisc = workingdf.groupby('DisclosureId',as_index=False)[self.discl_fields].first()
+
+        # if using archive_diff, filter self.allrec, self.alldisc
+        if use_archive_diff:
+            if not arc_diff:
+                arc_diff = hndl.archive_diff_pkl
+            import pickle
+            with open(arc_diff,'rb') as f:
+                arc_diff_dict = pickle.load(f)
+
+            disclst = arc_diff_dict['new_or_changed_disc']
+            self.allrec = self.allrec[self.allrec.DisclosureId.isin(disclst)].copy()
+            self.alldisc = self.alldisc[self.alldisc.DisclosureId.isin(disclst)].copy()
  
         # identify disclosures without chemicals
         gb = self.allrec[['DisclosureId','ingKeyPresent']]\
             .groupby('DisclosureId',as_index=False)['ingKeyPresent'].any()\
             .rename({'ingKeyPresent':'has_ingredients'},axis=1)
         
-        # get disclosure-level fields
-        self.alldisc = workingdf.groupby('DisclosureId',as_index=False)[self.discl_fields].first()
         # self.alldisc = fh.get_table(repo_dir=hndl.repo_dir,
         #                         tname='disclosures')
         ##!! TESTING: FILTER

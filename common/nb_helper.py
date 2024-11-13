@@ -51,9 +51,17 @@ findfont: Font family 'Helvetica' not found.
 </pre>
 </div>
 </div>"""
+    # text3 is the warning in folium; probably a replacement of text1
+    text3 = """<div class="jp-OutputArea-child">
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>Skipping field geo_point_2d: unsupported OGR type: 3
+</pre>
+</div>
+</div>"""
     # text = """"""
     alltext  = alltext.replace(text1,'')
     alltext  = alltext.replace(text2,'')
+    alltext  = alltext.replace(text3,'')
     with open(fn,'w',encoding='utf-8') as f:
         f.write(alltext)
 

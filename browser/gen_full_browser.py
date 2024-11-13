@@ -25,8 +25,8 @@ import openFF.browser.gen_scope as gen_scope
 ####
 testing_mode = False
 remake_workingdf = True
-use_archive_diff = False # when True, only builds pages that have changed since last build
-arc_diff = {}
+use_archive_diff = True # when True, only builds pages that have changed since last build
+arc_diff = hndl.archive_diff_pkl
 ####
 
 def erase_output_space(dir = hndl.browser_out_dir):
@@ -96,12 +96,12 @@ if __name__ == '__main__':
     nbh.make_sandbox()
     workingdf = prep_working_df()
     print(workingdf.columns)
-    _ = gen_chem.Chem_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_states.State_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_disc.Disc_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_disc_links.Disc_link_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_scope.ScopeGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    _ = gen_misc_nb.MiscNbGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_chem.Chem_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_states.State_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_disc.Disc_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_disc_links.Disc_link_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_scope.ScopeGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    # _ = gen_misc_nb.MiscNbGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     print('DONE')

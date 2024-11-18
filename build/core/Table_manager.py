@@ -30,6 +30,7 @@ class Table_constructor():
                        'cas_ing': None,
                        'bgCAS': None,
                        'companies': None, # all company data is also in records/disc
+                       'purpose': None, # all purpose is also in the records
                        'water_source':None,
                        }
 
@@ -38,6 +39,7 @@ class Table_constructor():
                           'cas_ing': os.path.join(self.pkldir,'cas_ing.parquet'),
                           'bgCAS': os.path.join(self.pkldir,'bgCAS.parquet'),
                           'companies': os.path.join(self.pkldir,'companies.parquet'),
+                          'purpose': os.path.join(self.pkldir,'purpose.parquet'),
                           'water_source': os.path.join(self.pkldir,'water_source.parquet'),
                           'disc_issues': os.path.join(self.pkldir,'disc_issues.parquet'),
                           'rec_issues': os.path.join(self.pkldir,'rec_issues.parquet'),
@@ -97,6 +99,13 @@ class Table_constructor():
                                       .drop(['first_date',
                                              'change_date','change_comment'],axis=1)
         
+    def assemble_purpose_table(self):
+        self.print_step('assembling purpose table')
+        self.tables['purpose'] = get_df(os.path.join(self.trans_dir,
+                                                       'purpose_xlate.parquet'))\
+                                      .drop(['first_date',
+                                             'change_date','change_comment'],axis=1)
+
     def assemble_bgCAS_table(self,cas_ing):
         self.print_step('assembling bgCAS table')
 
@@ -356,7 +365,31 @@ class Table_constructor():
             print(unSup.Supplier.unique().tolist())
         else: flag= ''
         self.print_step(f'Number uncurated Suppliers: {len(unSup)} {flag}',2)
+
+        ### bgPurpose        
+        self.print_step('create bgPurpose',1)
+
+        cmp = self.tables['purpose'][['rawName','xlateName']]
+        cmp.columns = ['Purpose','bgPurpose']
+
+        if len(cmp[cmp.Purpose.duplicated()])>0:
+            print(f'******  LOOKS like duplicates in PURPOSE table; N: {len(cmp)} ;keeping just the first')
+            # finding duplicates in company field
+            print(cmp[cmp.Purpose.duplicated(keep=False)])
+            cmp = cmp[~cmp.Purpose.duplicated()]
+
+        df = pd.merge(df,cmp,on='Purpose',
+                                 how='left',validate='m:1')
+        # ct.na_check(df,txt='bgSupplier add')
         
+        unPur = df[df.bgPurpose.isna()]
+        if len(unPur)>0: 
+            flag = '<******'
+            print(unPur.Purpose.unique().tolist())
+        else: flag= ''
+        self.print_step(f'Number uncurated Purpose: {len(unPur)} {flag}',2)
+
+
         self.print_step('flagging duplicate records',1)
         # print(df.columns)
         self.tables['chemrecs'] = self.flag_duplicated_records(df)
@@ -560,6 +593,7 @@ class Table_constructor():
         self.assemble_water_source_table(waterdf)
         self.assemble_cas_ing_table(df)
         self.assemble_companies_table()
+        self.assemble_purpose_table()
         self.assemble_bgCAS_table(self.tables['cas_ing'])
         self.assemble_disclosure_table(df)
         #df = self.assemble_PADUS_data(df)

@@ -75,10 +75,11 @@ def find_wells_within_area(gdf,wellgdf,crs=final_crs,name='test',
     tmp = gpd.sjoin(t,s,how='inner')#,predicate='within')
     return tmp.api10.tolist()
 
-def show_simple_map(lat,lon,clickable=False):
+def show_simple_map(lat,lon,clickable=False,
+                    width=600,height=400):
     import folium
     mlst = [{'location': [lat,lon], 'color':'red', 'popup':'Focal point'}]
-    m = folium.Map(location=[lat, lon], zoom_start=12)
+    m = folium.Map(location=[lat, lon], zoom_start=12,width=width, height=height)
 
     markers = mlst
     # Add the markers to the map
@@ -109,7 +110,8 @@ def show_simple_map(lat,lon,clickable=False):
     return m
     
 
-def showWells(fulldf,flat,flon,apilst,def_buffer=def_buffer):
+def showWells(fulldf,flat,flon,apilst,def_buffer=def_buffer,
+              width=600,height=400):
     """This shows a map with a focal point (flat,flon) and the wells in apilist."""
     import folium
     mlst = [{'location': [flat,flon], 'color':'red', 'popup':'Focal point'}]
@@ -118,7 +120,8 @@ def showWells(fulldf,flat,flon,apilst,def_buffer=def_buffer):
         #print(api,t)
         locs = t.iloc[0].tolist()
         mlst.append({'location': locs, 'color':'blue', 'popup':f'APINumber: {api}'})
-    m = folium.Map(location=[flat, flon], zoom_start=12)
+    m = folium.Map(location=[flat, flon], zoom_start=12,
+                   width=width, height=height)
 
     markers = mlst
     # Add the markers to the map

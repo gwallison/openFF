@@ -36,7 +36,7 @@ def store_df_as_csv(df,fn,encoding='utf-8',str_lst = lst_str_cols):
     t = df.copy()
     for col in str_lst:
         if col in t.columns:
-            # print(col)
+            print(col)
             t[col] = "'"+t[col]
     t.to_csv(fn,encoding=encoding)
     

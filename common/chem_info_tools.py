@@ -154,6 +154,7 @@ def make_fingerprint(df,casrn = '107-19-7'):
     
     # handle chem without ci data
     if len(out) == 0: # don't save anything
+        print('    No ChemInfo data for this CAS')
         #for i in range(20): out.append('noval') 
         return
     x = []; y = []; paths = []          
@@ -173,9 +174,11 @@ def make_fingerprint(df,casrn = '107-19-7'):
         ax.set_facecolor('black')
     plt.savefig(os.path.join(hndl.pic_dir,casrn,'haz_fingerprint.png'))    
 
+
+cas_ignore = ['proprietary','ambiguousID','sysAppMeta','conflictingID',
+              '7732-18-5']
+
 def make_all_fingerprints(caslst,hazdf):
-    cas_ignore = ['proprietary','ambiguousID','sysAppMeta','conflictingID',
-                  '7732-18-5']
     for i,cas in enumerate(caslst):
         print(f'{i}: {cas}')
         if not cas in cas_ignore:            

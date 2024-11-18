@@ -44,8 +44,8 @@ if make_final:
     if c == 'y':
         print('copying result to Google Drive webshare')
         shutil.copyfile(nb_html,
-                        f'g:/My Drive/webshare/weekly_reports/{today_str}.html')
-        
+                        # f'g:/My Drive/webshare/weekly_reports/{today_str}.html')
+                        f"C:/Users\Gary\My Drive\webshare\weekly_reports/{today_str}.html")        
     
         # print('updating date file')    
         # updates = pd.read_csv(update_fn)

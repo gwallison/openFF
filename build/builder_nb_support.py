@@ -411,7 +411,21 @@ def companies_step1(work_dir=work_dir,orig_dir=orig_dir):
 def companies_step2(work_dir=work_dir):
     import openFF.build.builder_tasks.CompanyNames_make_list as complist
     completed(complist.is_company_complete(work_dir))
+
+def purposes_step1(work_dir=work_dir,orig_dir=orig_dir):
+    import openFF.build.builder_tasks.Purpose_make_list as purplist
+    purposes = purplist.add_new_to_Xlate(get_raw_df(['CASNumber','Purpose',
+                                                      'DisclosureId','year']),
+                                          ref_dir=orig_dir,out_dir=work_dir)
     
+    completed()
+    iShow(purposes.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}],
+         classes="display compact cell-border", scrollX=True)  
+    
+def purposes_step2(work_dir=work_dir):
+    import openFF.build.builder_tasks.Purpose_make_list as purplist
+    completed(purplist.is_purpose_complete(work_dir))
+ 
 def location_step1(work_dir=work_dir,orig_dir=orig_dir,ext_dict=''):
     import openFF.build.builder_tasks.Location_cleanup as loc_clean
     locobj = loc_clean.Location_ID(get_raw_df(['api10','Latitude','Longitude',
@@ -477,6 +491,7 @@ def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
              'master_synonym_list.parquet',
              'CAS_deprecated.parquet',
              'company_xlate.parquet',
+             'purpose_xlate.parquet',
              'location_curated.parquet',
              'disclosureId_ref.parquet', 
              'upload_dates.parquet',

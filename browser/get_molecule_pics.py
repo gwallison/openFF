@@ -130,7 +130,7 @@ if __name__ == '__main__':
     #         #print(f'<<{cas}>>')
     #         fetch_chem_id_pic(cas)
     #         time.sleep(8)
-
+    # work first on chemical image from EPA
     for i,row in dtxdf.iterrows():
         #print(row.DTXSID)
         if not os.path.exists(os.path.join(pic_dir,row.bgCAS,'comptoxid.png')):
@@ -138,6 +138,17 @@ if __name__ == '__main__':
             if row.DTXSID[:3]=='DTX':
                 fetch_comptox_pic(row.bgCAS, row.DTXSID)
                 time.sleep(5)
+    # now build fingerprints for new chem
+    hazdf = cit.get_all_excel()
+    for cas in caslst:
+        if cas in cit.cas_ignore:
+            continue
+        if not os.path.exists(os.path.join(pic_dir,cas,'haz_fingerprint.png')):
+            print(f'tryiing to create fingerprint for: {cas}')
+            try:
+                cit.make_fingerprint(hazdf,cas)
+            except:
+                print(f'Error making {cas}; ignoring...')
 
       
     

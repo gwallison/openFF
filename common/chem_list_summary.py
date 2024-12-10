@@ -10,6 +10,7 @@ import numpy as np
 import openFF.common.file_handlers as fh
 import openFF.common.text_handlers as th
 import openFF.common.handles as hndl
+import openFF.common.functional_group_data as fgd
 
 class ChemListSummary():
     def __init__(self,df,
@@ -23,6 +24,7 @@ class ChemListSummary():
         self.ignore_duplicates = ignore_duplicates
         self.use_remote = use_remote
         self.do_not_list = {'chem_index': ['non_chem_report'],
+                            'chem_index_local' : [],
                             'colab_v1' : ['ambiguousID','non_chem_report'],
                             'summary_file' : [],
                             'single_disc': [],
@@ -32,6 +34,11 @@ class ChemListSummary():
                                        'mass_median','mass_90_perc',
                                        'rq_lbs','func_groups',
                                        'fingerprint','extrnl','earliest_date'],
+                        'chem_index_local': ['composite_id','bgCAS','epa_pref_name',
+                                             'img','tot_records','num_w_mass',
+                                                       'mass_median','mass_90_perc',
+                                                       'rq_lbs','func_groups','chat_GPT_fg',
+                                                       'fingerprint','extrnl','earliest_date'],
                         'colab_v1':   ['composite_id','refs','img','tot_records','num_w_mass',
                                        'tot_mass',
                                        'rq_lbs','fingerprint','extrnl'],
@@ -83,6 +90,10 @@ class ChemListSummary():
 
         gb = casingdf.groupby('bgCAS',as_index=False)['ingredCommonName'].first()
         casdf = casdf.merge(gb,on='bgCAS',how='left',validate='1:1')
+        
+        fgdf = self.get_functional_groups()
+        casdf = casdf.merge(fgdf,on='bgCAS', how='left',validate='1:1')
+        casdf = casdf.rename({'funct_groups':'chat_GPT_fg'},axis=1)
 
         c1 = np.where(self.ignore_duplicates,self.df.in_std_filtered,True)
 
@@ -168,3 +179,8 @@ class ChemListSummary():
 
     def get_disclosure_table(self,colset="disc_table"):
         pass
+    
+    def get_functional_groups(self):
+        obj = fgd.Functional_Groups()
+        return obj.get_all()
+        

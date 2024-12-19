@@ -419,6 +419,7 @@ def purposes_step1(work_dir=work_dir,orig_dir=orig_dir):
                                           ref_dir=orig_dir,out_dir=work_dir)
     
     completed()
+    print(purposes.xlateName.value_counts()[:30])
     iShow(purposes.reset_index(drop=True),maxBytes=0,columnDefs=[{"width": "100px", "targets": 0}],
          classes="display compact cell-border", scrollX=True)  
     

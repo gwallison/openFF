@@ -10,7 +10,7 @@ import numpy as np
 import openFF.common.file_handlers as fh
 import openFF.common.text_handlers as th
 import openFF.common.handles as hndl
-import openFF.common.functional_group_data as fgd
+import openFF.common.external_chem_data as fgd
 
 class ChemListSummary():
     def __init__(self,df,

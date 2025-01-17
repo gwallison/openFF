@@ -147,6 +147,16 @@ def get_cas_list():
             print(f'CAS list error: <<{cas}>>')
     return lst
 
+def get_SciFinder_cas_list():
+    """returns list of all CAS numbers in SciFinder library"""
+    lst = os.listdir(hndl.sci_finder_scrape_dir)
+    caslst = []
+    for fn in lst:
+        tentcas = fn.split('_')[0]
+        if tentcas.count('-')==2:
+            caslst.append(tentcas)
+    return caslst
+
 def get_casing_df():
     """return casing pickle from current repository; just CASNumber and IngName"""
     pkl = pd.read_parquet(os.path.join(hndl.curr_repo_pkl_dir,'cas_ing.parquet'))

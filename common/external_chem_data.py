@@ -13,7 +13,9 @@ class Functional_Groups():
     dataset for further processing."""
     
     def __init__(self):
-        self.indir = r"C:\Users\Gary\My Drive\webshare\scrape_data\chatGPT_functional_groups"
+        # self.indir = r"C:\Users\Gary\My Drive\webshare\scrape_data\chatGPT_functional_groups"
+        self.indir = r"G:\My Drive\webshare\scrape_data\chatGPT_functional_groups"
+
         
     def get_fg(self,fn):
         cas = ntpath.basename(fn).split('_')[0]

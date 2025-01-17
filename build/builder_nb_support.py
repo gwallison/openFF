@@ -294,7 +294,7 @@ def cas_curate_step1():
     else:
         display(md('### No new CAS numbers to curate. '))
     completed() 
-    
+        
 def cas_curate_step2(work_dir=work_dir,orig_dir=orig_dir):
     import openFF.build.builder_tasks.CAS_master_list as casmaster
     import openFF.build.core.make_CAS_ref_files as mcrf

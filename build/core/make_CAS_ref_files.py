@@ -31,6 +31,8 @@ import os
 #import csv
 import io
 from openFF.common.file_handlers import save_df, get_df
+import openFF.common.handles as hndl
+import scrape.SciFinder.SciFinder_support as sfs
 import warnings # to suppress annoying openpyxl warnings
 
 CT_bat_fn = 'comptox_batch_results.xlsx'
@@ -50,114 +52,170 @@ class CAS_list_maker():
 #  SciFinder lists        
 # ---------------------------------------------------------------
 
-    def process_SF_record(self,rec):
+## incorporating 2024 SciFinder scrape into these procedures
+
+    def make_SciFinder_index(self):
+        lst = os.listdir(hndl.sci_finder_scrape_dir)
+        caslst = []
+        fnlst = []
+        for fn in lst:
+            cas = sfs.get_cas_from_filename(fn)
+            if cas:
+                caslst.append(cas)
+                fnlst.append(fn)
+        return pd.DataFrame({'CASRN':caslst,'filename':fnlst})
+    
+    def process_SF_scrape_record(self,html_fn):
         """return tuple of (cas#,[syn],[dep])"""
-        cas = 'Nope'
-        prime = 'empty'
-        lst = [] # for synonyms
-        dellst = [] # for deprecated cas numbers
-        fields = rec.split('FIELD ')
-        for fld in fields:
-            if 'Registry Number:' in fld:
-                start = fld.find(':')+1
-                end = fld.find('\n')
-                cas = fld[start:end]
-            if 'CA Index Name:' in fld:
-                start = fld.find(':')+1
-                end = fld.find('\n')
-                prime = fld[start:end].lower()
-            if 'Other Names:' in fld:
-                start = fld.find(':')+1
-                lst = fld[start:].split(';')
-            if 'Deleted Registry Number(s):' in fld:
-                start = fld.find(':')+1
-                dellst = fld[start:].split(',')
-        olst = [prime]
-        for syn in lst:
-            syn = syn.strip().lower()
-            if len(syn)>0: 
-                if syn not in olst:
-                    olst.append(syn)                 
-        return (cas,olst,dellst)
+        cas = sfs.get_cas_from_filename(html_fn)
+        soup = sfs.get_soup(os.path.join(hndl.sci_finder_scrape_dir,html_fn))
+        lst = sfs.get_synonyms(soup)
+        dellst = sfs.get_deleted_registry_numbers(soup)
+        ingname = sfs.get_substance_name(soup)
+        return (cas,lst,dellst,ingname)
+        
+    def process_all_SF(self):
+        casdf = self.make_SciFinder_index()
+        ingname = []
+        ingcas = []
+        syncas = []
+        synname = []
+        delcas = []
+        delrepl = []
+        print(f'processing {len(casdf)} SciFinder files: ',end=' ')
+        for i,row in casdf.iterrows():
+            if i%100==0: print(i,end=' ')
+            res = self.process_SF_scrape_record(os.path.join(hndl.sci_finder_scrape_dir,
+                                                             row.filename))
+            # first the synonyms
+            for syn in res[1]:
+                syncas.append(row.CASRN)
+                synname.append(syn.lower())
+            # now deprecated:
+            for dep in res[2]:
+                delcas.append(dep)
+                delrepl.append(row.CASRN)
+            # finally the ingredient name
+            ingcas.append(row.CASRN)
+            ingname.append(res[3])
+        
+        self.SFname = pd.DataFrame({'cas_number':ingcas,'ing_name':ingname})
+        self.SFsyn = pd.DataFrame({'cas_number':syncas,'synonym':synname})
+        self.SFsyn = self.SFsyn[~self.SFsyn.duplicated()]
+        # print(self.SFsyn[self.SFsyn[['cas_number','synonym']].duplicated()])
+        self.SFsyn['source'] = 'SciFinder' 
+        self.SFdeprecated = pd.DataFrame({'deprecated':delcas,'cas_replacement':delrepl})
 
-    def process_SF_file(self,fn,ref_dict):
-        """process individual SF file"""
-        with io.open(fn,'r',encoding=encod) as f:
-            whole = f.read()
-        # make sure it looks like the correct format
-        if whole[:12] != 'START_RECORD':
-            print(f'Looks like file: {fn} may not be "tagged" format!')
-            print(whole[:15])
-            print('ignored...')
-            return ref_dict
-        records = whole.split('END_RECORD')
-        for rec in records:
-            tup = self.process_SF_record(rec)
-            ref_dict[tup[0]] = [tup[1],tup[2]]   
-        return ref_dict
+## ORIGINAL scifinder code
 
-    def make_SF_name_list(self):
-        inputdir = os.path.join(self.orig_dir,'CAS_ref_files')
-        self.SF_ref_dict = {}
-        fnlst = os.listdir(inputdir)
-        for fn in fnlst:
-            self.SF_ref_dict = self.process_SF_file(os.path.join(inputdir,fn),
-                                       self.SF_ref_dict)
-        # are there new entries?
-        try:
-            newdir = os.path.join(self.work_dir,'new_CAS_REF')
-            fnlst = os.listdir(newdir)
-            print(f'     -- including added files: {fnlst}')
-            for fn in fnlst:
-                self.SF_ref_dict = self.process_SF_file(os.path.join(newdir,fn),
-                                           self.SF_ref_dict)        
-        except:
-            print(f'No new files found in {newdir}')
+    # def process_SF_record(self,rec):
+    #     """return tuple of (cas#,[syn],[dep])"""
+    #     cas = 'Nope'
+    #     prime = 'empty'
+    #     lst = [] # for synonyms
+    #     dellst = [] # for deprecated cas numbers
+    #     fields = rec.split('FIELD ')
+    #     for fld in fields:
+    #         if 'Registry Number:' in fld:
+    #             start = fld.find(':')+1
+    #             end = fld.find('\n')
+    #             cas = fld[start:end]
+    #         if 'CA Index Name:' in fld:
+    #             start = fld.find(':')+1
+    #             end = fld.find('\n')
+    #             prime = fld[start:end].lower()
+    #         if 'Other Names:' in fld:
+    #             start = fld.find(':')+1
+    #             lst = fld[start:].split(';')
+    #         if 'Deleted Registry Number(s):' in fld:
+    #             start = fld.find(':')+1
+    #             dellst = fld[start:].split(',')
+    #     olst = [prime]
+    #     for syn in lst:
+    #         syn = syn.strip().lower()
+    #         if len(syn)>0: 
+    #             if syn not in olst:
+    #                 olst.append(syn)                 
+    #     return (cas,olst,dellst)
+
+    # def process_SF_file(self,fn,ref_dict):
+    #     """process individual SF file"""
+    #     with io.open(fn,'r',encoding=encod) as f:
+    #         whole = f.read()
+    #     # make sure it looks like the correct format
+    #     if whole[:12] != 'START_RECORD':
+    #         print(f'Looks like file: {fn} may not be "tagged" format!')
+    #         print(whole[:15])
+    #         print('ignored...')
+    #         return ref_dict
+    #     records = whole.split('END_RECORD')
+    #     for rec in records:
+    #         tup = self.process_SF_record(rec)
+    #         ref_dict[tup[0]] = [tup[1],tup[2]]   
+    #     return ref_dict
+
+    # def make_SF_name_list(self):
+    #     inputdir = os.path.join(self.orig_dir,'CAS_ref_files')
+    #     self.SF_ref_dict = {}
+    #     fnlst = os.listdir(inputdir)
+    #     for fn in fnlst:
+    #         self.SF_ref_dict = self.process_SF_file(os.path.join(inputdir,fn),
+    #                                    self.SF_ref_dict)
+    #     # are there new entries?
+    #     try:
+    #         newdir = os.path.join(self.work_dir,'new_CAS_REF')
+    #         fnlst = os.listdir(newdir)
+    #         print(f'     -- including added files: {fnlst}')
+    #         for fn in fnlst:
+    #             self.SF_ref_dict = self.process_SF_file(os.path.join(newdir,fn),
+    #                                        self.SF_ref_dict)        
+    #     except:
+    #         print(f'No new files found in {newdir}')
             
-        casl = list(self.SF_ref_dict.keys())
+    #     casl = list(self.SF_ref_dict.keys())
         
-        # first produce the cas# : ingredName file
-        namel = []
-        for cas in casl:
-            namel.append(self.SF_ref_dict[cas][0][0])  # take first name as primary
-        self.SFname = pd.DataFrame({'cas_number':casl,'ing_name':namel})
+    #     # first produce the cas# : ingredName file
+    #     namel = []
+    #     for cas in casl:
+    #         namel.append(self.SF_ref_dict[cas][0][0])  # take first name as primary
+    #     self.SFname = pd.DataFrame({'cas_number':casl,'ing_name':namel})
     
     
-    def make_SF_syn_list(self):
-        casl = self.SFname.cas_number.tolist()
-        synl = []
-        cas_for_syn = []
-        for cas in casl:
-            for syn in self.SF_ref_dict[cas][0]:
-                synl.append(syn)
-                cas_for_syn.append(cas)
-        self.SFsyn = pd.DataFrame({'synonym':synl,'cas_number':cas_for_syn})
-        self.SFsyn['source'] = 'SciFinder'
-        # print(f'Len SFsyn: {len(self.SFsyn)}')
+    # def make_SF_syn_list(self):
+    #     casl = self.SFname.cas_number.tolist()
+    #     synl = []
+    #     cas_for_syn = []
+    #     for cas in casl:
+    #         for syn in self.SF_ref_dict[cas][0]:
+    #             synl.append(syn)
+    #             cas_for_syn.append(cas)
+    #     self.SFsyn = pd.DataFrame({'synonym':synl,'cas_number':cas_for_syn})
+    #     self.SFsyn['source'] = 'SciFinder'
+    #     # print(f'Len SFsyn: {len(self.SFsyn)}')
         
-    def make_SF_deprecated_list(self):        
-        #n Next produce the deprecated file: dep_cas : cas#
-        depl = []
-        casl = self.SFname.cas_number.tolist()
-        cas_for_dep = []
-        for cas in casl:
-            for dep in self.SF_ref_dict[cas][1]:
-                t = dep.strip()
-                t = t.replace('\n',';') # allow them to be on multiple lines
-                if len(t)>0:
-                    lst = t.split(';')
-                    for item in lst:
-                        if not item == '':
-                            depl.append(item.strip())      
-                            cas_for_dep.append(cas)
-        self.SFdeprecated = pd.DataFrame({'deprecated':depl,'cas_replacement':cas_for_dep})
-        save_df(self.SFdeprecated,os.path.join(self.work_dir,'CAS_deprecated.parquet'))
+    # def make_SF_deprecated_list(self):        
+    #     #n Next produce the deprecated file: dep_cas : cas#
+    #     depl = []
+    #     casl = self.SFname.cas_number.tolist()
+    #     cas_for_dep = []
+    #     for cas in casl:
+    #         for dep in self.SF_ref_dict[cas][1]:
+    #             t = dep.strip()
+    #             t = t.replace('\n',';') # allow them to be on multiple lines
+    #             if len(t)>0:
+    #                 lst = t.split(';')
+    #                 for item in lst:
+    #                     if not item == '':
+    #                         depl.append(item.strip())      
+    #                         cas_for_dep.append(cas)
+    #     self.SFdeprecated = pd.DataFrame({'deprecated':depl,'cas_replacement':cas_for_dep})
+    #     save_df(self.SFdeprecated,os.path.join(self.work_dir,'CAS_deprecated.parquet'))
         
 
-    def make_all_SF(self):
-        self.make_SF_name_list()
-        self.make_SF_syn_list()
-        self.make_SF_deprecated_list()
+    # def make_all_SF(self):
+    #     self.make_SF_name_list()
+    #     self.make_SF_syn_list()
+    #     self.make_SF_deprecated_list()
 
 # ---------------------------------------------------------------
 #  CompTox lists        
@@ -337,7 +395,8 @@ class CAS_list_maker():
     
     def make_full_package(self):
         self.make_non_spec_syn_list()
-        self.make_all_SF()
+        # self.make_all_SF()  # this is fr the old version
+        self.process_all_SF()
         self.make_all_CT()
         self.final_name_list = pd.merge(self.SFname,self.CTname,
                                         on='cas_number',how='outer',validate='1:1',
@@ -372,7 +431,8 @@ class CAS_list_maker():
         self.make_CT_lists_list()
         
     def make_partial_set(self):
-        self.make_all_SF()
+        # self.make_all_SF()
+        self.process_all_SF()
         self.make_all_CT()
         self.final_name_list = pd.merge(self.SFname,self.CTname,
                                         on='cas_number',how='outer',validate='1:1',

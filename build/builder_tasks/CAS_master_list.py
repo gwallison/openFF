@@ -15,6 +15,7 @@ import os
 import shutil
 import openFF.build.core.cas_tools as ct
 from openFF.common.file_handlers import store_df_as_csv, get_csv, save_df, get_df
+import openFF.common.handles as hndl
 import sys
         
 
@@ -27,6 +28,23 @@ def get_CAS_deprecated(ref_dir):
 def get_orig_curated_CAS_list(orig_dir):
     return get_df(os.path.join(orig_dir,'curation_files','CAS_curated.parquet'))
 
+def get_chem_frame_with_filenames(lib=None):
+    if lib==None: lib = hndl.sci_finder_scrape_dir
+    lst = os.listdir(lib)
+    caslst = []
+    fnlst = []
+    for fn in lst:
+        tentcas = fn.split('_')[0]
+        if tentcas.count('-')==2:
+            caslst.append(tentcas)
+            fnlst.append(os.path.join(lib,fn))
+        else:
+            # print(f'rejecting {fn}')
+            pass
+    
+    return pd.DataFrame({'CASRN':caslst,'filename':fnlst})
+    
+
 def get_new_curated_CAS_list(work_dir):
     # Need to be careful bringing in missing values with this file
     out = pd.read_csv(os.path.join(work_dir,'CAS_curated_modified.csv'),
@@ -35,9 +53,14 @@ def get_new_curated_CAS_list(work_dir):
     # return get_csv(os.path.join(work_dir,'CAS_curated_modified.csv'))
 
 def save_comptox_search_list(work_dir):
-    df = get_new_curated_CAS_list(work_dir)
-    gb = df.groupby('curatedCAS',as_index=False).size()
-    store_df_as_csv(gb,os.path.join(work_dir,'COMPTOX_search_list.csv'))
+    # new version:  save whole list of SciFinder library, instead of just FF
+
+    # old:
+    # df = get_new_curated_CAS_list(work_dir)
+    # gb = df.groupby('curatedCAS',as_index=False).size()
+
+    df = get_chem_frame_with_filenames(lib=hndl.sci_finder_scrape_dir)
+    store_df_as_csv(df,os.path.join(work_dir,'COMPTOX_search_list.csv'))
 
 def is_new_complete(work_dir):
     # test to see if CAS_curate work has been done (if it needs to)
@@ -65,7 +88,7 @@ def get_new_tentative_CAS_list(rawdf,orig_dir,work_dir):
     """Answers the question: are there new tentative CASNumbers that need to be
     added to the CAS SciFinder reference?"""
     old = get_orig_curated_CAS_list(orig_dir)
-    print(f'old cas: {old.columns}')
+    # print(f'old cas: {old.columns}')
     new = get_new_CAS_list(rawdf)
     mg = pd.merge(new,old,on=['CASNumber'],
                   how = 'outer',indicator=True)
@@ -100,6 +123,8 @@ def get_new_tentative_CAS_list(rawdf,orig_dir,work_dir):
         num.append(len(api))
     new['ex_API'] = apis
     new['count'] = num
+    
+    new.to_parquet(os.path.join(work_dir,'new_cas_added.parquet')) # used for SciFinder
     
     if len(new)==0:
         # No curation necessary; copy original CAS_curated to the working dir.
@@ -170,7 +195,7 @@ def make_CAS_to_curate_file(df,ref_dir,work_dir):
         test['is_new'] = True
         # Now concat with the old data (DONT MERGE - otherwise old gets clobbered!)
         out = pd.concat([test,old],sort=True)
-        print(f'store_df: {out.columns}')
+        # print(f'store_df: {out.columns}')
         store_df_as_csv(out[['CASNumber','CAS_prospect','auto_status','on_ref_list',
                              'curatedCAS','categoryCAS','is_new',
                              'comment','first_date',

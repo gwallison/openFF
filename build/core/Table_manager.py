@@ -113,7 +113,8 @@ class Table_constructor():
         ref = ref[['cas_number','ing_name']]
         ref.columns = ['bgCAS','bgIngredientName']
         df = pd.DataFrame({'bgCAS':cas_ing.bgCAS.unique().tolist()})
-        df = df.merge(ref,on='bgCAS',how='left')
+        # df = df.merge(ref,on='bgCAS',how='left')
+        df = df.merge(ref,on='bgCAS',how='outer')
         
         self.print_step('add external references such as TEDX and PFAS',1)
         df = et.add_all_bgCAS_tables(df,sources=self.extdir,

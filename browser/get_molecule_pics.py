@@ -120,6 +120,7 @@ def show_chemID_only(caslst):
     
 if __name__ == '__main__':
     caslst = fh.get_cas_list()        
+    # caslst = fh.get_SciFinder_cas_list()
     dtxdf = fh.get_comptox_df()
     # print(dtxdf.columns)
     make_pic_dir(caslst=caslst)
@@ -144,7 +145,7 @@ if __name__ == '__main__':
         if cas in cit.cas_ignore:
             continue
         if not os.path.exists(os.path.join(pic_dir,cas,'haz_fingerprint.png')):
-            print(f'tryiing to create fingerprint for: {cas}')
+            print(f'trying to create fingerprint for: {cas}')
             try:
                 cit.make_fingerprint(hazdf,cas)
             except:

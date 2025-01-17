@@ -17,7 +17,7 @@ from openFF.common.nb_helper import add_favicon
 
 # update_fn = 'c:/MyDocs/OpenFF/data/transformed/upload_dates.csv'
 
-today_str = '2024-12-18' # used as file name when finalizing and uploading
+today_str = '2025-01-17' # used as file name when finalizing and uploading
 make_final = True
 today = datetime.date.today()
 nb_fn = 'browser/notebooks/Recent_Disclosures.ipynb'
@@ -45,7 +45,7 @@ if make_final:
         print('copying result to Google Drive webshare')
         shutil.copyfile(nb_html,
                         # f'g:/My Drive/webshare/weekly_reports/{today_str}.html')
-                        f"G:\My Drive\webshare\weekly_reports/{today_str}.html")        
+                        f"G:\\My Drive\\webshare\\weekly_reports/{today_str}.html")        
     
         # print('updating date file')    
         # updates = pd.read_csv(update_fn)

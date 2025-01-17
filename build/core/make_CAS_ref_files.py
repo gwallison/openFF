@@ -105,7 +105,8 @@ class CAS_list_maker():
         # print(self.SFsyn[self.SFsyn[['cas_number','synonym']].duplicated()])
         self.SFsyn['source'] = 'SciFinder' 
         self.SFdeprecated = pd.DataFrame({'deprecated':delcas,'cas_replacement':delrepl})
-
+        save_df(self.SFdeprecated,os.path.join(self.work_dir,'CAS_deprecated.parquet'))
+    
 ## ORIGINAL scifinder code
 
     # def process_SF_record(self,rec):

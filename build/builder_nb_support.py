@@ -103,7 +103,7 @@ def create_and_fill_folders(download_repo=True,
             print(f'Creating directory: {d}')
             os.mkdir(d)
         if d==final_dir:
-            others = ['pickles','curation_files','CAS_ref_files',
+            others = ['pickles','curation_files',#'CAS_ref_files',
                       'CompTox_ref_files','ChemInfo_ref_files']
             for oth in others:   
                 subdir = os.path.join(d,oth)
@@ -113,7 +113,7 @@ def create_and_fill_folders(download_repo=True,
                     print(f'Creating directory: {subdir}')
                     os.mkdir(subdir)
         if d==orig_dir:
-            others = ['pickles','curation_files','CAS_ref_files',
+            others = ['pickles','curation_files',#'CAS_ref_files',
                       'CompTox_ref_files','ChemInfo_ref_files']
             for oth in others:   
                 subdir = os.path.join(d,oth)
@@ -123,7 +123,8 @@ def create_and_fill_folders(download_repo=True,
                     print(f'Creating directory: {subdir}')
                     os.mkdir(subdir)
         if d==work_dir:
-            others = ['new_CAS_REF','new_COMPTOX_REF','new_CHEMINFO_REF']
+            others = [#'new_CAS_REF',
+                      'new_COMPTOX_REF','new_CHEMINFO_REF']
             for oth in others:   
                 subdir = os.path.join(d,oth)
                 if os.path.isdir(os.path.join(subdir)):
@@ -144,7 +145,8 @@ def create_and_fill_folders(download_repo=True,
         dir_df = pd.read_csv(dir_fn)
         dir_df = dir_df[~(dir_df.filename.str[0] == '.')] # drop any "hidden" files
         # print(dir_df) 
-        tocopy = ['CAS_ref_files','CompTox_ref_files','ChemInfo_ref_files',
+        tocopy = [#'CAS_ref_files',
+                  'CompTox_ref_files','ChemInfo_ref_files',
                   'curation_files','pickles']
         print('\nFetching repository files:')
         for d in tocopy:
@@ -453,17 +455,17 @@ def carrier_step(work_dir=work_dir,orig_dir=orig_dir):
     
 def builder_step1(final_dir=final_dir,work_dir=work_dir,orig_dir=orig_dir):
     # get all the CAS and CompTox ref files
-    cdir = os.path.join(orig_dir,'CAS_ref_files')
-    fdir = os.path.join(final_dir,"CAS_ref_files")
-    shutil.copytree(src=cdir,dst=fdir,dirs_exist_ok=True)
+    # cdir = os.path.join(orig_dir,'CAS_ref_files')
+    # fdir = os.path.join(final_dir,"CAS_ref_files")
+    # shutil.copytree(src=cdir,dst=fdir,dirs_exist_ok=True)
     
     cdir = os.path.join(orig_dir,'CompTox_ref_files')
     fdir = os.path.join(final_dir,"CompTox_ref_files")
     shutil.copytree(src=cdir,dst=fdir,dirs_exist_ok=True)
     
-    cdir = os.path.join(work_dir,'new_CAS_REF')
-    fdir = os.path.join(final_dir,"CAS_ref_files")
-    shutil.copytree(src=cdir,dst=fdir,dirs_exist_ok=True)
+    # cdir = os.path.join(work_dir,'new_CAS_REF')
+    # fdir = os.path.join(final_dir,"CAS_ref_files")
+    # shutil.copytree(src=cdir,dst=fdir,dirs_exist_ok=True)
     
     cdir = os.path.join(work_dir,'new_CHEMINFO_REF')
     fdir = os.path.join(final_dir,"ChemInfo_ref_files")
@@ -588,7 +590,8 @@ def make_repository(create_zip=False,final_dir=final_dir):
     except:
         print(f'{repodir} already exists or other problem creating directory')
 
-    dirs = ['CAS_ref_files','CompTox_ref_files','ChemInfo_ref_files',
+    dirs = [#'CAS_ref_files',
+            'CompTox_ref_files','ChemInfo_ref_files',
             'curation_files','pickles']
 
     for d in dirs:

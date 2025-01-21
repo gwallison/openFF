@@ -10,7 +10,7 @@ import numpy as np
 import openFF.common.file_handlers as fh
 import openFF.common.text_handlers as th
 import openFF.common.handles as hndl
-import openFF.common.external_chem_data as fgd
+# import openFF.common.external_chem_data as fgd
 
 class ChemListSummary():
     def __init__(self,df,
@@ -91,9 +91,10 @@ class ChemListSummary():
         gb = casingdf.groupby('bgCAS',as_index=False)['ingredCommonName'].first()
         casdf = casdf.merge(gb,on='bgCAS',how='left',validate='1:1')
         
-        fgdf = self.get_functional_groups()
-        casdf = casdf.merge(fgdf,on='bgCAS', how='left',validate='1:1')
-        casdf = casdf.rename({'funct_groups':'chat_GPT_fg'},axis=1)
+        #  This doesn't work with colab.  Need different approach
+        # fgdf = self.get_functional_groups()
+        # casdf = casdf.merge(fgdf,on='bgCAS', how='left',validate='1:1')
+        # casdf = casdf.rename({'funct_groups':'chat_GPT_fg'},axis=1)
 
         c1 = np.where(self.ignore_duplicates,self.df.in_std_filtered,True)
 
@@ -180,7 +181,7 @@ class ChemListSummary():
     def get_disclosure_table(self,colset="disc_table"):
         pass
     
-    def get_functional_groups(self):
-        obj = fgd.Functional_Groups()
-        return obj.get_all()
+    # def get_functional_groups(self):
+    #     obj = fgd.Functional_Groups()
+    #     return obj.get_all()
         

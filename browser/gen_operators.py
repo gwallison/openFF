@@ -86,7 +86,7 @@ class Operator_gen():
             gb.to_parquet(os.path.join(hndl.sandbox_dir,'operator.parquet'),index=False)
             # make unfiltered out file too
             dupdf = self.allrec[self.allrec.bgOperatorName==op][['bgOperatorName',
-                                                                 'OperatorName',
+                                                                 'OperatorName','r_flags',
                                                                  'date','dup_rec',
                                                                  'mass','APINumber',
                                                                  'bgStateName','bgCountyName',

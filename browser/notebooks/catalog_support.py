@@ -43,3 +43,8 @@ def showHeader(name,line2='',subt='',imglnk='',use_remote=False,link_up_level=0)
     display(HTML(nbh.get_common_header(name,line2=line2,subtitle=subt,imagelink=imglnk,
                                    repo_name=hndl.repo_name,cat_creation_date=hndl.cat_creation_date,
                                            link_up_level=link_up_level,use_remote=use_remote)))
+    
+    
+def show_chem_summary(cas,name,subs,eh_1,eh_2,CoC_str,GHS,
+                      perc_disc):
+    return ""

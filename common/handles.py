@@ -18,8 +18,8 @@ import platform
 locals = ['Dell_2023_Gary','M2','NucBoxM4']
 
 # repo_name = 'openFF_data_2024_03_21'
-repo_name = 'openFF_data_2025_01_17'
-# repo_name = 'current_repo'
+# repo_name = 'openFF_data_2025_01_17'
+repo_name = 'current_repo'
 bulkdata_date = 'January 17, 2025'
 
 curr_platform = ''
@@ -122,8 +122,9 @@ docs_images = os.path.join(root_code,'docs','images')
 ci_source = os.path.join(curr_repo_dir,"ChemInfo_ref_files")
 ci_summ_fn = 'CI_sdf_summary.parquet'
 
-###################  SciFinder scrape handles
+###################  Scrape handles
 sci_finder_scrape_dir = r"G:\My Drive\webshare\scrape_data\SciFinder_chem_pages"
+chatGPT_eh_scrape_dir = r"G:\My Drive\webshare\scrape_data\chatGPT_ehClasses"
 
 
 ##################  FF_issues handles

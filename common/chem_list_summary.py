@@ -37,7 +37,7 @@ class ChemListSummary():
                         'chem_index_local': ['composite_id','bgCAS','epa_pref_name',
                                              'img','tot_records','num_w_mass',
                                              'mass_median','mass_90_perc',
-                                             'rq_lbs','func_groups','chat_GPT_fg',
+                                             'rq_lbs','func_groups',#'chat_GPT_fg',
                                              'fingerprint','extrnl','earliest_date'],
                         'colab_v1':   ['composite_id','refs','img','tot_records','num_w_mass',
                                        'tot_mass',
@@ -61,6 +61,7 @@ class ChemListSummary():
         self.assemble_cas_df(use_remote=self.use_remote)
         
     def make_extrnl_column(self,chem_df):
+        non_cas = ['proprietary','conflictingID','ambiguousID','sysAppMeta']
         chem_df['extrnl'] = np.where(chem_df.is_on_CWA,'CWA<br>','    ')
         chem_df.extrnl = np.where(chem_df.is_on_AQ_CWA,chem_df.extrnl+'AQ_CWA<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_HH_CWA,chem_df.extrnl+'HH_CWA<br>',chem_df.extrnl)
@@ -70,7 +71,8 @@ class ChemListSummary():
         chem_df.extrnl = np.where(chem_df.is_on_prop65,chem_df.extrnl+'prop65<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_PFAS_list,chem_df.extrnl+'EPA_PFAS<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_UVCB,chem_df.extrnl+'UVCB<br>',chem_df.extrnl)
-        chem_df.extrnl = np.where(~(chem_df.is_on_TSCA),chem_df.extrnl+'non-TSCA<br>',chem_df.extrnl)
+        chem_df.extrnl = np.where( (~(chem_df.is_on_TSCA)) & (~(chem_df.bgCAS.isin(non_cas)) ),
+                                  chem_df.extrnl+'non-TSCA<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_diesel,chem_df.extrnl+'diesel<br>',chem_df.extrnl)
         chem_df.extrnl = np.where(chem_df.is_on_IRIS,chem_df.extrnl+'IRIS    ',chem_df.extrnl)
         chem_df['coc_lists'] = chem_df.extrnl.copy()

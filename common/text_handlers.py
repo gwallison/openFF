@@ -152,7 +152,8 @@ def getPubChemLink(cas):
     return ''
 
 def getMoleculeImg(cas,size=120,use_remote=False,link_up_level=0,
-                   alt=None):
+                   alt=None,
+                   unavail_text="<center>Image not available</center>"):
     # returns an html image link
     prefix = ''
     if link_up_level:
@@ -179,7 +180,7 @@ def getMoleculeImg(cas,size=120,use_remote=False,link_up_level=0,
         if os.path.exists(ci_path):
             if os.path.getsize(ci_path) > 0:
                 return f"""<center><img src="{prefix}images/{cas}/chemid.png" alt="{alttext}" onerror="this.onerror=null; this.remove();" width="{size}"></center>"""
-    return "<center>Image not available</center>"
+    return unavail_text
 
 def getFingerprintImg(cas,size=140,alt=None):
     # returns an html image link when possible

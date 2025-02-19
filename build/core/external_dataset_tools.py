@@ -9,6 +9,7 @@ import pandas as pd
 import os
 import geopandas
 from openFF.common.file_handlers import get_df, ext_fn
+import openFF.common.handles as hndl
 
 final_crs = 4326 # EPSG value for bgLat/bgLon; 4326 for WGS84: Google maps
 
@@ -34,7 +35,67 @@ def add_diesel_list(df):
     df['is_on_diesel'] = df.bgCAS.isin(cas)
     return df
 
+import difflib
+
+def correct_string(test_string, string_list):
+  """
+  Corrects minor errors in a text string by finding the closest match in a list.
+
+  Args:
+    test_string: The string to correct.
+    string_list: A list of strings to compare against.
+
+  Returns:
+    The closest matching string in the list, or the original string if no close
+    match is found.
+  """
+  closest_match = difflib.get_close_matches(test_string, string_list, n=1, cutoff=0.8)
+  if closest_match:
+      if isinstance(closest_match,list):
+          return closest_match[0]
+      return closest_match
+  else:
+      return test_string
+
+def get_EH_from_chatGPT_list(df):
+    indir = hndl.chatGPT_eh_scrape_dir
+    dlst = os.listdir(indir)
+    
+    # need this to normalize all results from chatGPT
+    t = df.groupby(['eh_Class_L1','eh_Class_L2'], as_index=False).size()
+    t['composite'] = t.eh_Class_L1 + ';' + t.eh_Class_L2
+    L1L2 = t.composite.tolist()
+    
+    caslst = []
+    L1lst = []
+    L2lst = []
+    fglst = []
+    for fn in dlst:
+        cas = fn.split('_')[0]
+        wfn = os.path.join(indir,fn)
+        with open(wfn,'r',encoding='utf-8') as f:
+            alltxt = f.read()
+            lines = alltxt.split('\n')
+        fgs = lines[0].replace('**FG','').replace('**','').strip()
+        # print(fgs)
+        if not fgs in L1L2:
+            fgs = correct_string(fgs, L1L2)
+        fgsplit = fgs.split(';')
+        caslst.append(cas)
+        fglst.append(fgs)
+        L1lst.append(fgsplit[0])
+        try:
+            L2lst.append(fgsplit[1])
+        except:
+            L2lst.append('')
+        
+    return pd.DataFrame({'bgCAS':caslst,
+                         'gpt_Class_L1':L1lst,
+                         'gpt_Class_L2':L2lst})       
+
 def add_Elsner_list(df,sources):
+    """New version (jan 2025) includes chatGPT classifications"""
+    import numpy as np
     print('     -- processing Elsner and Hoelzer list')
     reffn = ext_fn(ext_dir=sources,handle='eh_master_list')
     ehdf = pd.read_csv(reffn,quotechar='$')
@@ -43,11 +104,24 @@ def add_Elsner_list(df,sources):
     ehdf = ehdf.rename({'eh_CAS':'bgCAS'},axis=1)
     
     df = pd.merge(df,ehdf,on='bgCAS',how='left')
+    GPTdf = get_EH_from_chatGPT_list(df)
+    # print(GPTdf)
+    df = df.merge(GPTdf,on='bgCAS',how='left')
+    df['eh_source'] = np.where(df.eh_Class_L1.notna(),
+                               'EH_original','chatGPT')
+    df.eh_Class_L1 = np.where(df.eh_source=='EH_original',
+                              df.eh_Class_L1,
+                              df.gpt_Class_L1)
+    df.eh_Class_L2 = np.where(df.eh_source=='EH_original',
+                              df.eh_Class_L2,
+                              df.gpt_Class_L2)
+
     df[['eh_Class_L1', 'eh_Class_L2',
        'eh_subs_class','eh_function']] = df[['eh_Class_L1', 
                                              'eh_Class_L2',
                                              'eh_subs_class',
-                                             'eh_function']].fillna('') 
+                                             'eh_function']].fillna('')
+    df = df.drop(['gpt_Class_L1','gpt_Class_L2'],axis=1)
 
     return df
     

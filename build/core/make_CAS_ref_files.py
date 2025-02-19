@@ -28,6 +28,7 @@ import pandas as pd
 import numpy as np
 import shutil
 import os
+import re
 #import csv
 import io
 from openFF.common.file_handlers import save_df, get_df
@@ -54,6 +55,27 @@ class CAS_list_maker():
 
 ## incorporating 2024 SciFinder scrape into these procedures
 
+    def remove_scifinder_code(self, chemical_name):
+        """
+        Removes SciFinder version codes (e.g., '(9CI)', '(8CI, ACI)') from the end of a chemical name,
+        but keeps parentheses containing ratios or other non-version information.
+    
+        Args:
+            chemical_name (str): The chemical name string.
+    
+        Returns:
+            str: The chemical name with the version code removed (if applicable).
+        """
+        pattern = r"\([^)]*\)$"
+        match = re.search(pattern, chemical_name)
+    
+        if match:
+            content = match.group(0)[1:-1]  # Extract content inside parentheses
+            if re.match(r"^\d+CI(,\s*\d+CI)*$|^ACI(,\s*ACI)*$", content): #check if it matches a version code format
+                return re.sub(pattern, "", chemical_name).rstrip()
+        return chemical_name #return original if it's not a version code, or if there's no match.
+    
+        
     def make_SciFinder_index(self):
         lst = os.listdir(hndl.sci_finder_scrape_dir)
         caslst = []
@@ -90,14 +112,14 @@ class CAS_list_maker():
             # first the synonyms
             for syn in res[1]:
                 syncas.append(row.CASRN)
-                synname.append(syn.lower())
+                synname.append(self.remove_scifinder_code(syn).lower())
             # now deprecated:
             for dep in res[2]:
                 delcas.append(dep)
                 delrepl.append(row.CASRN)
             # finally the ingredient name
             ingcas.append(row.CASRN)
-            ingname.append(res[3])
+            ingname.append(self.remove_scifinder_code(res[3]))
         
         self.SFname = pd.DataFrame({'cas_number':ingcas,'ing_name':ingname})
         self.SFsyn = pd.DataFrame({'cas_number':syncas,'synonym':synname})

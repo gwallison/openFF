@@ -137,6 +137,7 @@ def is_purpose_complete(work_dir):
         c2 = purposes.status.isna().sum()==0
         c3 = purposes.first_date.isna().sum()==0
         save_df(purposes,os.path.join(work_dir,'purpose_xlate.parquet'))
+        print(c1, c2, c3)
         if ~(c1&c2&c3):
             print(purposes[c1|c2|c3])
             print('Apparent incomplete purpose_xlate_modified.csv file!')

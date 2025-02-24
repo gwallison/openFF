@@ -94,7 +94,9 @@ def get_EH_from_chatGPT_list(df):
                          'gpt_Class_L2':L2lst})       
 
 def add_Elsner_list(df,sources):
-    """New version (jan 2025) includes chatGPT classifications"""
+    """New version (jan 2025) includes chatGPT classifications, keeps
+    original EH classes when they are there, otherwise insert GPT
+    classes"""
     import numpy as np
     print('     -- processing Elsner and Hoelzer list')
     reffn = ext_fn(ext_dir=sources,handle='eh_master_list')
@@ -115,7 +117,7 @@ def add_Elsner_list(df,sources):
     df.eh_Class_L2 = np.where(df.eh_source=='EH_original',
                               df.eh_Class_L2,
                               df.gpt_Class_L2)
-
+    print(f'        -- empty EH CAS:\n {df[df.eh_Class_L1.isna()].bgCAS.unique().tolist()}')
     df[['eh_Class_L1', 'eh_Class_L2',
        'eh_subs_class','eh_function']] = df[['eh_Class_L1', 
                                              'eh_Class_L2',

@@ -106,15 +106,25 @@ def get_summary_from_xls(fn):
     """This routine throws a warning for each file in the report dir. They are
     harmless and difficult to remove."""
     t = pd.read_excel(fn,skiprows=5)
-    cols = ['DTXSID','CASRN','Name','HH: Oral','HH: Inhalation','HH: Dermal','HH: Carcinogenicity',
+    print(t.head(4))
+    # NOTE that EPA recently added a "SMILES" column that we must delete
+    # cols = ['DTXSID','CASRN','Name','HH: Oral','HH: Inhalation','HH: Dermal','HH: Carcinogenicity',
+    #         'HH: Genotoxicity Mutagenicity','HH: Endocrine Disruption','HH: Reproductive','HH: Developmental',
+    #         'HH: Neurotoxicity: Repeat Exposure','HH: Neurotoxicity: Single Exposure',
+    #         'HH: Systemic Toxicity: Repeat Exposure','HH: Systemic Toxicity: Single Exposure',
+    #         'HH: Skin Sensitization','HH: Skin Irritation','HH: Eye Irritation',
+    #         'Ecotoxicity: Acute Aquatic Toxicity','Ecotoxicity: Chronic Aquatic Toxicity',
+    #         'Fate: Persistence','Fate: Bioaccumulation','Fate: Exposure']
+    cols = ['DTXSID','CASRN','Name','SMILES','HH: Oral','HH: Inhalation','HH: Dermal','HH: Carcinogenicity',
             'HH: Genotoxicity Mutagenicity','HH: Endocrine Disruption','HH: Reproductive','HH: Developmental',
             'HH: Neurotoxicity: Repeat Exposure','HH: Neurotoxicity: Single Exposure',
             'HH: Systemic Toxicity: Repeat Exposure','HH: Systemic Toxicity: Single Exposure',
             'HH: Skin Sensitization','HH: Skin Irritation','HH: Eye Irritation',
             'Ecotoxicity: Acute Aquatic Toxicity','Ecotoxicity: Chronic Aquatic Toxicity',
             'Fate: Persistence','Fate: Bioaccumulation','Fate: Exposure']
+    print(len(cols))
     t.columns = cols
-    return t
+    return t.drop('SMILES',axis=1)
 
 
 def get_all_excel(inputdir=ci_dir, single_file = ''):
@@ -124,9 +134,10 @@ def get_all_excel(inputdir=ci_dir, single_file = ''):
         lst = os.listdir(inputdir)
     dfs = []
     for fn in lst:
-        if fn[-4:] != 'xlsx':
+        if (fn[-4:] != 'xlsx') | (fn[:4] != 'haza'):
             continue
         filename = os.path.join(inputdir,fn)
+        print(filename)
         dfs.append(get_summary_from_xls(filename))
     out = pd.concat(dfs,sort=False)
     print(len(out))

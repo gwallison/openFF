@@ -35,7 +35,8 @@ class MiscNbGen():
                         ('Short_description_of_Open-FF','Short description of Open-FF'),
                         #('FracFocus_Holes','Holes in FracFocus'),
                         ('Make_blog_images','Make data-dependent images'),
-                        ('sand_dominance_summary','Sand dominance summary')
+                        ('sand_dominance_summary','Sand dominance summary'),
+                        ('Open-FF_Op_Parents','Parents of operators')
                         ]
         self.make_all_nb()
 

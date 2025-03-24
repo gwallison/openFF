@@ -25,6 +25,7 @@ lst_str_cols = ['APINumber','bgCAS','api10','IngredientName','CASNumber','test',
                 'Supplier','OperatorName','TradeName','Purpose',
                 'rawName','cleanName','xlateName',  # for companyXlate...
                 'curatedCAS', # in CAS and casing curation files
+                'rawOpParent','bgOpParent'  #for parent xlate
                 ]
 
 

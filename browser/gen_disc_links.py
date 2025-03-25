@@ -19,6 +19,11 @@ today = datetime.today()
 class Disc_link_gen():
     
     def __init__(self,workingdf,arc_diff=None,use_archive_diff=False):
+        try:
+            # make links directory if it doesn't exist yet
+            os.mkdir(hndl.browser_api_links_dir)
+        except:
+            pass
         self.allrec = workingdf
         self.makeHTMLfiles()
 

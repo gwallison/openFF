@@ -77,13 +77,13 @@ class State_gen():
         ##########
         
         # first create state dirs in "states" browser_out dir, if needed
-        try:
-            root = hndl.browser_states_dir
-            for state in statelst:
-                state_lab = state.replace(' ','_')
+        root = hndl.browser_states_dir
+        for state in statelst:
+            state_lab = state.replace(' ','_')
+            try:
                 os.mkdir(os.path.join(root,state_lab))
-        except:
-            print('Adding individual states to states dir not needed')
+            except:
+                print(f'Adding {state_lab} to states directory not needed')
             
         stlst = []
         ctlst = []

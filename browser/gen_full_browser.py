@@ -97,10 +97,10 @@ if __name__ == '__main__':
     workingdf = prep_working_df()
     # print(workingdf.columns)
     #workingdf = workingdf[workingdf.bgCAS=='100-79-8']
-    _ = gen_chem.Chem_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    #_ = gen_chem.Chem_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_states.State_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_disc.Disc_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_disc_links.Disc_link_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
     # _ = gen_scope.ScopeGen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)

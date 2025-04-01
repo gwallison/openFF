@@ -31,12 +31,13 @@ class MiscNbGen():
                         ('Open-FF_Company_Names','Company Name Table'),
                         ('Open-FF_Data_Dictionary','Data Dictionary'),
                         ('Open-FF_Synonyms','Chemical Name Synonyms'),
-                        #('Open-FF_TradeNames','Trade Names and Composition Data'),
+                        ('Open-FF_TradeNames','Trade Names and Composition Data'),
                         ('Short_description_of_Open-FF','Short description of Open-FF'),
                         #('FracFocus_Holes','Holes in FracFocus'),
                         ('Make_blog_images','Make data-dependent images'),
                         ('sand_dominance_summary','Sand dominance summary'),
-                        ('Open-FF_Op_Parents','Parents of operators')
+                        ('Open-FF_Op_Parents','Parents of operators'),
+                        ('Colorado_disclosures','CO-ECMC disclosures')
                         ]
         self.make_all_nb()
 

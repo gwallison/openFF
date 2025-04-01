@@ -40,6 +40,7 @@ class FF_flaws_gen():
     
     def make_all_files(self):
         for i,row in self.flaws_master.iterrows():
+            print(f'Working on {row.Flag_id}')
             id = row.Flag_id
             if id[0] == 'r':
                 reckeys = self.rec_df[self.rec_df[row.Flag_id]].reckey.tolist()

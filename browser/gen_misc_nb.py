@@ -25,7 +25,7 @@ class MiscNbGen():
         # the following list is in tuples of (file basenane,page title)
         self.fulllist = [('Open-FF_Catalog','Data Browser'),
                         ('Open-FF_Scope_and_Aggregate_Stats','Big Picture Analysis'),
-                        #('Ohio_Drilling_Chemicals','Ohio Drilling Chemicals'),
+                        ('Ohio_Drilling_Chemicals','Ohio Drilling Chemicals'),
                         #('Open-FF_Auxillary_Data','Auxillary Data'),
                         ('Open-FF_CASNumber_and_IngredientName','CASRN & IngredientName pairs'),
                         ('Open-FF_Company_Names','Company Name Table'),

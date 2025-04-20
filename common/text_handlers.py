@@ -22,7 +22,7 @@ def wrap_URL_in_html(link,txtToShow='MAP'):
 
 def make_clickable(val):
     try:
-        if val[:4]=='http':
+        if val[:4] in ['http','file']:
             return '<a href="{}" target="_blank">{}</a>'.format(val,'map')
     except:
         return val

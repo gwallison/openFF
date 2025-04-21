@@ -94,6 +94,12 @@ class final_test():
         assert (self.df[c].IngredientName == 'missing').all()
         assert self.df[c].PercentHFJob.notna().sum()==0
         assert self.df[c].PercentHighAdditive.notna().sum()==0
+        
+    # def verifyBooleanStatus(self):
+    #     """Verify that the columns in the dataset that you expect to be booleans
+    #     are in fact, booleans"""
+    #     self.print_stage('Verify boolean status')
+                
 
     def run_all_tests(self):
         self.reckey_test()

@@ -41,6 +41,8 @@ st = datetime.now() # start timer
 
 # define    
 data_dir = r"C:\MyDocs\integrated\openFF_archive"
+data_dir = r"G:\My Drive\production\openFF_archive"
+
 bulk_dir = os.path.join(data_dir,'FF_bulk_data')
 raw_dir = os.path.join(data_dir,'raw_dataframes')
 out_dir = os.path.join(data_dir,'diff_dicts')

@@ -18,8 +18,8 @@ import platform
 locals = ['Dell_2023_Gary','M2','NucBoxM4']
 
 # repo_name = 'openFF_data_2024_03_21'
-repo_name = 'openFF_data_2025_04_20'
-bulkdata_date = 'April 20, 2025'
+repo_name = 'openFF_data_2025_05_14'
+bulkdata_date = 'May 14, 2025'
 
 curr_platform = ''
 if not platform.node() in locals:
@@ -34,8 +34,11 @@ if curr_platform=='remote':
     curr_data = "full_df.parquet"
 
 else:     
+    # root_code = r"C:\MyDocs\integrated\openFF"
+    # root_data = r"C:\MyDocs\integrated"
     root_code = r"C:\MyDocs\integrated\openFF"
-    root_data = r"C:\MyDocs\integrated"
+    root_data = r"G:\My Drive\production"
+
     curr_data = os.path.join(root_data,'repos',repo_name,"full_df.parquet")
     
 repo_dir = os.path.join(root_data,'repos')

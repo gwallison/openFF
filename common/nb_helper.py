@@ -3,6 +3,7 @@ import os
 import subprocess
 
 import openFF.common.handles as hndl
+import openFF.browser.add_analytics_to_all as aata
 
 #################### utils used within notebooks ########################
 
@@ -88,6 +89,7 @@ def make_notebook_output(nb_fn,output_fn, basic_output=False):
         b_text = ' --template=basic '
     s= f'jupyter nbconvert --no-input {b_text}--ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {nb_fn} --to=html --output="{out_fn[:-5]}" --output-dir="{out_dir}"'
     subprocess.run(s)
+    aata.add_codelet(output_fn)
     hide_map_warning(output_fn)
 
 

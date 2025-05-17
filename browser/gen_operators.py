@@ -18,11 +18,23 @@ import openFF.common.nb_helper as nbh
 
 class Operator_gen():
 
-    def __init__(self, workingdf,
+    def __init__(self, workingdf,arc_diff=None,use_archive_diff=False,
                  testing_mode=False
     ):
         print(f'Starting Operator Browser: using repository: {hndl.curr_data}')
         self.allrec = workingdf
+        # if using archive_diff, filter self.allrec, self.alldisc
+        if use_archive_diff:
+            if not arc_diff:
+                arc_diff = hndl.archive_diff_pkl
+            import pickle
+            with open(arc_diff,'rb') as f:
+                arc_diff_dict = pickle.load(f)
+            self.update_operator_list = self.allrec[self.allrec.OperatorName.isin(arc_diff_dict['OperatorName'])].bgOperatorName.unique().tolist()
+        else:
+            self.update_operator_list = self.allrec.bgOperatorName.unique().tolist()
+
+        
         self.workdf = self.allrec[(self.allrec.in_std_filtered)]
         self.make_all_files()
     
@@ -58,6 +70,9 @@ class Operator_gen():
         print(f'Number of operators to be processed: {len(oplst)}')
         # oplst = ['ascent']
         for op in oplst:
+            if not op in self.update_operator_list:
+                print(f'** {op:<40} **  not updated.')
+                continue
             workdf = t[t.bgOperatorName==op].copy()
             workdf['location_error'] = workdf.loc_name_mismatch|\
                                        (workdf.loc_within_county=='NO')|\

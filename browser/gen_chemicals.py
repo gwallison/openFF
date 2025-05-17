@@ -23,11 +23,12 @@ today = datetime.today()
 
 class Chem_gen():
 
-    def __init__(self, workingdf,
+    def __init__(self, workingdf,arc_diff=None,use_archive_diff=False,
                  caslist=[], # for testing; if not [], will only work on cas in list)
                  #testing_mode=False
     ):
         print(f'Starting Chem Browser: using repository: {hndl.curr_data}')
+
         self.caslist = caslist
         self.html_fn = os.path.join(hndl.browser_nb_dir,'chemical_report.html')
         self.no_data_html_fn = os.path.join(hndl.browser_nb_dir,'chemical_report_no_data.html')
@@ -44,6 +45,21 @@ class Chem_gen():
         self.allrec['Purp_trunc'] = np.where(self.allrec.Purpose.str.len()>30,
                                                   self.allrec.Purpose.str[:30]+'...',
                                                   self.allrec.Purpose)
+
+        # if using archive_diff, filter self.allrec, self.alldisc
+        if use_archive_diff:
+            if not arc_diff:
+                arc_diff = hndl.archive_diff_pkl
+            import pickle
+            with open(arc_diff,'rb') as f:
+                arc_diff_dict = pickle.load(f)
+            self.allrec['casing'] = list(zip(self.allrec['CASNumber'],
+                                             self.allrec['IngredientName']))
+            self.update_bgCAS_list = self.allrec[self.allrec.casing.isin(arc_diff_dict['casing'])].bgCAS.unique().tolist()
+        else:
+            self.update_bgCAS_list = self.allrec.bgCAS.unique().tolist()
+
+
         # some global stats for chem_reports
         w_chem = ~(self.allrec.no_chem_recs)
         filtered = self.allrec.in_std_filtered
@@ -71,31 +87,12 @@ class Chem_gen():
                 hndl.bulkdata_date,today,cas]
         pd.DataFrame({'varname':vname,'value':vals}).to_csv(hndl.ref_fn,
                                                             index=False)
-    # def make_chem_report_output(self,nb_fn,output_fn, basic_output=False):
-    #     res = os.path.split(output_fn)
-    #     out_dir = res[0]
-    #     out_fn = res[1] 
-    #     assert out_fn[-5:]=='.html', f'Expecting .html ext on {output_fn}'
-    #     b_text = ''
-    #     if basic_output:
-    #         b_text = ' --template=basic '
-    #     s= f'jupyter nbconvert --no-input {b_text}--ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute {nb_fn} --to=html --output={out_fn[:-5]} --output-dir={out_dir}'
-    #     subprocess.run(s)
-    #     nbh.hide_map_warning(output_fn)
-
-    # def make_no_data_output(self,subfn=''):
-    #     s= 'jupyter nbconvert --no-input --ExecutePreprocessor.allow_errors=True --ExecutePreprocessor.timeout=-1 --execute chemical_report_no_data.ipynb --to=html '
-    #     subprocess.run(s)
-    #     nbh.hide_map_warning(self.no_data_html_fn)
-
-    # def compile_chem_informatics(self):
-    #     cit.sdf_extract()
     def make_chem_list(self):
         import math
         t = self.allrec # just a handle
         if self.caslist != []: # then do all
             t = t[t.bgCAS.isin(self.caslist)]
-        print(len(t),self.caslist)
+        #print(len(t),self.caslist)
         gb = t.groupby('bgCAS',as_index=False)[['bgIngredientName','epa_pref_name',
                                                 'IngredientName','iupac_name']].first()
         # self.make_bgCAS_name_df(gb)
@@ -108,6 +105,9 @@ class Chem_gen():
             #if i>15:  # control the overall list
             #    continue # skip the rest
             chem = row.bgCAS
+            if not chem in self.update_bgCAS_list:
+                print(f'{i}: ** {chem:>13} **  not updated')
+                continue
             ing = row.epa_pref_name
             if ing == '':
                 ing= row.bgIngredientName
@@ -122,7 +122,6 @@ class Chem_gen():
                                 row.bgIngredientName)
             
             tt = self.allrec[self.allrec.bgCAS==chem].copy()
-            # tt = tt.filter(self.filtered_fields,axis=1).copy()
             mx = tt.mass.max()
             an_fn = f'analysis_{chem}.html'
             fulloutfn = os.path.join(hndl.browser_out_dir,chem,an_fn)
@@ -137,28 +136,20 @@ class Chem_gen():
                 nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'chemical_report_no_data.ipynb'),
                                     output_fn=fulloutfn)
                 self.fix_no_data_html(chem,ing,0,mx,fulloutfn)
-                # shutil.copyfile(self.no_data_fn,
-                #                 os.path.join(hndl.browser_out_dir,chem,an_fn))
                 print(f'{i}: ** {chem:>13} **  n recs: {len(tt):>7,};  max mass: {mx:>10,} - NO FILTERED DATA')
                 continue             
             # report with data
             print(f'{i}: ** {chem:>13} **  n recs: {len(tt):>7,};  max mass: {mx:>10,}')               
             # if len(tt)>0:
             tt['map_link'] = tt.apply(lambda x: th.getMapLink(x),axis=1)
-            # else:
-            #     tt['map_link'] = ''
-            # if len(tt)>5: # don't map the very small chemicals
-                # self.sitemap_txt += f'\t<url>\n\t\t<loc>{chem}/analysis_{chem}.html</loc>\n\t</url>\n'
+
             # save data to file for later notebook access
             tt.to_parquet(os.path.join(hndl.sandbox_dir,'data.parquet'),index=False)
             
             nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'chemical_report.ipynb'),
                                     output_fn=fulloutfn)
             self.fix_chem_html(chem,ing,tt.in_std_filtered.sum(),mx,fulloutfn)
-            # an_fn = f'analysis_{chem}.html'
-            # shutil.copyfile(self.jupyter_fn,
-                            # os.path.join(self.outdir,chem,an_fn))
-                # make the State Index
+
         fulloutfn = os.path.join(hndl.browser_out_dir,'Open-FF_Chemicals.html')
         nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'Open-FF_Chemicals.ipynb'),
                                 output_fn=fulloutfn)

@@ -18,7 +18,7 @@ import openFF.common.nb_helper as nbh
 
 class State_gen():
 
-    def __init__(self, workingdf,
+    def __init__(self, workingdf,arc_diff=None,use_archive_diff=False,
                  testing_mode=False
     ):
         print(f'Starting State Browser: using repository: {hndl.curr_data}')
@@ -26,6 +26,31 @@ class State_gen():
         self.workdf = self.allrec[(self.allrec.in_std_filtered)\
                                    &(self.allrec.bgStateName.notna())\
                                    &(self.allrec.loc_within_state=='YES')]
+            
+        # if using archive_diff, filter self.allrec, self.alldisc
+        if use_archive_diff:
+            if not arc_diff:
+                arc_diff = hndl.archive_diff_pkl
+            import pickle
+            with open(arc_diff,'rb') as f:
+                arc_diff_dict = pickle.load(f)
+            self.allrec['state_county'] = list(zip(self.allrec['StateName'],
+                                             self.allrec['CountyName']))
+            self.update_state_list = self.allrec[self.allrec.state_county.isin(arc_diff_dict['state_county'])].bgStateName.unique().tolist()
+
+            changed_counties_df = self.allrec[self.allrec.state_county.isin(arc_diff_dict['state_county'])][['bgStateName','bgCountyName']]
+            changed_counties = []
+            for i,row in changed_counties_df[~changed_counties_df.duplicated()].iterrows():
+                changed_counties.append((row.bgStateName,row.bgCountyName))
+            self.update_county_list = changed_counties
+        else:
+            self.update_state_list = self.allrec.bgStateName.unique().tolist()
+            changed_counties_df = self.allrec[['bgStateName','bgCountyName']]
+            changed_counties = []
+            for i,row in changed_counties_df[~changed_counties_df.duplicated()].iterrows():
+                changed_counties.append((row.bgStateName,row.bgCountyName))
+            self.update_county_list = changed_counties
+        
         self.state_fn = './work/state_report.html'
         self.county_fn = './work/county_report.html'
         
@@ -91,6 +116,9 @@ class State_gen():
         
         for state in statelst:
             print(f'----------{state}------------')
+            if not state in self.update_state_list:
+                print('     not updated')
+                continue
             workdf = self.workdf[self.workdf.bgStateName==state][['date','bgStateName','bgCountyName',
                                               'DisclosureId','OperatorName','WellName',
                                               'TotalBaseWaterVolume',
@@ -148,6 +176,9 @@ class State_gen():
             dupdf.to_parquet(os.path.join(hndl.sandbox_dir,'state_unfilt.parquet'),index=False)
  
             for county in workdf.bgCountyName.unique().tolist():
+                if not (state,county) in self.update_county_list:
+                    print(f'  -{county} not updated')
+                    continue
                 print(f'  -{county}')
                 cnty_state_name = county.lower().replace(' ','_')+'-'+state.lower().replace(' ','_')
                 fn = os.path.join(hndl.browser_states_dir,cnty_state_name+'.html')
@@ -176,17 +207,12 @@ class State_gen():
                                     output_fn=fn)
                 self.fix_county_title(fn,cnty_state_name)
 
-                # cn_fn = f'{cnty_state_name}.html'
-                # shutil.copyfile(self.county_fn,
-                #                 os.path.join(self.outdir,'states',cn_fn))
                 
             print(f'** {state.title():<16} **  n recs: {len(workdf):>10,}')
             fulloutfn = os.path.join(hndl.browser_out_dir,'states',f'{state}.html')
             nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'state_report.ipynb'),
                                     output_fn=fulloutfn)
             self.fix_state_title(fulloutfn,state)
-        #  pd.DataFrame({'state':stlst,'county':ctlst})\
-        #      .to_csv(os.path.join(self.outdir,'states/state_county_df.csv'))
 
         # make the State Index
         fulloutfn = os.path.join(hndl.browser_out_dir,'Open-FF_States_and_Counties.html')

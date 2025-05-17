@@ -26,6 +26,8 @@ class Disc_link_gen():
             pass
         self.allrec = workingdf
         self.makeHTMLfiles()
+        self.arc_diff=arc_diff
+        self.use_archive_diff=use_archive_diff
 
     
     def make_api_list(self):
@@ -166,16 +168,30 @@ class Disc_link_gen():
         t['status'] = 'current'
         t['has_chem_recs'] = ~(t.no_chem_recs)
         
+        # if using archive_diff, get list of api that have changed
+        if self.use_archive_diff:
+            if not self.arc_diff:
+                arc_diff = hndl.archive_diff_pkl
+            import pickle
+            with open(arc_diff,'rb') as f:
+                arc_diff_dict = pickle.load(f)
+            
+            disclst = arc_diff_dict['new_or_changed_disc']
+            api_update_lst = t[t.DisclosureId.isin(disclst)].api10.unique().tolist()
+        else:
+            api_update_lst = t.api10.unique().tolist() # update all api
+        
         api10s = []
         links = []
         for i,api in enumerate(self.apis):
             if i%1000==0:
                 print(f'on api {api}, number {i}')
             oneapi = t[t.api10==api].copy()
-            html = self.generate_HTML(api,oneapi)
-            fn = os.path.join(hndl.browser_api_links_dir,api+'.html')
-            with open(fn,'w') as f:
-                f.write(html)
+            if api in api_update_lst:
+                html = self.generate_HTML(api,oneapi)
+                fn = os.path.join(hndl.browser_api_links_dir,api+'.html')
+                with open(fn,'w') as f:
+                    f.write(html)
             api10s.append(api)
             url = hndl.browser_root+f'api_links/{api}.html'
             links.append(url)

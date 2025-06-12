@@ -316,7 +316,9 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
     # display(f)
     return f
 
-def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,include_shape=False,area_df=None,
+def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,
+                                include_shape=False,area_df=None,
+                                
                      fields=['APINumber','TotalBaseWaterVolume','year','OperatorName','ingKeyPresent'],
                      aliases=['API Number','Water Volume','year','Operator','has chem recs'],
                      use_remote=False,
@@ -373,6 +375,7 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,i
             html += '-- '+ th.getFFLink(row,'FracFocus')
             html += '<br>-- '+ th.getDisclosureLink(row.APINumber,row.DisclosureId,'Open-FF',
                                                     use_remote=use_remote)
+            
 
         popup = folium.Popup(html)
         folium.Marker(

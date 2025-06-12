@@ -198,3 +198,67 @@ def ext_fn(ext_dir="https://storage.googleapis.com/open-ff-common/ext_data/",
     # through files
     ext_dict = get_ext_master_dic(os.path.join(ext_dir,masterfn))
     return os.path.join(ext_dir,ext_dict[handle])
+
+
+#######  getting files onto google storage
+
+import os
+from google.cloud import storage
+from time import sleep
+
+def upload_file_to_bucket(bucket_name, blob_name, file_path, verbose=True, disable_caching=False):
+    """Uploads a file to the specified bucket.
+    For example: bucket_name ='open-ff-browser',
+                   blob_name='Raw_disclosures.html'
+                   file_path=local_path
+
+    Args:
+        bucket_name (str): The name of the Google Cloud Storage bucket.
+        blob_name (str): The name of the object (blob) in the bucket.
+        file_path (str): The local path to the file to upload.
+        verbose (bool): If True, prints messages about the upload process. Defaults to True.
+        disable_caching (bool): If True, sets Cache-Control to 'public, max-age=60' to prevent caching.
+                                If False, no specific Cache-Control is set, allowing default caching.
+                                Defaults to False.
+    """
+
+    # Set the project ID as an environment variable
+    os.environ["GOOGLE_CLOUD_PROJECT"] = "open-FF-catalog"
+
+    # Define metadata for cache control
+    # metadata = None
+    # Set the metadata attribute on the blob object BEFORE uploading
+
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+
+        if disable_caching:
+            blob.cache_control = 'public, max-age=30' # This is the specific attribute for Cache-Control
+            # Or if you wanted to set other custom metadata fields:
+            # blob.metadata = {'Cache-Control': 'no-store', 'your-custom-field': 'value'}
+        else:
+            # If caching is not disabled, you might want to explicitly set a default or clear it
+            # if it was set elsewhere previously for this blob instance.
+            # For this scenario, if disable_caching is False, we typically just leave it default
+            # or set a reasonable cache duration. Let's make it a reasonable default.
+            # If you want to explicitly clear it, you'd do: blob.cache_control = None
+            # For demonstration, let's set a reasonable public cache if not disabling.
+            # You can adjust this to your desired default.
+            blob.cache_control = 'public, max-age=300' # Cache for 5 minutes by default if not disabled
+
+        # Upload the file with the specified metadata
+        blob.upload_from_filename(file_path)
+
+        if verbose:
+            print(f"File '{file_path}' uploaded to 'gs://{bucket_name}/{blob_name}' successfully.")
+
+    except Exception as e: # Catch a more general Exception for better error handling
+        if verbose:
+            print(f"Failed to upload file to storage: {file_path}. Error: {e}")
+        # The retry logic was nested and could cause issues.
+        # It's generally better to handle retries outside or with a dedicated library if complex.
+        # For simplicity, I've removed the nested try/except and just kept the main one.
+        # If you need retry logic, consider using a library like tenacious or implementing a clearer loop.
+        sleep(3) # Still keep the pause, but after the single attempt

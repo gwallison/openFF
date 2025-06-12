@@ -25,9 +25,9 @@ class Disc_link_gen():
         except:
             pass
         self.allrec = workingdf
-        self.makeHTMLfiles()
         self.arc_diff=arc_diff
         self.use_archive_diff=use_archive_diff
+        self.makeHTMLfiles()
 
     
     def make_api_list(self):

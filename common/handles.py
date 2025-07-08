@@ -18,8 +18,8 @@ import platform
 locals = ['Dell_2023_Gary','M2','NucBoxM4']
 
 # repo_name = 'openFF_data_2024_03_21'
-repo_name = 'openFF_data_2025_05_14'
-bulkdata_date = 'May 14, 2025'
+repo_name = 'openFF_data_2025_07_07'
+bulkdata_date = 'July 7, 2025'
 
 curr_platform = ''
 if not platform.node() in locals:
@@ -72,7 +72,8 @@ working_df_cols = ['DisclosureId', 'JobEndDate', 'JobStartDate', 'OperatorName',
                     'is_on_IRIS', 'is_on_PFAS_list', 'epa_pref_name', 'is_on_NPDWR', 'is_on_prop65', 'is_on_TEDX', 'is_on_diesel', 
                     'is_on_UVCB', 'rq_lbs', 'in_std_filtered']
 
-
+skinny_df_cols = ['bgLatitude','bgLongitude','date','api10','bgCAS',
+                  'mass','bgOperatorName','DisclosureId','in_std_filtered']
 # full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo/full_df.parquet"
 # full_url = "https://storage.googleapis.com/open-ff-common/repos/current_repo_FFV4/full_df.parquet"
 

@@ -17,6 +17,7 @@ def make_full_set_file(sources,outdir):
     wsfn =  os.path.join(sources,'pickles','water_source.parquet')
     outfn = os.path.join(outdir,'full_df.parquet')
     workingfn = os.path.join(outdir,'working_df.parquet')
+    skinnyfn = os.path.join(outdir,'skinny_df.parquet')
 
     df = pd.merge(fh.get_df(descfn),fh.get_df(recsfn),on='DisclosureId',how='inner')
     # df = pd.merge(df,fh.get_df(wsfn),on='DisclosureId',how='left',validate='m:1')
@@ -25,9 +26,15 @@ def make_full_set_file(sources,outdir):
     df['in_std_filtered'] = ~(df.is_duplicate)&~(df.dup_rec)
     df = df.set_index('reckey',drop=False,verify_integrity=True) # added to make pulling out subsets more robust (Nov 2024)
     fh.save_df(df,outfn)
+    print('Full df saved')
 
     wdf = df[hndl.working_df_cols].copy()
     fh.save_df(wdf,workingfn)
+    print('Working df saved')
+    
+    sdf = df[hndl.skinny_df_cols].copy()
+    fh.save_df(sdf,skinnyfn)
+    print('Skinny df saved')
     
     return df
 

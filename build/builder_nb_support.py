@@ -637,6 +637,10 @@ def make_repository(create_zip=False,final_dir=final_dir):
     directories.append('')
     filenames.append('working_df.parquet')
 
+    shutil.copy(os.path.join(final_dir,'skinny_df.parquet'),repodir)
+    directories.append('')
+    filenames.append('skinny_df.parquet')
+
     shutil.copy(os.path.join(final_dir,'disclosure_issues.parquet'),repodir)
     directories.append('')
     filenames.append('disclosure_issues.parquet')

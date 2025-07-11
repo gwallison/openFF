@@ -96,7 +96,7 @@ def walk_all_files(filepath,version='google'):
         # modify_sitemap(filepath,"https://storage.googleapis.com/open-ff-browser/")
 
 if __name__ == '__main__':
-    dirpath = r"C:\MyDocs\integrated\browser_to_google"
-    #dirpath = r"C:\MyDocs\OpenFF\src\openFF-catalog\out\openFF_browser_2023_11_25"
+    # dirpath = r"C:\MyDocs\integrated\browser_to_google"
+    dirpath = r"G:\My Drive\production\browser_out"
     create_index(dirpath)
     walk_all_files(dirpath,version='google')

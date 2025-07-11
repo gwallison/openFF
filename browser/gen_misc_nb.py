@@ -37,7 +37,7 @@ class MiscNbGen():
                         ('Make_blog_images','Make data-dependent images'),
                         ('sand_dominance_summary','Sand dominance summary'),
                         ('Open-FF_Op_Parents','Parents of operators'),
-                        ('Colorado_disclosures','CO-ECMC disclosures')
+                        # ('Colorado_disclosures','CO-ECMC disclosures')
                         ]
         self.make_all_nb()
 

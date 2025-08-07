@@ -100,9 +100,11 @@ def getAPILink(row, txt='',latname='bgLatitude',lonname='bgLongitude'):
     lnk = f'https://maps.google.com/maps?q={row[latname]},{row[lonname]}&t=k'
     return wrap_URL_in_html(lnk,row.APINumber)
 
-def getFFLink(row, txt='',fmt=''):
+def getFFLink(row, txt='',fmt='',rtn_raw_link=False):
     # link to the FF disclosure with the (default) text as the APINumber
     lnk = f'https://www.fracfocus.org/wells/{row.APINumber}'
+    if rtn_raw_link:
+        return lnk
     if txt=='':
         if fmt == 'short':
             txt = row.APINumber[:10]
@@ -110,7 +112,6 @@ def getFFLink(row, txt='',fmt=''):
             txt = row.APINumber[:2]+'-'+row.APINumber[2:5]+'-'+row.APINumber[5:10]
         else:
             txt = row.APINumber
-            
     return wrap_URL_in_html(lnk,txt)
 
 def getAPIListLink(api10,txt='Link to disclosure list'):

@@ -18,8 +18,8 @@ import platform
 locals = ['Dell_2023_Gary','M2','NucBoxM4']
 
 # repo_name = 'openFF_data_2024_03_21'
-repo_name = 'openFF_data_2025_08_07'
-bulkdata_date = 'August 7, 2025'
+repo_name = 'openFF_data_2025_09_07'
+bulkdata_date = 'September 7, 2025'
 
 curr_platform = ''
 if not platform.node() in locals:
@@ -120,6 +120,9 @@ logos_dir = os.path.join(image_dir,'logos')
 
 # images used in the documents section (not in the image dir)
 docs_images = os.path.join(root_code,'docs','images') 
+
+###################  chem_profiler handles
+chem_prof_dir = r"C:\MyDocs\integrated\chem_profiles"
 
 ################### ChemInformatics handles
 ci_source = os.path.join(curr_repo_dir,"ChemInfo_ref_files")

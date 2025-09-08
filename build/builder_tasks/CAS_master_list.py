@@ -162,8 +162,9 @@ def make_CAS_to_curate_file(df,ref_dir,work_dir):
     cond2 = test['_merge']=='both'
     if (cond1&cond2).sum()>0:
         print('DEPRECATED DETECTED ON AN VERIFIED CAS')
+        print('make sure it is changed in the curation list!')
         print(test[cond1&cond2])
-        sys.exit(1)
+        # sys.exit(1)
         
     # mark the deprecated and take the valid CAS as bgCAS
     test['on_ref_list'] = np.where(test['_merge']=='both',

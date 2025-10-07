@@ -1,4 +1,8 @@
-"""Used to create various reports, mostly for the colab notebooks"""
+"""Used to create various reports, mostly for the colab notebooks
+
+This is a first version.  See ../../MyDocs/integrated/openFF/common/generate_PDF_report_v1.py
+for a newer version"""
+
 import os
 import pandas as pd
 from reportlab.pdfgen import canvas
@@ -97,6 +101,32 @@ class Report_gen():
                                ('GRID',(0,0),(-1,-1),0.5,colors.black)
                                 ])
 
+    # def make_table(self, df, convert=True, style=None, colWidths=None):
+    #     data = df
+    #     if convert:
+    #         data = self.convert_df(df)
+        
+    #     # Create the table with optional column widths
+    #     t = Table(data, colWidths=colWidths)
+    
+    #     # Use a default style if none is provided, otherwise use the custom one
+    #     if style is None:
+    #         default_style = TableStyle([
+    #             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+    #             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesoke),
+    #             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    #             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+    #             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    #             ('BACKGROUND', (0, 1), (-1, -1), colors.beige), # Row banding
+    #             ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    #         ])
+    #         t.setStyle(default_style)
+    #     else:
+    #         t.setStyle(style)
+            
+    #     return t
+    
+    
     # def add_paragraph(self,txt):
     #     para = Paragraph(txt,style=self.styles["Normal"])
     #     self.story.append(para)

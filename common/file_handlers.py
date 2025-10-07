@@ -180,6 +180,7 @@ def get_comptox_df():
     return pkl[pkl.DTXSID.notna()][['bgCAS','DTXSID']]
 
 ##### external file dictionary handler
+
 def get_ext_master_dic(url="https://storage.googleapis.com/open-ff-common/ext_data/ext_data_master_list.csv"):
     # pulling from main cloud source
     df = get_df(url)

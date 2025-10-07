@@ -18,7 +18,7 @@ import platform
 locals = ['Dell_2023_Gary','M2','NucBoxM4']
 
 # repo_name = 'openFF_data_2024_03_21'
-repo_name = 'openFF_data_2025_09_07'
+repo_name = 'openFF_data_2025_09_07 - with watershed'
 bulkdata_date = 'September 7, 2025'
 
 curr_platform = ''
@@ -123,6 +123,7 @@ docs_images = os.path.join(root_code,'docs','images')
 
 ###################  chem_profiler handles
 chem_prof_dir = r"C:\MyDocs\integrated\chem_profiles"
+browser_chemhaz_root = "https://storage.googleapis.com/open-ff-chem-profiles"
 
 ################### ChemInformatics handles
 ci_source = os.path.join(curr_repo_dir,"ChemInfo_ref_files")
@@ -131,7 +132,6 @@ ci_summ_fn = 'CI_sdf_summary.parquet'
 ###################  Scrape handles
 sci_finder_scrape_dir = r"G:\My Drive\webshare\scrape_data\SciFinder_chem_pages"
 chatGPT_eh_scrape_dir = r"G:\My Drive\webshare\scrape_data\chatGPT_ehClasses"
-
 
 ##################  FF_issues handles
 ff_issues_dir = os.path.join(root_data,'FF_issues')

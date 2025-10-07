@@ -98,7 +98,7 @@ class State_gen():
         statelst = self.workdf.bgStateName.unique().tolist()
         
         ##########
-        # statelst = ['colorado']
+        #statelst = ['colorado']
         ##########
         
         # first create state dirs in "states" browser_out dir, if needed
@@ -113,32 +113,37 @@ class State_gen():
         stlst = []
         ctlst = []
         fnlst = []
+        allworkdf = self.workdf[['date','bgStateName','bgCountyName',
+                                          'DisclosureId','OperatorName','WellName',
+                                          'TotalBaseWaterVolume',
+                                          'bgCAS', 'is_valid_cas','perc_proprietary',
+                                          'APINumber', 'bgOperatorName','mass',
+                                          'bgLatitude','bgLongitude','no_chem_recs',
+                                          'is_on_DWSHA','is_on_CWA',
+                                          'is_on_PFAS_list',
+                                          "loc_name_mismatch",
+                                          "loc_within_county", 
+                                          "loc_within_state",
+                                          'latlon_too_coarse',
+                                          'ws_perc_total',
+                                          'perc_pw','perc_gw_high_TDS','perc_gw_low_TDS',
+                                          'perc_sw_high_TDS','perc_sw_low_TDS',
+                                          'perc_other_high_TDS','perc_other_low_TDS',
+                                          'huc8','huc8_name','in_std_filtered']].copy()
+        allworkdf['location_error'] = allworkdf.loc_name_mismatch|\
+                                   (allworkdf.loc_within_county=='NO')|\
+                                   (allworkdf.loc_within_state=='NO')|\
+                                   allworkdf.latlon_too_coarse
         
         for state in statelst:
             print(f'----------{state}------------')
             if not state in self.update_state_list:
                 print('     not updated')
                 continue
-            workdf = self.workdf[self.workdf.bgStateName==state][['date','bgStateName','bgCountyName',
-                                              'DisclosureId','OperatorName','WellName',
-                                              'TotalBaseWaterVolume',
-                                              'bgCAS', 'is_valid_cas','perc_proprietary',
-                                              'APINumber', 'bgOperatorName',
-                                              'bgLatitude','bgLongitude','no_chem_recs',
-                                              'is_on_DWSHA','is_on_CWA',
-                                              'is_on_PFAS_list',
-                                              "loc_name_mismatch",
-                                              "loc_within_county", 
-                                              "loc_within_state",
-                                              'latlon_too_coarse',
-                                              'ws_perc_total',
-                                              'perc_pw','perc_gw_high_TDS','perc_gw_low_TDS',
-                                              'perc_sw_high_TDS','perc_sw_low_TDS',
-                                              'perc_other_high_TDS','perc_other_low_TDS']].copy()
-            workdf['location_error'] = workdf.loc_name_mismatch|\
-                                       (workdf.loc_within_county=='NO')|\
-                                       (workdf.loc_within_state=='NO')|\
-                                       workdf.latlon_too_coarse
+            # need to let watershed notebook know which focal state
+            with open(os.path.join(hndl.sandbox_dir,'watershed_state.txt'),'w') as f:
+                      f.write(state)
+            workdf = allworkdf[allworkdf.bgStateName==state]
             #workdf['is_proprietary'] = workdf.bgCAS=='proprietary'
             gb = workdf.groupby('DisclosureId',as_index=False)[['date','APINumber','TotalBaseWaterVolume',
                                                                 'bgCountyName','bgStateName','WellName',
@@ -149,7 +154,8 @@ class State_gen():
                                                                 'ws_perc_total',
                                                                 'perc_pw','perc_gw_high_TDS','perc_gw_low_TDS',
                                                                 'perc_sw_high_TDS','perc_sw_low_TDS',
-                                                                'perc_other_high_TDS','perc_other_low_TDS']].first()
+                                                                'perc_other_high_TDS','perc_other_low_TDS',
+                                                                'huc8','huc8_name']].first()
             gb1 = self.count_all_trues(workdf[['DisclosureId','is_on_DWSHA','is_on_CWA',
                                                               'is_on_PFAS_list']])
             # gb1 = workdf.groupby('DisclosureId',as_index=False)[['is_on_DWSHA','is_on_CWA',
@@ -206,7 +212,52 @@ class State_gen():
                 nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'county_report.ipynb'),
                                     output_fn=fn)
                 self.fix_county_title(fn,cnty_state_name)
+            
+            # make watershed working set and make it available to notebooks
+            import geopandas as gpd
+            final_crs = 4326 # WGS84
+            gdb_path =  r"C:\MyDocs\integrated\ext_data\WBD_National_GDB.zip"
+            huc8_layer_name = 'WBDHU8'  # Example layer name, use the one you found
 
+
+            # Read the specific layer into a GeoDataFrame
+            huc8_gdf = gpd.read_file(gdb_path, layer=huc8_layer_name)
+            huc8_gdf = huc8_gdf.drop('loaddate',axis=1)
+            huc8_gdf.to_crs(final_crs)            
+            
+            huc8_gdf.to_parquet(os.path.join(hndl.sandbox_dir,'huc8_gdf.parquet'))
+            
+
+            for watershed in workdf.huc8.unique().tolist():
+                # if not (state,county) in self.update_county_list:
+                #     print(f'  -{county} not updated')
+                #     continue
+                print(f'  -watershed {watershed}')
+                sname = state.lower().replace(' ','_') 
+                fn = os.path.join(hndl.browser_states_dir,f'huc8_{str(watershed)}_{sname}.html')
+
+                # for watershed work, we need all data, not just state data, so we use allworkdf
+                allworkdf[allworkdf.huc8==watershed].to_parquet(os.path.join(hndl.sandbox_dir,'watershed_recs.parquet'),index=False)
+                gb = allworkdf[allworkdf.huc8==watershed].groupby('DisclosureId',as_index=False)[['date','APINumber','TotalBaseWaterVolume',
+                                                                                              'bgCountyName','bgStateName','WellName',
+                                                                                              'bgLatitude','bgLongitude',
+                                                                                              'OperatorName','no_chem_recs',
+                                                                                              'huc8','huc8_name','in_std_filtered']].first()
+                
+                gb['TBWV'] = gb.TotalBaseWaterVolume.map(lambda x: th.round_sig(x,3,guarantee_str='??')) + ' gallons'
+                gb['year'] = gb.date.astype('str')
+                gb['has_chem'] = np.where(gb.no_chem_recs,'No','Yes')
+                                                                                               
+                # stlst.append(state)
+                # ctlst.append(county)
+                # fnlst.append(cnty_state_name+'.html')  # used to make FT link table
+                gb.to_parquet(os.path.join(hndl.sandbox_dir,'watershed.parquet'),index=False)
+                # gb.to_csv('./work/county.csv')
+                # self.make_county_output()
+
+                nbh.make_notebook_output(nb_fn=os.path.join(hndl.browser_nb_dir,'watershed_report.ipynb'),
+                                    output_fn=fn)
+                # self.fix_watershed_title(fn,cnty_state_name)
                 
             print(f'** {state.title():<16} **  n recs: {len(workdf):>10,}')
             fulloutfn = os.path.join(hndl.browser_out_dir,'states',f'{state}.html')

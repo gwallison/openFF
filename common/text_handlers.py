@@ -39,6 +39,13 @@ def getCatLink(cas,text_to_show='Analysis',use_remote=False):
     s = f'{preamble}{cas}/analysis_{cas}.html'
     return wrap_URL_in_html(s,text_to_show)
 
+def getHazDBLink(cas,text_to_show='link',use_remote=True):
+    preamble = ''
+    if use_remote:
+        preamble = hndl.browser_chemhaz_root
+    s = f'{preamble}/chemicals/{cas}.html'
+    return wrap_URL_in_html(s,text_to_show)
+
 def getOpLink(opname,text_to_show='Operator details',
               use_remote=False, up_level=False):
     preamble = ''
@@ -77,6 +84,12 @@ def getBlogCountyLink(row,text_to_show='Link to county summary'):
     name += row.StateName.lower().replace(' ','_')
     s = f'https://storage.googleapis.com/open-ff-browser/states/{name}.html'
     return wrap_URL_in_html(s,text_to_show)
+
+def getBlogWatershedLink(row,text_to_show='Link to watershed summary'):
+    name = row.statename.lower().replace(' ','_')
+    s = f'https://storage.googleapis.com/open-ff-browser/states/huc8_{row.huc8}_{name}.html'
+    return wrap_URL_in_html(s,text_to_show)
+
 
 
 def getFlawLink(flaw_id,text_to_show='',use_remote=False):
@@ -201,7 +214,26 @@ def getFingerprintImg(cas,size=140,alt=None):
         return f"""<center><img src="https://storage.googleapis.com/open-ff-browser/images/{cas}/haz_fingerprint.png" alt="{alttext}"  onerror="this.onerror=null; this.remove();" width={size}></center>"""
     return "<center>ChemInformatics not available</center>"
     
+def getHazChemImg(cas,size=140,alt=None):
+    # returns an html image link when possible
+    # check if we have it locally, but link to the cloud version
+    fp_path = os.path.join(r"C:\MyDocs\integrated\chem_profiles\code\tmp\tier_fig",
+                           f'{cas}.png')
+    # take comptox version if it exists
+    cas_ignore = ['7732-18-5','proprietary','conflictingID',
+                  'ambiguousID','sysAppMeta','cas_not_assigned']
+    if alt:
+        alttext = alt
+    else:
+        alttext = f'EPA Cheminformatics classifications of {cas}'
+
+    if cas in cas_ignore:
+        return ' <center>---</center> '
+    if os.path.exists(fp_path):
+        return f"""<center><img src="https://storage.googleapis.com/open-ff-browser/images/ChemHazTier/{cas}.png" alt="{alttext}"  onerror="this.onerror=null; this.remove();" width={size}></center>"""
+    return "<center>Tier analysis not available</center>"
     
+        
 def getCompToxRef(DTXSID):
     #return DTXSID   
     try:

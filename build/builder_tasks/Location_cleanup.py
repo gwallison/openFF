@@ -12,6 +12,11 @@ Location_cleanup updates for version 15:
     - removing some previous location flags; keeping latlon_too_coarse (but changing
       it to less than 7 decimal digits - still in the "privacy" range.)
 """
+
+import sys
+sys.path.insert(0,'c:/MyDocs/integrated/') # adjust to your setup
+
+
 # from geopy.distance import geodesic
 import pandas as pd
 import numpy as np
@@ -229,37 +234,47 @@ class Location_ID():
         final.loc_within_county = final.loc_within_county.fillna('unknown')        
         return final
         
+    def add_watershed_columns(self, in_df):
+        fn = r"C:\MyDocs\integrated\ext_data\WBD_National_GDB.zip"
+        t = in_df.groupby('DisclosureId',as_index=False)[['bgLatitude','bgLongitude']].first()
 
-    # def get_upload_ref_orig(self):
-    #     return pd.read_csv(self.upload_ref_fn,quotechar='$',encoding='utf-8',
-    #                        low_memory=False)
-    
-    # def get_upload_ref(self):
-    #     return get_df(self.upload_ref_fn)
-    
+        # 3. Convert the input DataFrame to a GeoDataFrame
+        #    This creates a 'geometry' column with Point objects.
+        ff_gdf = geopandas.GeoDataFrame(
+            t,
+            geometry=geopandas.points_from_xy(t.bgLongitude, t.bgLatitude),
+            crs=final_crs  # Ensure the coordinate reference systems match
+        )
+        layers_to_add = ['WBDHU2','WBDHU4','WBDHU6','WBDHU8','WBDHU10'] #,'WBDHU12']
+        out_df = pd.DataFrame()
+        for layer in layers_to_add:
+            print(f'   -- adding watershed layer: {layer}')
+            wbd_gdf = geopandas.read_file(fn, layer=layer)
+            wbd_gdf = wbd_gdf.to_crs(final_crs)
+            points_with_huc = geopandas.sjoin(
+                                        ff_gdf,
+                                        wbd_gdf,
+                                        how='inner',
+                                        predicate='within'
+                                        )
+            # get the col name to keep
+            cols = list(points_with_huc.columns)
+            for col in cols:
+                if col[:3]=='huc':
+                    my_colname = col
+                    break
+            points_with_huc = points_with_huc[['DisclosureId',my_colname,'name']]
+            points_with_huc = points_with_huc.rename({'name':my_colname+'_name'},axis=1)
+            if len(out_df) == 0:
+                out_df = points_with_huc.copy()
+            else:
+                out_df = out_df.merge(points_with_huc)
+        return out_df
+            
+     
     def get_disclosureId_ref(self):
         return get_df(self.disclosureId_ref_fn)
     
-    # def save_upload_ref(self,df):
-    #     """save the data frame that serves as an uploadKey reference; in particular
-    #     best guesses on location data """
-    
-    #     # df[['UploadKey','StateName','bgStateName','CountyName','bgCountyName',
-    #     #     'Latitude','bgLatitude','stLatitude',
-    #     #     'Longitude','bgLongitude','stLongitude',
-    #     #     'bgLocationSource',
-    #     #     'latlon_too_coarse','loc_name_mismatch',
-    #     #     'loc_within_state','loc_within_county']]\
-    #     #         .to_csv(self.upload_ref_fn,quotechar='$',
-    #     #                                  encoding='utf-8',
-    #     #                                  index=False)
-    #     save_df(df[['UploadKey','StateName','bgStateName','CountyName','bgCountyName',
-    #                 'Latitude','bgLatitude','stLatitude',
-    #                 'Longitude','bgLongitude','stLongitude',
-    #                 'bgLocationSource',
-    #                 'latlon_too_coarse','loc_name_mismatch',
-    #                 'loc_within_state','loc_within_county']],               
-    #             self.upload_ref_fn)
         
     def save_disclosureId_ref(self,df):
         """save the data frame that serves as a disclosureId reference; in particular
@@ -270,7 +285,10 @@ class Location_ID():
                     'Longitude','bgLongitude','stLongitude',
                     'bgLocationSource',
                     'latlon_too_coarse','loc_name_mismatch',
-                    'loc_within_state','loc_within_county']],               
+                    'loc_within_state','loc_within_county',
+                    'huc2','huc2_name',
+                    'huc8','huc8_name',
+                    'huc10','huc10_name',]],               
                 self.disclosureId_ref_fn)
         
 
@@ -375,6 +393,17 @@ class Location_ID():
         assert final.DisclosureId.duplicated().sum()==0
         assert len(final)== rawlen
     
+        print('Add watershed ids')
+        ws_df = self.add_watershed_columns(final)
+        # print(ws_df.columns)
+        final = final.merge(ws_df,on='DisclosureId',how='left',validate='m:1')
+        print(final.head())
         self.save_disclosureId_ref(final)
         return newlen
     
+if __name__ == '__main__':
+    df = pd.read_parquet(r"G:\My Drive\production\repos\openFF_data_2025_09_07\raw_flat.parquet")
+    loc = Location_ID(input_df=df,ref_dir=r"C:\MyDocs\integrated\openFF\build\sandbox\orig_dir",
+                      out_dir= r"C:\MyDocs\integrated\openFF\build\sandbox\tmp",
+                      ext_dir=r"C:\MyDocs\integrated\ext_data")
+    out = loc.clean_location()

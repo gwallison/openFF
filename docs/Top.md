@@ -32,9 +32,6 @@ These notebooks are code Jupyter notebooks, but are designed to be used by peopl
 - [Notebook overview](Notebook_overview.md)
 - [How to use notebooks](How_to_use_notebooks.md)
 
-### Change Log
-This file is used to summarize changes of Open-FF and the changes that we find at FracFocus.  This log sstarted in early 2024.
-- [Change log](Change_log_2024.md)
 
   
 |[Index](Top.md)|[Next](What_is_FracFocus.md)|

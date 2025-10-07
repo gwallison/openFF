@@ -105,7 +105,7 @@ def get_common_header(title = '',line2 ='', subtitle = '',imagelink='',
         local_prefix = hndl.browser_root
         
     logo = """<center><a href="https://frackingchemicaldisclosure.wordpress.com/" title="Open-FF home page, tour and blog"><img src="https://storage.googleapis.com/open-ff-common/openFF_logo.png" alt="openFF logo" width="100" height="100"><h2>Open-FF</h2></a></center>"""
-    logoFT = """<center><a href="https://www.fractracker.org/" title="FracTracker Alliance"><img src="https://storage.googleapis.com/open-ff-common/2021_FT_logo_icon.png" alt="FracTracker logo" width="100" height="100"><br><h4>Sponsored by FracTracker Alliance</h4></a></center>"""
+    logoFT = """<center><a href="https://www.fractracker.org/" title="FracTracker Alliance"><img src="https://storage.googleapis.com/open-ff-common/2025_FT_logo_icon.png" alt="FracTracker logo" width="80" height="80"><br><h4>Sponsored by FracTracker Alliance</h4></a></center>"""
 
     if show_source:
         source = f"""This file was generated on {cat_creation_date:%B %d, %Y} <br>from data repository: {repo_name}."""

@@ -75,6 +75,58 @@ def find_wells_within_area(gdf,wellgdf,crs=final_crs,name='test',
     tmp = gpd.sjoin(t,s,how='inner')#,predicate='within')
     return tmp.api10.tolist()
 
+def show_simple_map_and_shape(lat,lon,clickable=False,include_shape=False,
+                    area_df=None,zoom = 10,
+                    width=600,height=400):
+    import folium
+    f = folium.Figure(width=width, height=height)
+
+    mlst = [{'location': [lat,lon], 'color':'red', 'popup':'Focal point'}]
+    map_center = [lat, lon] 
+    m = folium.Map(tiles="openstreetmap", location=map_center, zoom_start=8).add_to(f)
+
+    if include_shape:
+        bounds = area_df.total_bounds
+
+        sw = [bounds[1], bounds[0]]
+        ne = [bounds[3], bounds[2]]
+        
+        m.fit_bounds([sw, ne])
+
+        # The rest of your GeoJson plotting code is correct and can stay the same
+        style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
+        folium.GeoJson(area_df,
+                       style_function=lambda x: style,
+                       smooth_factor=.2,
+                       name='watershed'
+                       ).add_to(m)
+
+    markers = mlst
+    # Add the markers to the map
+    for marker in markers:
+        folium.Marker(
+            location=marker['location'],
+            icon=folium.Icon(color=marker['color']),
+            popup=marker['popup']
+        ).add_to(m)
+        # Display the map
+           
+    # Add a tile layer with satellite imagery
+    folium.TileLayer(
+        tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+        attr='Google',
+        name='Google Satellite',
+        overlay=False,
+        control=True,
+        subdomains=['mt0', 'mt1', 'mt2', 'mt3']
+    ).add_to(m)
+        
+    # Add layer control to switch between base maps
+    folium.LayerControl().add_to(m)
+
+    return m
+    
+
 def show_simple_map(lat,lon,clickable=False,
                     width=600,height=400):
     import folium
@@ -108,7 +160,6 @@ def show_simple_map(lat,lon,clickable=False,
     folium.LayerControl().add_to(m)
 
     return m
-    
 
 def showWells(fulldf,flat,flon,apilst,def_buffer=def_buffer,
               width=600,height=400):
@@ -192,7 +243,7 @@ def showDisclosures(fulldf,flat,flon,disclst,def_buffer=def_buffer):
 
     return m
 
-def showWells_in_area(fulldf,area_df,apilst):
+def showWells_in_area(fulldf,area_df,apilst,width=600,height=400):
     """Shows the wells in apilist as well as the area(s) in area_df. This was first used to show census tracts."""
     import folium
     mlst = []
@@ -202,8 +253,16 @@ def showWells_in_area(fulldf,area_df,apilst):
         locs = t.iloc[0].tolist()
         mlst.append({'location': locs, 'color':'blue', 'popup':f'APINumber: {api}'})
 
-    location=[area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]]
-    m = folium.Map(location=location, zoom_start=10,width='50%',height='50%')
+    # location=[area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]]
+    m = folium.Map(width=width,height=height)
+    
+    bounds = area_df.total_bounds
+
+    sw = [bounds[1], bounds[0]]
+    ne = [bounds[3], bounds[2]]
+    
+    m.fit_bounds([sw, ne])
+
 
     markers = mlst
     # Add the markers to the map
@@ -211,6 +270,7 @@ def showWells_in_area(fulldf,area_df,apilst):
         folium.Marker(
             location=marker['location'],
             icon=folium.Icon(color=marker['color']),
+            name='well markers',
             popup=marker['popup']
         ).add_to(m)
         # Display the map
@@ -318,6 +378,7 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
 
 def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,
                                 include_shape=False,area_df=None,
+                                include_filled_shape=False,filled_area_df=None,
                                 
                      fields=['APINumber','TotalBaseWaterVolume','year','OperatorName','ingKeyPresent'],
                      aliases=['API Number','Water Volume','year','Operator','has chem recs'],
@@ -331,18 +392,28 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,
     from IPython.display import display, HTML
 
     f = folium.Figure(width=width, height=height)
-    if include_shape:
+    if include_shape | include_filled_shape:
         #print('including shape!')
         area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
         m = folium.Map(tiles="openstreetmap",location=area, zoom_start=7).add_to(f)
         
-        # show area
-        style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
-        folium.GeoJson(area_df,
-                       style_function=lambda x: style,
-                       smooth_factor=.2,
-                       name= 'target area'
-                       ).add_to(m)
+        if include_shape:
+            # show area
+            style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
+            folium.GeoJson(area_df,
+                           style_function=lambda x: style,
+                           smooth_factor=.2,
+                           name= 'target area'
+                           ).add_to(m)
+
+        if include_filled_shape:
+            # show area
+            filled_style = {'fillColor': 'blue', 'color': 'red'}
+            folium.GeoJson(filled_area_df,
+                           style_function=lambda x: filled_style,
+                           smooth_factor=.2,
+                           name= 'filled area'
+                           ).add_to(m)
 
 
     else:
@@ -656,6 +727,145 @@ def create_county_choropleth(data,
                     ).add_to(m)   
     display(f)
     return f
+
+def create_watershed_choropleth(data,
+                             start_loc=[40, -96],start_zoom = 6,
+                             include_shape=False,area_df=None,
+                             include_state=False,state_df=None,
+                             custom_scale = [], plotlog = True,
+                             legend_name = 'Test legend',
+                             show_only_data_states=True,
+                             #popup_enabled=True, tooltip_enabled=False,
+                             fields = ['huc8_name','huc8','orig_value','watershed_link'],
+                             aliases = ['Watershed name:',
+                                        'Watershed code',
+                                        'Num disclosures: ',
+                                        '']):
+    import folium
+    from IPython.display import display, HTML
+    # fn = r"C:\MyDocs\OpenFF\data\non-FF\georef-united-states-of-america-county.geojson"
+    # if len(data)<1:
+    #     print('No mappable data')
+    #     return
+    geojson = area_df
+    data['orig_value'] = data.value
+    data['watershed_link'] = data.apply(lambda x: th.getBlogWatershedLink(x),axis=1)
+    # # disable links to non-FF counties
+    # data.county_link = np.where(data.orig_value.isna(),'not available',
+    #                            data.county_link)
+
+    # geojson['StateName'] = geojson.ste_name.str.lower()
+    # geojson['CountyName'] = geojson.coty_name.str.lower()
+    # geojson = fix_county_names(geojson)
+    working = geojson[['huc8','huc8_name','geometry']]
+    # #geojson = geojson.to_crs(5070)
+    # print(working.columns)
+    # print(data.columns)
+    working = pd.merge(working,data,on='huc8',how='left')
+    # print(geojson.info())
+    if start_loc==[]:
+        start_loc = [geojson.geometry.centroid.x.mean(),geojson.geometry.centroid.y.mean()]
+    f = folium.Figure(width=600, height=400)
+
+    # if include_shape:
+    #     print('including shape!')
+    #     area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
+    #     m = folium.Map(tiles="openstreetmap",location=area, 
+    #                    zoom_start=start_zoom).add_to(f)
+        
+    #     # show area
+    #     style = {'fillColor': '#00000000', 'color': 'red'}
+    #     folium.GeoJson(area_df,
+    #                    style_function=lambda x: style,
+    #                    smooth_factor=.2,
+    #                    name= 'target area',
+    #                    fillOpacity=0.4,
+    #                    opacity=0.2,
+    #                    weight=0.4,
+
+    #                    ).add_to(m)
+
+
+    # else:
+    #     m = folium.Map(location= start_loc,tiles="openstreetmap",
+    #                    zoom_start=start_zoom).add_to(f)
+    
+    m = folium.Map(location= start_loc, tiles="openstreetmap",
+                   zoom_start=start_zoom).add_to(f)
+    if plotlog:
+        working.value = np.log10(working.value+1)
+        legend_name = legend_name + ' (log transformed)'
+    working.orig_value.fillna('no data',inplace=True)
+    
+    if custom_scale==[]:
+        custom_scale = (working['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
+    # if show_only_data_states:
+    #     gb = data.groupby(['StateName','CountyName'],as_index=False)['value'].first()
+    #     datalst = []
+    #     for i,row in gb.iterrows():
+    #         datalst.append((row.StateName,row.CountyName))
+    #     wlst = []
+    #     working['tup'] = list(zip(working.StateName.tolist(),working.CountyName.tolist()))
+    #     geojson['tup'] = list(zip(geojson.StateName.tolist(),geojson.CountyName.tolist()))
+        
+    #     working = working[working.tup.isin(datalst)]
+    #     geojson = geojson[geojson.tup.isin(datalst)]
+    # working.StateName = working.StateName.str.title()
+    # working.CountyName = working.CountyName.str.title()
+    #print(f'States in geojson: {working.StateName.unique().tolist()}')
+    folium.Choropleth(
+                geo_data=geojson,
+                data=working,
+                columns=['huc8', 'value'],  #Here we tell folium to get the fips and plot values for each state
+                key_on='feature.properties.huc8',
+                threshold_scale=custom_scale, #use the custom scale we created for legend
+                fill_color='YlOrRd',
+                nan_fill_color="gainsboro", #Use white color if there is no data available for the area
+                fill_opacity=0.4,
+                line_opacity=0.2,
+                line_weight=0.2,
+                legend_name= legend_name, #title of the legend
+                highlight=True,
+                line_color='black').add_to(m) 
+    
+    if include_state:
+        # show area
+        # print('including state!')
+        state_style = {'fillColor': '#00000000', 'color': 'blue'}
+        folium.GeoJson(state_df,
+                       style_function=lambda x: state_style,
+                       smooth_factor=.2,
+                       name= 'state area'
+                       ).add_to(m)
+
+    folium.features.GeoJson(
+                data=working,
+                name='',
+                smooth_factor=2,
+                style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
+                popup=folium.features.GeoJsonPopup(
+                    fields=fields,
+                    aliases=aliases, 
+                    localize=True,
+                    sticky=False,
+                    labels=True,
+                    style="""
+                        background-color: #F0EFEF;
+                        border: 2px solid black;
+                        border-radius: 3px;
+                        box-shadow: 3px;
+                    """,
+                    max_width=800,),
+                        highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
+                    ).add_to(m)  
+
+    # Add layer control to switch between base maps
+    folium.LayerControl().add_to(m)
+
+    display(f)
+    return f
+
+
 
 def orig_create_county_choropleth(data,
                              start_loc=[40, -96],start_zoom = 6,

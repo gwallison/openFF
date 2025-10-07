@@ -24,6 +24,7 @@ init_notebook_mode(all_interactive=True)
 from itables import show as iShow
 import itables.options as opt
 opt.classes="display compact cell-border"
+opt.allow_html = True  # added Sept 2025
 opt.maxBytes = 0
 
 

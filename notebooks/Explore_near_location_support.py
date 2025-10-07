@@ -14,6 +14,7 @@ if use_itables:
     opt.classes="display compact cell-border"
     opt.maxBytes = 0
     opt.maxColumns = 0
+    opt.allow_html = True
 else:
     def iShow(df,maxBytes=0,classes=None): # dummy iShow
         display(df)

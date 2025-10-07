@@ -59,13 +59,13 @@ def calc_MI_values(rec_df,disc_df):
     rec_df['job_mass_MI'] = rec_df.MassIngredient/rec_df.PercentHFJob
     rec_df.job_mass_MI = np.where(rec_df.MassIngredient>too_small,
                                   rec_df.job_mass_MI,
-                                  np.NaN)
+                                  np.nan)
     # must also remove records with a 0 for PercentHFJ, otherwise
     # creates a condition where denominator is infinite and therefore NOT inconsistent!
     # April, 2022
     rec_df.job_mass_MI = np.where(rec_df.PercentHFJob>0,
                                   rec_df.job_mass_MI,
-                                  np.NaN)
+                                  np.nan)
     
     
     # Look for inconsistencies in MassIngredient at the disclosure level,
@@ -79,7 +79,7 @@ def calc_MI_values(rec_df,disc_df):
                        how='left',validate='1:1')
     rec_df = pd.merge(rec_df,disc_df[['DisclosureId','MI_inconsistent']],
                   on='DisclosureId',how='left')
-    rec_df['cleanMI'] = np.where(rec_df.MI_inconsistent,np.NaN,rec_df.MassIngredient)
+    rec_df['cleanMI'] = np.where(rec_df.MI_inconsistent,np.nan,rec_df.MassIngredient)
     rec_df = rec_df.drop('MI_inconsistent',axis=1)
 
     gb2 = rec_df[rec_df.is_water_carrier].groupby('DisclosureId',as_index=False)[['PercentHFJob','MassIngredient']].sum()
@@ -95,7 +95,7 @@ def calc_MI_values(rec_df,disc_df):
     
     disc_df['carrier_density_MI'] = np.where(disc_df.within_total_tolerance & (~disc_df.MI_inconsistent),
                                              disc_df.carrier_mass_MI/disc_df.TotalBaseWaterVolume,
-                                             np.NaN)
+                                             np.nan)
     disc_df['bgDensity'] = np.where(disc_df.carrier_density_from_comment>7,
                                     disc_df.carrier_density_from_comment,
                                     8.34)
@@ -140,7 +140,7 @@ def calc_mass(rec_df,disc_df):
 #     cond = disc_df.within_total_tolerance&disc_df.has_TBWV
 #     disc_df.carrier_percent = np.where(cond,
 #                                        disc_df.carrier_percent,
-#                                        np.NaN)    
+#                                        np.nan)    
 # =============================================================================
     disc_df['carrier_mass'] = disc_df.TotalBaseWaterVolume * disc_df.bgDensity
     disc_df['job_mass'] = disc_df.carrier_mass/(disc_df.carrier_percent/100)
@@ -150,7 +150,7 @@ def calc_mass(rec_df,disc_df):
     rec_df['calcMass'] = (rec_df.PercentHFJob/100)*rec_df.job_mass
 
     # a calcMass of ZERO is a non-disclosure, so set to NaN (added Dec 2021)
-    rec_df.calcMass = np.where(rec_df.calcMass==0,np.NaN,rec_df.calcMass)
+    rec_df.calcMass = np.where(rec_df.calcMass==0,np.nan,rec_df.calcMass)
     rec_df = rec_df.drop('job_mass',axis=1)
     
     rec_df = calc_massComp(rec_df,disc_df)
@@ -175,7 +175,7 @@ def calc_massComp(rec_df,disc_df):
     rec_df['massCompFlag'] = rec_df.massComp>massComp_upper_limit
     print(f'{sp}Number calcMass values rejected by massComp: {rec_df.massCompFlag.sum():,}')
     rec_df['calcMass_unfiltered'] = rec_df.calcMass
-    rec_df.calcMass = np.where(rec_df.massCompFlag,np.NaN,rec_df.calcMass)
+    rec_df.calcMass = np.where(rec_df.massCompFlag,np.nan,rec_df.calcMass)
 
     # construct 'mass' and 'massSource'
     rec_df['massSource'] = 'neither'
@@ -185,7 +185,7 @@ def calc_massComp(rec_df,disc_df):
     ###             be adjusted too.
     # # just MI
     # rec_df.massSource = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),'MI_only',rec_df.massSource)
-    # rec_df['mass'] = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),rec_df.cleanMI,np.NaN)
+    # rec_df['mass'] = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.isna()),rec_df.cleanMI,np.nan)
 
     # # just calcMass
     # rec_df.massSource = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),'calcMass_only',rec_df.massSource)
@@ -193,7 +193,7 @@ def calc_massComp(rec_df,disc_df):
 
     # just calcMass
     rec_df.massSource = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),'calcMass_only',rec_df.massSource)
-    rec_df['mass'] = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),rec_df.calcMass,np.NaN)
+    rec_df['mass'] = np.where(~(rec_df.cleanMI>0)&(rec_df.calcMass.notna()),rec_df.calcMass,np.nan)
 
     # both, use the MI value over the calcMass value
     rec_df.massSource = np.where((rec_df.cleanMI>0)&(rec_df.calcMass.notna()),'MI_and_calcMass',rec_df.massSource)

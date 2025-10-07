@@ -202,12 +202,12 @@ class Table_constructor():
         # # Any date_added earlier than 10/2018 is unknown
         # refdate = datetime.datetime(2018,10,1) # date that I started keeping track
         # df.pub_delay_days = np.where(df.date_added<refdate,
-        #                              np.NaN,
+        #                              np.nan,
         #                              df.pub_delay_days)# is less recent than refdate
         # # any fracking date earlier than 4/1/2011 is before FF started taking data
         # refdate = datetime.datetime(2011,4,1) # date that fracfocus started
         # df.pub_delay_days = np.where(df.date<refdate,
-        #                              np.NaN,
+        #                              np.nan,
         #                              df.pub_delay_days)# is less recent than refdate
         return df
 
@@ -445,7 +445,7 @@ class Table_constructor():
         
         recs['is_water_carrier'] = False
         disc['carrier_status'] = 'unknown'
-        #disc['carrier_percent'] = np.NaN
+        #disc['carrier_percent'] = np.nan
         #disc['has_curated_carrier'] = False
         disc['has_water_carrier'] = False
         disc['carrier_problem_flags'] = ''
@@ -552,7 +552,7 @@ class Table_constructor():
         rec_df = pd.merge(rec_df,disc_df[['DisclosureId','within_total_tolerance']],
                           on='DisclosureId',how='left')
         rec_df.calcMass = np.where(rec_df.within_total_tolerance,
-                                   rec_df.calcMass,np.NaN)
+                                   rec_df.calcMass,np.nan)
         self.tables['chemrecs'] = rec_df.drop(['within_total_tolerance'],axis=1)
         self.tables['disclosures'] = disc_df
         

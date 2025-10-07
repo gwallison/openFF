@@ -51,11 +51,33 @@ class ScopeGen():
         cond = self.allrec.bgCAS=='1330-20-7'
         gb6 = self.allrec[cond&(self.allrec.in_std_filtered)].groupby('DisclosureId',as_index=False)\
             ['calcMass'].sum().rename({'calcMass':'xylene_mass'},axis=1)
+
+        ### Ted's request in Sept 2025
+        # xdf = []
+        # chemtup = [('111-30-8','glutaraldehyde_mass'),
+        #            ('67-56-1','methanol_mass'),
+        #            ('107-21-1','ethylene_glycol_mass'),
+        #            ('79-06-1','acrylamide_mass'),
+        #            ('64742-94-5','solvent_distillate_mass'),
+        #            ('9002-84-0','PTFE_mass'),
+        #            ('80-05-7','BPA_mass'),
+        #            ('123-91-1','1,4-Dioxane_mass')]
+        # for tup in chemtup:
+        #     cond = self.allrec.bgCAS==tup[0]
+        #     xdf.append(self.allrec[cond&(self.allrec.in_std_filtered)].groupby('DisclosureId',as_index=False)\
+        #         ['calcMass'].sum().rename({'calcMass':tup[1]},axis=1))
+
+
         out = pd.merge(gb1,gb2,on='DisclosureId',how='left')
         out = pd.merge(out,gb3,on='DisclosureId',how='left')
         out = pd.merge(out,gb4,on='DisclosureId',how='left')
         out = pd.merge(out,gb5,on='DisclosureId',how='left')
         out = pd.merge(out,gb6,on='DisclosureId',how='left')
+        
+        ### more for Ted's request:
+        # for tdf in xdf:
+        #     out = pd.merge(out,tdf,on='DisclosureId',how='left')
+
         out.drop('DisclosureId',axis=1,inplace=True)
         out.to_csv(os.path.join(hndl.browser_scope_dir,'water_sand_btex.zip'),
                    encoding='utf-8',index=False,

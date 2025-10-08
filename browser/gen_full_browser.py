@@ -58,10 +58,10 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
                 print('-- creating new test workingdf')
                 df = fh.get_df(os.path.join(hndl.curr_repo_dir,'full_df.parquet'))
                 c3 = df.bgCAS.isin(['1319-33-1','50-00-0'])#,'proprietary','7732-18-5','71-43-2','non_chem_record','ambiguousID'])
-                c2 = df.bgCountyName == 'monroe'
-                c1 = df.bgStateName == 'ohio'
-                c4 = df.bgOperatorName.isin(['antero','eclipse resources'])
-                df = df[c1 & c2 & c4]
+                # c2 = df.bgCountyName == 'monroe'
+                c1 = df.bgStateName == 'texas'
+                c4 = df.bgOperatorName.isin(['baker'])
+                df = df[c1 & c3 & c4]
                 # df = df[c4 & c1]
                 df.to_parquet(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
             workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'test_df.parquet'))
@@ -97,12 +97,12 @@ if __name__ == '__main__':
     workingdf = prep_working_df()
     # print(workingdf.columns)
     #workingdf = workingdf[workingdf.bgCAS=='100-79-8']
-    # _ = gen_chem.Chem_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_chem.Chem_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
     _ = gen_states.State_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_disc.Disc_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_disc_links.Disc_link_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
-    # _ = gen_scope.ScopeGen(workingdf) 
-    # _ = gen_misc_nb.MiscNbGen(workingdf) 
+    _ = gen_operators.Operator_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_flaws.FF_flaws_gen(workingdf) #,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_disc.Disc_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_disc_links.Disc_link_gen(workingdf,arc_diff,use_archive_diff=use_archive_diff)
+    _ = gen_scope.ScopeGen(workingdf) 
+    _ = gen_misc_nb.MiscNbGen(workingdf) 
     print('DONE')

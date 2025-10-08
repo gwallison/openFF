@@ -76,14 +76,14 @@ class Read_FF():
         """take a comment field and return density if it is present; there is a 
         common format"""
         if pd.isna(cmmt):
-            return np.NaN
+            return np.nan
         if 'density' not in cmmt.lower():
-            return np.NaN
+            return np.nan
         try:
             dens = re.findall(r"(\d*\.\d+|\d+)",cmmt)[0]
             return float(dens)
         except:
-            return np.NaN
+            return np.nan
     
     def make_date_fields(self,df):
         """Create the 'date' and 'year' fields from JobEndDate and correct errors"""

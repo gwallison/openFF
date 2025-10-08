@@ -55,24 +55,28 @@ class CAS_list_maker():
 
 ## incorporating 2024 SciFinder scrape into these procedures
 
-    def remove_scifinder_code(self, chemical_name):
+    def remove_scifinder_code(self, chemical_name,casrn):
         """
         Removes SciFinder version codes (e.g., '(9CI)', '(8CI, ACI)') from the end of a chemical name,
         but keeps parentheses containing ratios or other non-version information.
     
         Args:
             chemical_name (str): The chemical name string.
+            casrn (str): is used solely to identify errors
     
         Returns:
             str: The chemical name with the version code removed (if applicable).
         """
         pattern = r"\([^)]*\)$"
-        match = re.search(pattern, chemical_name)
-    
-        if match:
-            content = match.group(0)[1:-1]  # Extract content inside parentheses
-            if re.match(r"^\d+CI(,\s*\d+CI)*$|^ACI(,\s*ACI)*$", content): #check if it matches a version code format
-                return re.sub(pattern, "", chemical_name).rstrip()
+        try:
+            match = re.search(pattern, chemical_name)
+        
+            if match:
+                content = match.group(0)[1:-1]  # Extract content inside parentheses
+                if re.match(r"^\d+CI(,\s*\d+CI)*$|^ACI(,\s*ACI)*$", content): #check if it matches a version code format
+                    return re.sub(pattern, "", chemical_name).rstrip()
+        except:
+            print(f'Error; ignoring "remove_scifinder_code" for <{chemical_name}>, cas: {casrn}')
         return chemical_name #return original if it's not a version code, or if there's no match.
     
         
@@ -112,14 +116,14 @@ class CAS_list_maker():
             # first the synonyms
             for syn in res[1]:
                 syncas.append(row.CASRN)
-                synname.append(self.remove_scifinder_code(syn).lower())
+                synname.append(self.remove_scifinder_code(syn,row.CASRN).lower())
             # now deprecated:
             for dep in res[2]:
                 delcas.append(dep)
                 delrepl.append(row.CASRN)
             # finally the ingredient name
             ingcas.append(row.CASRN)
-            ingname.append(self.remove_scifinder_code(res[3]))
+            ingname.append(self.remove_scifinder_code(res[3],row.CASRN))
         
         self.SFname = pd.DataFrame({'cas_number':ingcas,'ing_name':ingname})
         self.SFsyn = pd.DataFrame({'cas_number':syncas,'synonym':synname})
@@ -294,7 +298,7 @@ class CAS_list_maker():
         # print(f'Number in CompTox names: {len(self.CTname)}')
 
     def make_syn_list(self,cas,rec,caslst,synlst):
-        if rec in ['',None,np.NaN]:
+        if rec in ['',None,np.nan]:
             return caslst, synlst
         lst = rec.split('|')
         for i in lst:
@@ -314,7 +318,7 @@ class CAS_list_maker():
         caslst = []
         synlst = []
         for i,row in rawsyn.iterrows():
-             if row.identifier != np.NaN:
+             if row.identifier != np.nan:
                  caslst,synlst = self.make_syn_list(row.cas_number,
                                                     row.identifier,
                                                     caslst,

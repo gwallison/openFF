@@ -46,6 +46,51 @@ def getHazDBLink(cas,text_to_show='link',use_remote=True):
     s = f'{preamble}/chemicals/{cas}.html'
     return wrap_URL_in_html(s,text_to_show)
 
+
+def getHazChemImgWithLink(cas, size=140, alt=None):
+    """
+    Generates an HTML snippet for a chemical hazard image that links to a 
+    detailed profile page, opening it in a new tab.
+    """
+    # returns an html image link when possible
+    # check if we have it locally, but link to the cloud version
+    # fp_path = os.path.join(r"C:\MyDocs\integrated\chem_profiles_old\code\tmp\tier_fig",
+    #                        f'{cas}.png')
+    fp_path = os.path.join(r"C:\MyDocs\integrated\chem_profiles\mkdocs\site\images",
+                           f'{cas}.svg')
+    
+    # Base URL for the chemical profile pages to link to
+    preamble = "https://storage.googleapis.com/open-ff-chem-profiles"
+
+    # take comptox version if it exists
+    cas_ignore = ['7732-18-5', 'proprietary', 'conflictingID',
+                  'ambiguousID', 'sysAppMeta', 'cas_not_assigned']
+    
+    if alt:
+        alttext = alt
+    else:
+        alttext = f'Open-FF Hazard Tier graphic for {cas}'
+
+    if cas in cas_ignore:
+        return ' <center>---</center> '
+        
+    if os.path.exists(fp_path):
+        # Define the URL for the link destination
+        link_url = f'{preamble}/chemicals/{cas}.html'
+        
+        # Define the URL for the image source
+        # img_url = f"https://storage.googleapis.com/open-ff-browser/images/ChemHazTier/{cas}.png"
+        img_url = f"https://storage.googleapis.com/open-ff-chem-profiles/images/{cas}.svg"
+        
+        # **This is the new HTML structure**
+        # The <img> tag is now wrapped in an <a> tag.
+        # - href="{link_url}": Sets the destination URL for the link.
+        # - target="_blank": Ensures the link opens in a new browser tab.
+        # - rel="noopener noreferrer": A security measure for links that open in a new tab.
+        return f'''<center> <a href="{link_url}" target="_blank" rel="noopener noreferrer"> <img src="{img_url}" alt="{alttext}" onerror="this.onerror=null; this.remove();" width={size}></a></center>'''
+
+    return "<center>Tier analysis not available</center>"
+
 def getOpLink(opname,text_to_show='Operator details',
               use_remote=False, up_level=False):
     preamble = ''

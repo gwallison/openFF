@@ -52,7 +52,8 @@ def init_output_space(dir = hndl.browser_out_dir):
 
     
 def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf):
-    if remake_workingdf:        
+    if remake_workingdf:     
+        print ('starting new work build...')
         if testing_mode:
             if remake_workingdf:
                 print('-- creating new test workingdf')
@@ -83,6 +84,7 @@ def prep_working_df(testing_mode=testing_mode, remake_workingdf=remake_workingdf
 
       
         fh.save_df(workdf,(os.path.join(hndl.sandbox_dir,'workdf.parquet'))) # for the indexes
+        print ('finished new work build.')
     else:
         workdf = fh.get_df(os.path.join(hndl.sandbox_dir,'workdf.parquet'))
     return workdf

@@ -300,7 +300,7 @@ def showWells_in_area(fulldf,area_df,apilst,width=600,height=400):
 def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shape=False,area_df=None,
                      fields=['APINumber','TotalBaseWaterVolume','year','OperatorName','ingKeyPresent'],
                      aliases=['API Number','Water Volume','year','Operator','has chem recs'],
-                     width=600,height=400):
+                     width=600,height=400, use_cluster=True):
     # only the first item of the area df is used.  Meant to be a simple outline, like a county line
     import folium
     from folium import plugins
@@ -322,9 +322,10 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
     else:
         m = folium.Map(tiles="openstreetmap").add_to(f)
     locations = list(zip(data.bgLatitude, data.bgLongitude))
-    cluster = plugins.MarkerCluster(locations=locations,
-                                   name='cluster markers')#,                     
-    m.add_child(cluster)
+    if use_cluster:
+        cluster = plugins.MarkerCluster(locations=locations,
+                                       name='cluster markers')#,                     
+        m.add_child(cluster)
     
     sw = data[['bgLatitude', 'bgLongitude']].min().values.tolist()
     ne = data[['bgLatitude', 'bgLongitude']].max().values.tolist()
@@ -375,6 +376,90 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
 
     # display(f)
     return f
+
+## used for multiple maps with same orientation
+def create_simple_point_map(data,inc_disc_link=True,include_shape=False,area_df=None,
+                            flat = 40.23682638157763,  
+                            flon = -104.5829007950955,
+                            width=600,height=400,
+                            zoom_start=7.5, marker_size = 3):
+    # only the first item of the area df is used.  Meant to be a simple outline, like a county line
+    import folium
+    from folium import plugins
+    f = folium.Figure(width=width, height=height)
+    if include_shape:
+        #print('including shape!')
+        area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
+        m = folium.Map(tiles="openstreetmap",location=area, zoom_start=zoom_start, 
+                       zoom_snap=0.25,zoom_control=False).add_to(f)
+        
+        # show area
+        style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
+        folium.GeoJson(area_df,
+                       style_function=lambda x: style,
+                       smooth_factor=.2,
+                       name= 'target area'
+                       ).add_to(m)
+
+
+    else:
+        m = folium.Map(location=[flat, flon],tiles="openstreetmap",
+                       zoom_start=zoom_start, zoom_snap=0.25,
+                       zoom_control=False).add_to(f)
+        
+    mlst = []
+    for loc in data.location.tolist():
+        t = data[data.location==loc].groupby('location')[['bgLatitude','bgLongitude']].first()
+        #print(api,t)
+        locs = t.iloc[0].tolist()
+        mlst.append({'location': locs, 'color':'blue', 'popup':f'location: {loc}'})
+
+    # Add the markers to the map
+    for marker in mlst:
+        folium.CircleMarker(
+            location=marker['location'],
+            radius=marker_size,               # 5 is pretty small
+            color='red',            # Border color
+            fill=True,
+            fill_color='pink',       # Interior color
+            fill_opacity=0.2,       # Make it solid
+            # popup=marker['popup'] # Uncomment if needed
+        ).add_to(m)
+    # locations = list(zip(data.bgLatitude, data.bgLongitude))
+    
+    # sw = data[['bgLatitude', 'bgLongitude']].min().values.tolist()
+    # ne = data[['bgLatitude', 'bgLongitude']].max().values.tolist()
+    # m.fit_bounds([sw, ne]) 
+
+    # gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.bgLongitude,
+    #                                                         data.bgLatitude),
+    #                        crs=final_crs)
+    # folium.features.GeoJson(
+    #         data=gdf,
+    #         name='information marker',
+    #         show=True,
+    #         smooth_factor=2,
+    #         style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
+    #         # popup=folium.features.GeoJsonPopup(
+    #         #     # fields=fields,
+    #         #     # aliases=aliases, 
+    #         #     localize=True,
+    #         #     sticky=False,
+    #         #     labels=True,
+    #         #     style="""
+    #         #         background-color: #F0EFEF;
+    #         #         border: 2px solid black;
+    #         #         border-radius: 3px;
+    #         #         box-shadow: 3px;
+    #         #     """,
+    #         #     max_width=800,),
+    #         highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
+    #         ).add_to(m)   
+    
+
+    return f
+
+
 
 def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,
                                 include_shape=False,area_df=None,

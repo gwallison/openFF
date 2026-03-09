@@ -10,7 +10,7 @@ fundamental characteristics of the final data sets.
 TO ADD:
     - check critical columns for non-printing chars (see cas_tools)
 """
-#import pandas as pd
+import pandas as pd
 
 
 class final_test():
@@ -58,7 +58,8 @@ class final_test():
         14 characters long."""
         self.print_stage('Confirm APINumber integrity')
         assert self.df.APINumber.isna().sum()==0, 'There are some NaN in APINumber'
-        assert self.df.APINumber.dtype=='O', f'APINumber should be dtype "O", but is {self.df.APINumber.dtype}'
+        # assert self.df.APINumber.dtype==str, f'APINumber should be dtype "str", but is {self.df.APINumber.dtype}'
+        assert pd.api.types.is_string_dtype(self.df.APINumber), f"APINumber should be strings, but is {self.df.APINumber.dtype}"
         self.df['apilen'] = self.df.APINumber.str.len()
         
         #print(f'API/UPK for short API: {self.df[self.df.apilen<14][["APINumber","DisclosureId"]]}')

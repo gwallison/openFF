@@ -177,8 +177,10 @@ def make_CAS_to_curate_file(df,ref_dir,work_dir):
     #  these are targets for later curating
     cond1 = test.valid_after_cleaning
     cond2 = test.on_ref_list=='unk'
-    test['CAS_prospect'] = np.where(cond1&cond2,'valid_but_empty',test.tent_CAS)
-    test['on_ref_list'] = np.where(cond1&cond2,'valid_but_empty',test.on_ref_list)
+    test['CAS_prospect'] = np.where(cond1.astype(bool)&cond2.astype(bool),
+                                    'valid_but_empty',test.tent_CAS)
+    test['on_ref_list'] = np.where(cond1.astype(bool)&cond2.astype(bool),
+                                   'valid_but_empty',test.on_ref_list)
     test = test.drop(['deprecated',
                       'cas_replacement','tent_CAS',
                       #'ing_name',

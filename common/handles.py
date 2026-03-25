@@ -15,7 +15,7 @@ from datetime import datetime
 import os
 import platform
 
-locals = ['Dell_2023_Gary','M2','NucBoxM4']
+locals = ['Dell_2023_Gary','M2','NucBoxM4','geekom1']
 
 # repo_name = 'openFF_data_2024_03_21'
 repo_name = 'openFF_data_2026_03_08'

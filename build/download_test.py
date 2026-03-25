@@ -31,7 +31,7 @@ import ff_archive_tools.Meta_reader as mreader
 
 import openFF.build.core.fetch_archive_difference_set as fads
 
-production_computer = 'M2'  # set to the computer name performing production tasks
+production_computers = ['Dell_2023_Gary','geekom1']  # set to the computer name performing production tasks
 
 
 today = datetime.today()
@@ -187,7 +187,7 @@ def notebook_to_google_drive(lg=lg,move_to_storage=True):
     import os
     import platform
     
-    if platform.node() == production_computer:           
+    if platform.node() in production_computers:           
         lg.logline('Performing generation of Raw_disclosures.html')
         fn = 'Raw_disclosures.html'
         fulloutfn = os.path.join(r"G:\My Drive\webshare\daily_status",fn)
@@ -215,7 +215,7 @@ def difflib_to_google_drive(lg=lg):
     drive_bu = r"G:\My Drive\webshare\daily_status\diff_files_backup"
     storage_prefix = 'difflib/'
     
-    if platform.node() == production_computer:           
+    if platform.node() in production_computers:           
         lg.logline('Performing move of difflib files to google storage')
         flst = os.listdir(drive_dir)
         cntr = 0

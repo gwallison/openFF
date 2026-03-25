@@ -757,7 +757,7 @@ def create_county_choropleth(data,
     if plotlog:
         working.value = np.log10(working.value+1)
         legend_name = legend_name + ' (log transformed)'
-    working.orig_value.fillna('no data',inplace=True)
+    working.orig_value = working.orig_value.astype(object).fillna('no data')
     
     if custom_scale==[]:
         custom_scale = (working['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()

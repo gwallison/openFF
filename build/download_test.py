@@ -251,7 +251,8 @@ def main_run():
         lg.logline(f'  Changed disclosures: {len(out["changed_disc"])}')
         lg.logline(f'  Removed disclosures: {len(out["removed_disc"])}')
         archive_test_files(out, old_raw_fn,new_raw_fn)
-        update_pub_delay()
+
+        # update_pub_delay() # need to find the problem with this
         
         # make Raw_disclosures html
         notebook_to_google_drive()

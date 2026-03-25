@@ -17,3 +17,4 @@ __pycache__/
 ext/
 *.pytest_cache/
 spike*.ipynb
+.claude

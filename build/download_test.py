@@ -31,7 +31,7 @@ import ff_archive_tools.Meta_reader as mreader
 
 import openFF.build.core.fetch_archive_difference_set as fads
 
-production_computers = ['Dell_2023_Gary','geekom1']  # set to the computer name performing production tasks
+production_computers = ['Dell_2023_Gary','Geekom1']  # set to the computer name performing production tasks
 
 
 today = datetime.today()

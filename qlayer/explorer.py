@@ -41,6 +41,12 @@ def load_disclosure_partition(bucket_id):
 
 
 @st.cache_data(show_spinner=False)
+def load_chemrec_partition(bucket_id):
+    """Tier 4 — chemical records for one of 256 disclosure-keyed partitions."""
+    return pd.read_parquet(f"{BASE_URL}/chemrecs/part_{bucket_id:03d}.parquet")
+
+
+@st.cache_data(show_spinner=False)
 def load_chemicals_for_cas(bgcas):
     """Tier 3 — all chemrec rows for one bgCAS, fetched on demand."""
     safe = str(bgcas).replace("/", "-")
@@ -116,23 +122,40 @@ with tab_location:
 
         if chosen_id:
             bucket_id = key_to_bucket(chosen_id)
-            with st.spinner(f"Fetching disclosures/part_{bucket_id:03d}.parquet (tier 2)..."):
-                partition = load_disclosure_partition(bucket_id)
 
-            row = partition[partition["DisclosureId"] == chosen_id]
-            if len(row):
+            col_disc, col_chem = st.columns(2)
+
+            with col_disc:
+                with st.spinner(f"Fetching disclosures/part_{bucket_id:03d}.parquet (tier 2)..."):
+                    partition = load_disclosure_partition(bucket_id)
+                row = partition[partition["DisclosureId"] == chosen_id]
+                if len(row):
+                    st.caption(
+                        f"`disclosures/part_{bucket_id:03d}.parquet` "
+                        f"({len(partition):,} disclosures in partition)"
+                    )
+                    detail = (
+                        row.iloc[0]
+                        .dropna()
+                        .reset_index()
+                        .rename(columns={"index": "Field", 0: "Value"})
+                    )
+                    st.dataframe(detail, use_container_width=True, hide_index=True)
+
+            with col_chem:
+                with st.spinner(f"Fetching chemrecs/part_{bucket_id:03d}.parquet (tier 4)..."):
+                    chem_part = load_chemrec_partition(bucket_id)
+                chems = chem_part[chem_part["DisclosureId"] == chosen_id]
                 st.caption(
-                    f"Loaded `disclosures/part_{bucket_id:03d}.parquet` "
-                    f"({len(partition):,} disclosures in this partition)"
+                    f"`chemrecs/part_{bucket_id:03d}.parquet` "
+                    f"— **{len(chems):,} chemical records** for this disclosure"
                 )
-                # Display as a two-column field/value table
-                detail = (
-                    row.iloc[0]
-                    .dropna()
-                    .reset_index()
-                    .rename(columns={"index": "Field", 0: "Value"})
-                )
-                st.dataframe(detail, use_container_width=True, hide_index=True)
+                show_cols = [c for c in [
+                    "bgCAS", "IngredientName", "mass", "is_on_CWA",
+                    "is_on_IRIS", "is_on_PFAS_list",
+                ] if c in chems.columns]
+                st.dataframe(chems[show_cols] if show_cols else chems,
+                             use_container_width=True, hide_index=True)
 
 
 # ── Tab 2: Browse by Chemical ─────────────────────────────────────────────────

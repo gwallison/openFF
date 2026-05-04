@@ -34,6 +34,7 @@ All file paths below are relative to this base URL.
 | `index.parquet` | ~5 MB | One row per disclosure — use for filtering and search |
 | `chem_index.parquet` | ~2 MB | One row per bgCAS — pre-computed stats across all disclosures |
 | `disclosures/part_000.parquet` … `part_255.parquet` | ~1 MB each | Disclosure rows partitioned by MD5(DisclosureId) |
+| `chemrecs/part_000.parquet` … `part_255.parquet` | ~4 MB each | Chemical records partitioned by MD5(DisclosureId) |
 | `chemicals_by_cas/cas_{bgCAS}.parquet` | varies | All chemrec rows for one bgCAS value |
 | `manifest.json` | tiny | Build metadata (timestamp, record counts) |
 
@@ -119,6 +120,66 @@ row = partition[partition["DisclosureId"] == disclosure_id]
 
 Each partition file contains roughly 1/256th of all disclosures (~950 rows at
 current scale) and includes all columns from the source `disclosures.parquet`.
+
+---
+
+## Fetching chemical records for a disclosure (tier 4)
+
+Chemical records for all disclosures are split across 256 partition files using
+the **same** MD5 hash as the `disclosures/` tier. A single `key_to_bucket()` call
+retrieves both the disclosure metadata and its chemical records.
+
+```python
+import hashlib
+import pandas as pd
+
+BASE_URL = "https://storage.googleapis.com/open-ff-query-layer/v1"
+
+def key_to_bucket(disclosure_id, n=256):
+    return int(hashlib.md5(str(disclosure_id).encode()).hexdigest(), 16) % n
+
+disclosure_id = "your-disclosure-id-here"
+bucket_id     = key_to_bucket(disclosure_id)
+
+# Disclosure metadata (tier 2)
+disc_partition = pd.read_parquet(
+    f"{BASE_URL}/disclosures/part_{bucket_id:03d}.parquet"
+)
+# Chemical records (tier 4) — same bucket, different prefix
+chem_partition = pd.read_parquet(
+    f"{BASE_URL}/chemrecs/part_{bucket_id:03d}.parquet"
+)
+
+disclosure  = disc_partition[disc_partition["DisclosureId"] == disclosure_id]
+chemicals   = chem_partition[chem_partition["DisclosureId"] == disclosure_id]
+```
+
+Each `chemrecs/` partition file contains all chemical records for the disclosures
+in that bucket (~20,000 rows per partition at current scale). Columns include
+chemical identity (`bgCAS`, `CASNumber`, `IngredientName`), mass data, and
+regulatory/hazard list membership (`is_on_CWA`, `is_on_IRIS`, etc.) pre-joined
+from the bgCAS reference table.
+
+To load chemical records for a **set** of disclosures (e.g. all wells in a watershed):
+
+```python
+disc_ids  = ["id-1", "id-2", ...]   # from spatial / geographic filter
+buckets   = sorted({key_to_bucket(d) for d in disc_ids})
+disc_set  = set(disc_ids)
+
+parts = []
+for b in buckets:
+    df = pd.read_parquet(f"{BASE_URL}/chemrecs/part_{b:03d}.parquet")
+    parts.append(df[df["DisclosureId"].isin(disc_set)])
+
+chemicals = pd.concat(parts, ignore_index=True)
+```
+
+For a typical HUC-10 watershed with ~100–200 disclosures the DisclosureIds hash
+to roughly 60–120 distinct buckets, so only that fraction of the 256 files is
+fetched. Partition files are well-suited to Streamlit `@st.cache_data` caching
+so each file is fetched at most once per server session regardless of how many
+watersheds are queried.
 
 ---
 

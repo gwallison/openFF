@@ -583,7 +583,8 @@ def create_state_choropleth(data,
     if plotlog:
         geojson.value = np.log10(geojson.value+1)
         legend_name = legend_name + ' (log transformed)'
-    geojson.orig_value.fillna('no data',inplace=True)
+    # the following line no longer works - 5/2026
+    # geojson.orig_value.fillna('no data',inplace=True)
     #print(geojson[['StateName','value']])
     
     if custom_scale==[]:
@@ -657,7 +658,8 @@ def create_master_state_choropleth(data,
     if plotlog:
         geojson.value = np.log10(geojson.value+1)
         legend_name = legend_name + ' (log transformed)'
-    geojson.orig_value.fillna('no data',inplace=True)
+    # the following line no longer works - 5/2026
+    # geojson.orig_value.fillna('no data',inplace=True)
     #print(geojson[['StateName','value']])
     
     if custom_scale==[]:
@@ -757,7 +759,8 @@ def create_county_choropleth(data,
     if plotlog:
         working.value = np.log10(working.value+1)
         legend_name = legend_name + ' (log transformed)'
-    working.orig_value = working.orig_value.astype(object).fillna('no data')
+    # the following line no longer works - 5/2026
+    # working.orig_value = working.orig_value.astype(object).fillna('no data')
     
     if custom_scale==[]:
         custom_scale = (working['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
@@ -960,7 +963,8 @@ def create_watershed_choropleth(data,
     if plotlog:
         working['value'] = np.log10(working['value'] + 1)
         legend_name = legend_name + ' (log transformed)'
-    working['orig_value'].fillna('no data', inplace=True)
+    # the following line no longer works - 5/2026
+    # working['orig_value'].fillna('no data', inplace=True)
 
     if not custom_scale:
         custom_scale = (working['value'].quantile((0, 0.2, 0.4, 0.6, 0.8, 1))).tolist()
@@ -1069,7 +1073,8 @@ def orig_create_county_choropleth(data,
     if plotlog:
         working.value = np.log10(working.value+1)
         legend_name = legend_name + ' (log transformed)'
-    working.orig_value.fillna('no data',inplace=True)
+    # the following line no longer works - 5/2026
+    # working.orig_value.fillna('no data',inplace=True)
     
     if custom_scale==[]:
         custom_scale = (working['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()

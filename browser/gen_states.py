@@ -273,7 +273,7 @@ class State_gen():
         
         # now make tables for FracTracker links
         clinkdf = pd.DataFrame({'state':stlst, 'county':ctlst,'cntyfn':fnlst})
-        clinkdf['county_page_link'] = hndl.browser_root+'state/'+clinkdf.cntyfn
+        clinkdf['county_page_link'] = hndl.browser_root+'state/'+clinkdf.cntyfn.fillna('').astype(str)
         clinkdf.to_parquet(self.county_FT_index_fn)
         stset = list(set(stlst))
         slinkdf = pd.DataFrame({'state':stset})

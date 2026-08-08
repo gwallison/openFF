@@ -15,6 +15,30 @@ final_crs = 4326 # WGS84
 proj_crs = 3857 # convert to this when calculating distances
 def_buffer = 1609.34 # one mile
 
+def _drop_unmappable_cols(gdf, keep_extra=()):
+    """Strip columns that folium/json can't serialize before handing a
+    GeoDataFrame to folium.
+
+    Specifically guards against 'geo_point_2d' (present in the
+    georef-united-states-of-america-{state,county}.geojson files), which
+    used to be silently skipped by fiona ("Skipping field geo_point_2d:
+    invalid/unsupported OGR type: 3") but is loaded as a numpy ndarray by
+    pyogrio -- the engine geopandas now defaults to when fiona isn't
+    installed. An ndarray in a property column makes
+    json.dumps(gdf.__geo_interface__) raise
+    "TypeError: Object of type ndarray is not JSON serializable" wherever
+    that GeoDataFrame is later passed to folium.Choropleth/folium.GeoJson.
+
+    Any column containing at least one ndarray value is dropped (other than
+    'geometry' and anything explicitly listed in keep_extra).
+    """
+    if gdf is None:
+        return gdf
+    bad = [c for c in gdf.columns
+           if c != 'geometry' and c not in keep_extra
+           and gdf[c].apply(lambda v: isinstance(v, np.ndarray)).any()]
+    return gdf.drop(columns=bad) if bad else gdf
+
 def fix_county_names(df):
     trans = {'mckenzie':'mc kenzie',
              'dewitt':'de witt',
@@ -32,11 +56,11 @@ def make_as_well_gdf(in_df,latName='bgLatitude',lonName='bgLongitude',
     # in_df['api10'] = in_df.APINumber.str[:10]
 
     gb = in_df.groupby('api10',as_index=False)[[latName,lonName,'DisclosureId']].first()
-    gdf =  gpd.GeoDataFrame(gb, geometry= gpd.points_from_xy(gb[lonName], 
+    gdf =  gpd.GeoDataFrame(gb, geometry= gpd.points_from_xy(gb[lonName],
                                                              gb[latName],
                                                              crs=final_crs))
     return gdf
-    
+
 
 def find_disclosures_near_point(lat,lon,wellgdf,crs=final_crs,name='test',
                           buffer_m=def_buffer, bbnum=0.25):
@@ -82,15 +106,16 @@ def show_simple_map_and_shape(lat,lon,clickable=False,include_shape=False,
     f = folium.Figure(width=width, height=height)
 
     mlst = [{'location': [lat,lon], 'color':'red', 'popup':'Focal point'}]
-    map_center = [lat, lon] 
+    map_center = [lat, lon]
     m = folium.Map(tiles="openstreetmap", location=map_center, zoom_start=8).add_to(f)
 
     if include_shape:
+        area_df = _drop_unmappable_cols(area_df)
         bounds = area_df.total_bounds
 
         sw = [bounds[1], bounds[0]]
         ne = [bounds[3], bounds[2]]
-        
+
         m.fit_bounds([sw, ne])
 
         # The rest of your GeoJson plotting code is correct and can stay the same
@@ -110,7 +135,7 @@ def show_simple_map_and_shape(lat,lon,clickable=False,include_shape=False,
             popup=marker['popup']
         ).add_to(m)
         # Display the map
-           
+
     # Add a tile layer with satellite imagery
     folium.TileLayer(
         tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
@@ -120,12 +145,12 @@ def show_simple_map_and_shape(lat,lon,clickable=False,include_shape=False,
         control=True,
         subdomains=['mt0', 'mt1', 'mt2', 'mt3']
     ).add_to(m)
-        
+
     # Add layer control to switch between base maps
     folium.LayerControl().add_to(m)
 
     return m
-    
+
 
 def show_simple_map(lat,lon,clickable=False,
                     width=600,height=400):
@@ -142,7 +167,7 @@ def show_simple_map(lat,lon,clickable=False,
             popup=marker['popup']
         ).add_to(m)
         # Display the map
-           
+
     # Add a tile layer with satellite imagery
     folium.TileLayer(
         tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
@@ -152,10 +177,10 @@ def show_simple_map(lat,lon,clickable=False,
         control=True,
         subdomains=['mt0', 'mt1', 'mt2', 'mt3']
     ).add_to(m)
-    
+
     if clickable:
         folium.features.ClickForLatLng().add_to(m)
-        
+
     # Add layer control to switch between base maps
     folium.LayerControl().add_to(m)
 
@@ -183,11 +208,11 @@ def showWells(fulldf,flat,flon,apilst,def_buffer=def_buffer,
             popup=marker['popup']
         ).add_to(m)
         # Display the map
-        
+
     # add circle around focal point
     folium.Circle(radius=def_buffer,location=[flat,flon],
                   color='crimson',fill=True).add_to(m)
-    
+
     # Add a tile layer with satellite imagery
     folium.TileLayer(
         tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
@@ -223,11 +248,11 @@ def showDisclosures(fulldf,flat,flon,disclst,def_buffer=def_buffer):
             popup=marker['popup']
         ).add_to(m)
         # Display the map
-        
+
     # add circle around focal point
     folium.Circle(radius=def_buffer,location=[flat,flon],
                   color='crimson',fill=True).add_to(m)
-    
+
     # Add a tile layer with satellite imagery
     folium.TileLayer(
         tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
@@ -246,6 +271,7 @@ def showDisclosures(fulldf,flat,flon,disclst,def_buffer=def_buffer):
 def showWells_in_area(fulldf,area_df,apilst,width=600,height=400):
     """Shows the wells in apilist as well as the area(s) in area_df. This was first used to show census tracts."""
     import folium
+    area_df = _drop_unmappable_cols(area_df)
     mlst = []
     for api in apilst:
         t = fulldf[fulldf.api10==api].groupby('APINumber')[['bgLatitude','bgLongitude']].first()
@@ -255,12 +281,12 @@ def showWells_in_area(fulldf,area_df,apilst,width=600,height=400):
 
     # location=[area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]]
     m = folium.Map(width=width,height=height)
-    
+
     bounds = area_df.total_bounds
 
     sw = [bounds[1], bounds[0]]
     ne = [bounds[3], bounds[2]]
-    
+
     m.fit_bounds([sw, ne])
 
 
@@ -274,7 +300,7 @@ def showWells_in_area(fulldf,area_df,apilst,width=600,height=400):
             popup=marker['popup']
         ).add_to(m)
         # Display the map
-        
+
     # show area
     style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
     folium.GeoJson(area_df,
@@ -307,9 +333,10 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
     f = folium.Figure(width=width, height=height)
     if include_shape:
         #print('including shape!')
+        area_df = _drop_unmappable_cols(area_df)
         area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
         m = folium.Map(tiles="openstreetmap",location=area, zoom_start=10).add_to(f)
-        
+
         # show area
         style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
         folium.GeoJson(area_df,
@@ -324,12 +351,12 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
     locations = list(zip(data.bgLatitude, data.bgLongitude))
     if use_cluster:
         cluster = plugins.MarkerCluster(locations=locations,
-                                       name='cluster markers')#,                     
+                                       name='cluster markers')#,
         m.add_child(cluster)
-    
+
     sw = data[['bgLatitude', 'bgLongitude']].min().values.tolist()
     ne = data[['bgLatitude', 'bgLongitude']].max().values.tolist()
-    m.fit_bounds([sw, ne]) 
+    m.fit_bounds([sw, ne])
 
     gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.bgLongitude,
                                                             data.bgLatitude),
@@ -342,7 +369,7 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
             style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
             popup=folium.features.GeoJsonPopup(
                 fields=fields,
-                aliases=aliases, 
+                aliases=aliases,
                 localize=True,
                 sticky=False,
                 labels=True,
@@ -354,8 +381,8 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
                 """,
                 max_width=800,),
                     highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
-                ).add_to(m)   
-    
+                ).add_to(m)
+
     # Add a tile layer with satellite imagery
     folium.TileLayer(
         tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
@@ -372,14 +399,14 @@ def create_point_map(data,include_mini_map=False,inc_disc_link=True,include_shap
     if include_mini_map:
         minimap = plugins.MiniMap()
         m.add_child(minimap)
-        
+
 
     # display(f)
     return f
 
 ## used for multiple maps with same orientation
 def create_simple_point_map(data,inc_disc_link=True,include_shape=False,area_df=None,
-                            flat = 40.23682638157763,  
+                            flat = 40.23682638157763,
                             flon = -104.5829007950955,
                             width=600,height=400,
                             zoom_start=7.5, marker_size = 3):
@@ -389,10 +416,11 @@ def create_simple_point_map(data,inc_disc_link=True,include_shape=False,area_df=
     f = folium.Figure(width=width, height=height)
     if include_shape:
         #print('including shape!')
+        area_df = _drop_unmappable_cols(area_df)
         area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
-        m = folium.Map(tiles="openstreetmap",location=area, zoom_start=zoom_start, 
+        m = folium.Map(tiles="openstreetmap",location=area, zoom_start=zoom_start,
                        zoom_snap=0.25,zoom_control=False).add_to(f)
-        
+
         # show area
         style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
         folium.GeoJson(area_df,
@@ -406,7 +434,7 @@ def create_simple_point_map(data,inc_disc_link=True,include_shape=False,area_df=
         m = folium.Map(location=[flat, flon],tiles="openstreetmap",
                        zoom_start=zoom_start, zoom_snap=0.25,
                        zoom_control=False).add_to(f)
-        
+
     mlst = []
     for loc in data.location.tolist():
         t = data[data.location==loc].groupby('location')[['bgLatitude','bgLongitude']].first()
@@ -426,10 +454,10 @@ def create_simple_point_map(data,inc_disc_link=True,include_shape=False,area_df=
             # popup=marker['popup'] # Uncomment if needed
         ).add_to(m)
     # locations = list(zip(data.bgLatitude, data.bgLongitude))
-    
+
     # sw = data[['bgLatitude', 'bgLongitude']].min().values.tolist()
     # ne = data[['bgLatitude', 'bgLongitude']].max().values.tolist()
-    # m.fit_bounds([sw, ne]) 
+    # m.fit_bounds([sw, ne])
 
     # gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.bgLongitude,
     #                                                         data.bgLatitude),
@@ -442,7 +470,7 @@ def create_simple_point_map(data,inc_disc_link=True,include_shape=False,area_df=
     #         style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
     #         # popup=folium.features.GeoJsonPopup(
     #         #     # fields=fields,
-    #         #     # aliases=aliases, 
+    #         #     # aliases=aliases,
     #         #     localize=True,
     #         #     sticky=False,
     #         #     labels=True,
@@ -454,8 +482,8 @@ def create_simple_point_map(data,inc_disc_link=True,include_shape=False,area_df=
     #         #     """,
     #         #     max_width=800,),
     #         highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
-    #         ).add_to(m)   
-    
+    #         ).add_to(m)
+
 
     return f
 
@@ -464,7 +492,7 @@ def create_simple_point_map(data,inc_disc_link=True,include_shape=False,area_df=
 def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,
                                 include_shape=False,area_df=None,
                                 include_filled_shape=False,filled_area_df=None,
-                                
+
                      fields=['APINumber','TotalBaseWaterVolume','year','OperatorName','ingKeyPresent'],
                      aliases=['API Number','Water Volume','year','Operator','has chem recs'],
                      use_remote=False,
@@ -478,10 +506,14 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,
 
     f = folium.Figure(width=width, height=height)
     if include_shape | include_filled_shape:
+        if area_df is not None:
+            area_df = _drop_unmappable_cols(area_df)
+        if include_filled_shape and filled_area_df is not None:
+            filled_area_df = _drop_unmappable_cols(filled_area_df)
         #print('including shape!')
         area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
         m = folium.Map(tiles="openstreetmap",location=area, zoom_start=7).add_to(f)
-        
+
         if include_shape:
             # show area
             style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
@@ -506,12 +538,12 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,
 
     sw = data[['bgLatitude', 'bgLongitude']].min().values.tolist()
     ne = data[['bgLatitude', 'bgLongitude']].max().values.tolist()
-    m.fit_bounds([sw, ne]) 
+    m.fit_bounds([sw, ne])
 
-    
+
     cluster = plugins.MarkerCluster(name='cluster markers')
     m.add_child(cluster)
-    
+
     # import ipywidgets as widgets
     # import markdown
     gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.bgLongitude,
@@ -531,14 +563,14 @@ def create_integrated_point_map(data,include_mini_map=False,inc_disc_link=True,
             html += '-- '+ th.getFFLink(row,'FracFocus')
             html += '<br>-- '+ th.getDisclosureLink(row.APINumber,row.DisclosureId,'Open-FF',
                                                     use_remote=use_remote)
-            
+
 
         popup = folium.Popup(html)
         folium.Marker(
             location=[row.bgLatitude,row.bgLongitude],
-            popup = popup,                
+            popup = popup,
         ).add_to(cluster)
-    
+
     # Add a tile layer with satellite imagery
     folium.TileLayer(
         tiles='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
@@ -577,7 +609,7 @@ def create_state_choropleth(data,
     m = folium.Map(location= start_loc, tiles="openstreetmap",
                     zoom_start=start_zoom).add_to(f)
 #     fg1 = folium.FeatureGroup(name=legend_name,overlay=False).add_to(m)
-    
+
     geojson = pd.merge(geojson,data,on=['StateName'],how='left')
     #geojson.value.fillna(0,inplace=True)
     if plotlog:
@@ -586,7 +618,7 @@ def create_state_choropleth(data,
     # the following line no longer works - 5/2026
     # geojson.orig_value.fillna('no data',inplace=True)
     #print(geojson[['StateName','value']])
-    
+
     if custom_scale==[]:
         custom_scale = (geojson['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
     folium.Choropleth(
@@ -602,8 +634,8 @@ def create_state_choropleth(data,
                 line_weight=0.3,
                 legend_name= legend_name, #title of the legend
                 highlight=True,
-                line_color='black').add_to(m) 
-    
+                line_color='black').add_to(m)
+
     folium.features.GeoJson(
                 data=geojson,
                 name='',
@@ -611,7 +643,7 @@ def create_state_choropleth(data,
                 style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
                 tooltip=folium.features.GeoJsonTooltip(
                     fields=fields,
-                    aliases=aliases, 
+                    aliases=aliases,
                     localize=True,
                     sticky=False,
                     labels=True,
@@ -623,7 +655,7 @@ def create_state_choropleth(data,
                     """,
                     max_width=800,),
                         highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
-                    ).add_to(m)   
+                    ).add_to(m)
 
     display(f)
 
@@ -652,7 +684,7 @@ def create_master_state_choropleth(data,
     m = folium.Map(location= start_loc, tiles="openstreetmap",
                     zoom_start=start_zoom).add_to(f)
 #     fg1 = folium.FeatureGroup(name=legend_name,overlay=False).add_to(m)
-    
+
     geojson = pd.merge(geojson,data,on=['StateName'],how='left')
     #geojson.value.fillna(0,inplace=True)
     if plotlog:
@@ -661,7 +693,7 @@ def create_master_state_choropleth(data,
     # the following line no longer works - 5/2026
     # geojson.orig_value.fillna('no data',inplace=True)
     #print(geojson[['StateName','value']])
-    
+
     if custom_scale==[]:
         custom_scale = (geojson['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
     folium.Choropleth(
@@ -677,8 +709,8 @@ def create_master_state_choropleth(data,
                 line_weight=0.3,
                 legend_name= legend_name, #title of the legend
                 highlight=True,
-                line_color='black').add_to(m) 
-    
+                line_color='black').add_to(m)
+
     folium.features.GeoJson(
                 data=geojson,
                 name='',
@@ -686,7 +718,7 @@ def create_master_state_choropleth(data,
                 style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
                 popup=folium.features.GeoJsonPopup(
                     fields=fields,
-                    aliases=aliases, 
+                    aliases=aliases,
                     localize=True,
                     sticky=False,
                     labels=True,
@@ -698,7 +730,7 @@ def create_master_state_choropleth(data,
                     """,
                     max_width=800,),
                         highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
-                    ).add_to(m)   
+                    ).add_to(m)
 
     return f
 
@@ -718,6 +750,7 @@ def create_county_choropleth(data,
         print('No mappable data')
         return
     geojson = gpd.read_file(fn)
+    geojson = _drop_unmappable_cols(geojson)
     data['orig_value'] = data.value
     data['county_link'] = data.apply(lambda x: th.getBlogCountyLink(x),axis=1)
     # disable links to non-FF counties
@@ -737,10 +770,11 @@ def create_county_choropleth(data,
 
     if include_shape:
         #print('including shape!')
+        area_df = _drop_unmappable_cols(area_df)
         area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
-        m = folium.Map(tiles="openstreetmap",location=area, 
+        m = folium.Map(tiles="openstreetmap",location=area,
                        zoom_start=start_zoom).add_to(f)
-        
+
         # show area
         style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
         folium.GeoJson(area_df,
@@ -753,7 +787,7 @@ def create_county_choropleth(data,
     else:
         m = folium.Map(location= start_loc,tiles="openstreetmap",
                        zoom_start=start_zoom).add_to(f)
-    
+
     # m = folium.Map(location= start_loc, tiles="openstreetmap",
     #                zoom_start=start_zoom).add_to(f)
     if plotlog:
@@ -761,7 +795,7 @@ def create_county_choropleth(data,
         legend_name = legend_name + ' (log transformed)'
     # the following line no longer works - 5/2026
     # working.orig_value = working.orig_value.astype(object).fillna('no data')
-    
+
     if custom_scale==[]:
         custom_scale = (working['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
     if show_only_data_states:
@@ -772,7 +806,7 @@ def create_county_choropleth(data,
         wlst = []
         working['tup'] = list(zip(working.StateName.tolist(),working.CountyName.tolist()))
         geojson['tup'] = list(zip(geojson.StateName.tolist(),geojson.CountyName.tolist()))
-        
+
         working = working[working.tup.isin(datalst)]
         geojson = geojson[geojson.tup.isin(datalst)]
     working.StateName = working.StateName.str.title()
@@ -791,8 +825,8 @@ def create_county_choropleth(data,
                 line_weight=0.4,
                 legend_name= legend_name, #title of the legend
                 highlight=True,
-                line_color='black').add_to(m) 
-    
+                line_color='black').add_to(m)
+
     folium.features.GeoJson(
                 data=working,
                 name='',
@@ -800,7 +834,7 @@ def create_county_choropleth(data,
                 style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
                 popup=folium.features.GeoJsonPopup(
                     fields=fields,
-                    aliases=aliases, 
+                    aliases=aliases,
                     localize=True,
                     sticky=False,
                     labels=True,
@@ -812,7 +846,7 @@ def create_county_choropleth(data,
                     """,
                     max_width=800,),
                         highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
-                    ).add_to(m)   
+                    ).add_to(m)
     display(f)
     return f
 
@@ -845,14 +879,14 @@ def create_county_choropleth(data,
 #         start_loc = [geojson.geometry.centroid.x.mean(),geojson.geometry.centroid.y.mean()]
 #     f = folium.Figure(width=600, height=400)
 
-    
+
 #     m = folium.Map(location= start_loc, tiles="openstreetmap",
 #                    zoom_start=start_zoom).add_to(f)
 #     if plotlog:
 #         working.value = np.log10(working.value+1)
 #         legend_name = legend_name + ' (log transformed)'
 #     working.orig_value.fillna('no data',inplace=True)
-    
+
 #     if custom_scale==[]:
 #         custom_scale = (working['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
 #     folium.Choropleth(
@@ -868,8 +902,8 @@ def create_county_choropleth(data,
 #                 line_weight=0.2,
 #                 legend_name= legend_name, #title of the legend
 #                 highlight=True,
-#                 line_color='black').add_to(m) 
-    
+#                 line_color='black').add_to(m)
+
 #     if include_state:
 #         state_style = {'fillColor': '#00000000', 'color': 'blue'}
 #         folium.GeoJson(state_df,
@@ -885,7 +919,7 @@ def create_county_choropleth(data,
 #                 style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
 #                 popup=folium.features.GeoJsonPopup(
 #                     fields=fields,
-#                     aliases=aliases, 
+#                     aliases=aliases,
 #                     localize=True,
 #                     sticky=False,
 #                     labels=True,
@@ -897,7 +931,7 @@ def create_county_choropleth(data,
 #                     """,
 #                     max_width=800,),
 #                         highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
-#                     ).add_to(m)  
+#                     ).add_to(m)
 
 #     # Add layer control to switch between base maps
 #     folium.LayerControl().add_to(m)
@@ -927,19 +961,20 @@ def create_watershed_choropleth(data,
     # ---- START: GEOMETRY SIMPLIFICATION ----
     # We will work with a copy of the area_df to avoid changing the original object
     geojson = area_df.copy()
+    geojson = _drop_unmappable_cols(geojson)
 
     # Apply simplification if a positive tolerance value is provided
     if simplification_tolerance and simplification_tolerance > 0:
         print(f"Applying simplification with tolerance: {simplification_tolerance} meters")
         # Reproject to a projected CRS (meters) for accurate simplification
         geojson = geojson.to_crs(epsg=3857)
-        
+
         # Apply the simplification method
         geojson['geometry'] = geojson.geometry.simplify(
             tolerance=simplification_tolerance,
             preserve_topology=True
         )
-        
+
         # Reproject back to the standard geographic CRS for folium
         geojson = geojson.to_crs(epsg=4326)
     # ---- END: GEOMETRY SIMPLIFICATION ----
@@ -959,7 +994,7 @@ def create_watershed_choropleth(data,
     f = folium.Figure(width=600, height=400)
     m = folium.Map(location=start_loc, tiles="openstreetmap",
                    zoom_start=start_zoom).add_to(f)
-                   
+
     if plotlog:
         working['value'] = np.log10(working['value'] + 1)
         legend_name = legend_name + ' (log transformed)'
@@ -986,6 +1021,7 @@ def create_watershed_choropleth(data,
         line_color='black').add_to(m)
 
     if include_state:
+        state_df = _drop_unmappable_cols(state_df)
         state_style = {'fillColor': '#00000000', 'color': 'blue'}
         folium.GeoJson(state_df,
                        style_function=lambda x: state_style,
@@ -1020,118 +1056,7 @@ def create_watershed_choropleth(data,
     display(f)
     return f
 
-def orig_create_county_choropleth(data,
-                             start_loc=[40, -96],start_zoom = 6,
-                             include_shape=False,area_df=None,
-                             custom_scale = [], plotlog = True,
-                             legend_name = 'Test legend',
-                             show_only_data_states=True,
-                             #popup_enabled=True, tooltip_enabled=False,
-                             fields = ['CountyName','orig_value'],
-                             aliases = ['County: ','data: ']):
-    import folium
-    from IPython.display import display, HTML
-    fn = r"C:\MyDocs\OpenFF\data\non-FF\georef-united-states-of-america-county.geojson"
-    if len(data)<1:
-        print('No mappable data')
-        return
-    geojson = gpd.read_file(fn)
-    data['orig_value'] = data.value
-
-    geojson['StateName'] = geojson.ste_name.str.lower()
-    geojson['CountyName'] = geojson.coty_name.str.lower()
-    geojson = fix_county_names(geojson)
-    working = geojson[['StateName','CountyName','coty_code','geometry']]
-    #geojson = geojson.to_crs(5070)
-    working = pd.merge(working,data,on=['StateName','CountyName'],how='left')
-    #print(geojson.info())
-    if start_loc==[]:
-        start_loc = [geojson.geometry.centroid.x.mean(),geojson.geometry.centroid.y.mean()]
-    f = folium.Figure(width=600, height=400)
-
-    if include_shape:
-        #print('including shape!')
-        area = [area_df.centroid.geometry.y.iloc[0],area_df.centroid.geometry.x.iloc[0]] # just first one
-        m = folium.Map(tiles="openstreetmap",location=area, 
-                       zoom_start=start_zoom).add_to(f)
-        
-        # show area
-        style = {'fillColor': '#00000000', 'color': '#0000FFFF'}
-        folium.GeoJson(area_df,
-                       style_function=lambda x: style,
-                       smooth_factor=.2,
-                       name= 'target area'
-                       ).add_to(m)
-
-
-    else:
-        m = folium.Map(location= start_loc,tiles="openstreetmap",
-                       zoom_start=start_zoom).add_to(f)
-    
-    # m = folium.Map(location= start_loc, tiles="openstreetmap",
-    #                zoom_start=start_zoom).add_to(f)
-    if plotlog:
-        working.value = np.log10(working.value+1)
-        legend_name = legend_name + ' (log transformed)'
-    # the following line no longer works - 5/2026
-    # working.orig_value.fillna('no data',inplace=True)
-    
-    if custom_scale==[]:
-        custom_scale = (working['value'].quantile((0,0.2,0.4,0.6,0.8,1))).tolist()
-    if show_only_data_states:
-        gb = data.groupby(['StateName','CountyName'],as_index=False)['value'].first()
-        datalst = []
-        for i,row in gb.iterrows():
-            datalst.append((row.StateName,row.CountyName))
-        wlst = []
-        working['tup'] = list(zip(working.StateName.tolist(),working.CountyName.tolist()))
-        geojson['tup'] = list(zip(geojson.StateName.tolist(),geojson.CountyName.tolist()))
-        
-#         working = working[working.StateName.isin(data.StateName.unique().tolist())]
-#         geojson = geojson[geojson.StateName.isin(data.StateName.unique().tolist())]
-#         c1 = working.CountyName.isin(data.CountyName.unique().tolist())
-#         c2 = working.StateName.isin(data.StateName.unique().tolist())
-#         c3 = geojson.CountyName.isin(data.CountyName.unique().tolist())
-#         c4 = geojson.StateName.isin(data.StateName.unique().tolist())
-        working = working[working.tup.isin(datalst)]
-        geojson = geojson[geojson.tup.isin(datalst)]
-    working.StateName = working.StateName.str.title()
-    working.CountyName = working.CountyName.str.title()
-    #print(f'States in geojson: {working.StateName.unique().tolist()}')
-    folium.Choropleth(
-                geo_data=geojson,
-                data=working,
-                columns=['coty_code', 'value'],  #Here we tell folium to get the fips and plot values for each state
-                key_on='feature.properties.coty_code',
-                threshold_scale=custom_scale, #use the custom scale we created for legend
-                fill_color='YlOrRd',
-                nan_fill_color="gainsboro", #Use white color if there is no data available for the area
-                fill_opacity=0.7,
-                line_opacity=0.4,
-                line_weight=0.4,
-                legend_name= legend_name, #title of the legend
-                highlight=True,
-                line_color='black').add_to(m) 
-    
-    folium.features.GeoJson(
-                data=working,
-                name='',
-                smooth_factor=2,
-                style_function=lambda x: {'color':'black','fillColor':'transparent','weight':0.5},
-                popup=folium.features.GeoJsonPopup(
-                    fields=fields,
-                    aliases=aliases, 
-                    localize=True,
-                    sticky=False,
-                    labels=True,
-                    style="""
-                        background-color: #F0EFEF;
-                        border: 2px solid black;
-                        border-radius: 3px;
-                        box-shadow: 3px;
-                    """,
-                    max_width=800,),
-                        highlight_function=lambda x: {'weight':3,'fillColor':'grey'},
-                    ).add_to(m)   
-    display(f)
-    return f
+# NOTE: orig_create_county_choropleth (the pre-refactor version of
+# create_county_choropleth) was removed here. It was not called from any
+# notebook and carried the same unfixed 'geo_data=geojson' bug described in
+# _drop_unmappable_cols above.
